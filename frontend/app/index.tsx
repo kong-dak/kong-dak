@@ -1,18 +1,53 @@
 import { Link, router } from "expo-router";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import "../global.css";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import HomeScreen from "./main/MainHome";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import DiaryScreen from "./diary/DiaryHome";
+import CalendarScreen from "./calendar/CalendarHome";
+import PlayScreen from "./play/PlayHome";
+import BucketScreen from "./bucket/BucketHome";
+import LoginHome from "./login/LoginHome"; // LoginHome 컴포넌트를 가져옴
+import LoginScreen from "./login/LoginHome";
 
-export default function HomeScreen() {
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+export default function App() {
   return (
-    <View>
-      <Text className="text-lg text-red-400 bg-sky-300 pt-8">
-        app/index 페이지asd
-      </Text>
-      <Link href={"/diary"}>app/diary/index로 이동하기</Link>
-      <Pressable onPress={() => router.push("/diary/details")}>
-        <Text>app/diary/details로 이동하기</Text>
-      </Pressable>
-    </View>
+    <Tab.Navigator initialRouteName="LoginHome">
+      <Tab.Screen
+        name="LoginHome"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="MainHome"
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="DiaryHome"
+        component={DiaryScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="CalenderHome"
+        component={CalendarScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="PlayHome"
+        component={PlayScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="BucketHome"
+        component={BucketScreen}
+        options={{ headerShown: false }}
+      />
+    </Tab.Navigator>
   );
 }
 
