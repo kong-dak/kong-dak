@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, View } from "react-native";
+import { Image, StyleSheet, Platform, View, Text } from "react-native";
 
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -7,11 +7,10 @@ import { ThemedView } from "@/components/ThemedView";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 export default function HomeScreen() {
-  const Tab = createBottomTabNavigator();
   return (
-    <Tab.Navigator initialRouteName="Home">
-      <Tab.Screen name="Home" component={HomeScreen} />
-    </Tab.Navigator>
+    <View>
+      <Text>Tab Home Screen</Text>
+    </View>
   );
 }
 
