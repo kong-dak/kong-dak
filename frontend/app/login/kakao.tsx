@@ -4,12 +4,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { router } from "expo-router";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-export type RootStackParam = {
-  MainHome: undefined;
-};
-
 export default function KakaoScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParam>>();
   return (
     <View className="color-bg-white h-full flex justify-between px-2 py-2">
       <View className="h-[30%]">
@@ -23,7 +18,7 @@ export default function KakaoScreen() {
       <View>
         <TouchableOpacity
           className=" bg-yellow-300 flex items-center justify-center py-2 rounded-sm my-2"
-          onPress={() => router.push("/(tabs)/main")}
+          onPress={() => router.push("/login/setnick")}
         >
           <Text>동의하고 계속하기</Text>
         </TouchableOpacity>
