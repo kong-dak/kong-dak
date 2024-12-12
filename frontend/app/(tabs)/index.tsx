@@ -1,15 +1,19 @@
-import { Image, StyleSheet, Platform, View, Text } from "react-native";
+import { Image, StyleSheet, Platform, View, Text, Button } from "react-native";
 
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { router } from "expo-router";
+import { AppText } from "@/components/common/AppText";
 
 export default function HomeScreen() {
   return (
-    <View>
-      <Text>Tab Home Screen</Text>
+    <View className="color-bg-white h-full flex items-center px-2 py-2">
+      <View className="flex flex-row justify-end items-center"></View>
+      <AppText>Home화면입니다</AppText>
+      <Button title="Go to TestScreen" onPress={() => router.push("/diary")} />
     </View>
   );
 }
