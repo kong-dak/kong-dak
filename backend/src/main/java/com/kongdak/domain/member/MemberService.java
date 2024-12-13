@@ -32,4 +32,22 @@ public class MemberService {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
     }
+
+    public Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    @Transactional
+    public Member updateNickname(long memberId, String nickname) {
+        Member member = findMemberById(memberId);
+        member.updateNickname(nickname);
+        return member;
+    }
+
+    @Transactional
+    public void deactivateMember(Long memberId) {
+        Member member = findMemberById(memberId);
+        member.deactivate();
+    }
 }

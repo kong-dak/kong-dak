@@ -2,6 +2,8 @@ package com.kongdak.domain.member;
 
 import com.kongdak.domain.BaseTimeEntity;
 import com.kongdak.domain.couple.Couple;
+import com.kongdak.global.exception.BusinessException;
+import com.kongdak.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -40,8 +42,18 @@ public class Member extends BaseTimeEntity {
         this.oAuthProvider = oAuthProvider;
     }
 
-    public void updateNickname(String nickname){
+    public void updateNickname(String nickname) {
+        validateNickname(nickname);
         this.nickname = nickname;
+    }
+
+    private void validateNickname(String nickname) {
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_NICKNAME);
+        }
+        if (nickname.length() < 2 || nickname.length() > 20) {
+            throw new BusinessException(ErrorCode.INVALID_NICKNAME_LENGTH);
+        }
     }
 
     public void deactivate(){
