@@ -40,3 +40,6 @@ out/
 .env
 application-local.properties
 application.properties
+
+### MacOS
+.DS_Store
