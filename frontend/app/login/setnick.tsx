@@ -4,14 +4,17 @@ import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  TextInput,
+} from "react-native-gesture-handler";
 
 export default function SetNicknameScreen() {
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [isChecked2, setIsChecked2] = useState<boolean>(false);
   const [nickText, setNickText] = useState<string>("");
   return (
-    <View className="color-bg-white h-full flex items-center px-2 py-2">
+    <View className="section">
       <View className="h-[35%]"></View>
       <View className="h-[15%]">
         <View className="h-full flex items-center justify-between">
@@ -21,15 +24,15 @@ export default function SetNicknameScreen() {
               미입력시 별명이 랜덤으로 정해집니다.
             </AppText>
           </View>
-          <View className="flex items-center ">
+          <GestureHandlerRootView className="flex items-center">
             <TextInput
               className="text-center"
-              style={styles.TextInput}
+              style={[styles.TextInput, { outline: "none" }]}
               placeholder="사용할 별명을 입력해주세요"
               placeholderTextColor={Colors.gray}
             />
             <View style={styles.underline} />
-          </View>
+          </GestureHandlerRootView>
         </View>
       </View>
       <View className="h-[30%]"></View>

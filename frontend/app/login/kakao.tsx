@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function KakaoScreen() {
   return (
-    <View className="color-bg-white h-full flex justify-between px-2 py-2">
+    <View className="section justify-between">
       <View className="h-[30%]">
         <View className="h-[70%]" />
         <View className="flex">
@@ -15,7 +15,7 @@ export default function KakaoScreen() {
         </View>
       </View>
 
-      <View>
+      <View className="mb-8 w-[60%]">
         <TouchableOpacity
           className=" bg-yellow-300 flex items-center justify-center py-2 rounded-sm my-2"
           onPress={() => router.push("/login/setnick")}

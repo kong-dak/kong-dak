@@ -10,3 +10,10 @@
 .font-size-small {
   font-size: 12px;
 }
+.section {
+  background-color: #fefefe;
+  display: flex;
+  align-items: center;
+  padding: 2;
+  flex: 1;
+}

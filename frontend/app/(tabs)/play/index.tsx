@@ -9,7 +9,7 @@ export type RootStackParam = {
 export default function PlayScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParam>>();
   return (
-    <View>
+    <View className="section">
       <Text>Play화면입니다</Text>
       <Button
         title="Go to TestScreen"

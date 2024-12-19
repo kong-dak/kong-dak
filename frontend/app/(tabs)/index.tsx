@@ -1,4 +1,12 @@
-import { Image, StyleSheet, Platform, View, Text, Button } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Platform,
+  View,
+  Text,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -7,13 +15,41 @@ import { ThemedView } from "@/components/ThemedView";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { router } from "expo-router";
 import { AppText } from "@/components/common/AppText";
+import { AntDesign, Feather } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
 
 export default function HomeScreen() {
   return (
-    <View className="color-bg-white h-full flex items-center px-2 py-2">
-      <View className="flex flex-row justify-end items-center"></View>
-      <AppText>Home화면입니다</AppText>
-      <Button title="Go to TestScreen" onPress={() => router.push("/diary")} />
+    <View className="section">
+      <View className="w-full flex flex-row-reverse">
+        <AntDesign
+          className="m-2"
+          name="setting"
+          size={24}
+          color={Colors.main}
+        />
+        <Feather className="m-2" name="bell" size={24} color={Colors.main} />
+      </View>
+      <View className="w-full flex flex-row-reverse">
+        <AppText className="font-size-big my-1 mx-2">멀쩡한 바지</AppText>
+      </View>
+      <View className="w-full flex flex-row-reverse">
+        <TouchableOpacity
+          className="flex items-center justify-center my-1 mx-2"
+          onPress={() => router.push("/mycode")}
+        >
+          <AppText color={Colors.gray} className="font-size-big">
+            상대를 연결해주세요
+          </AppText>
+        </TouchableOpacity>
+      </View>
+
+      <View className="w-[95%] my-6 bg-gray-100 rounded py-3 px-6 flex flex-col items-center justify-center">
+        <AppText className="font-size-regular">Day 1</AppText>
+        <AppText className="font-size-big my-2">
+          상대와 하고싶은 데이트는 무엇인가요?
+        </AppText>
+      </View>
     </View>
   );
 }
