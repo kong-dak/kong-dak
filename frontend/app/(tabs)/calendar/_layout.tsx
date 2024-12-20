@@ -20,6 +20,7 @@ export default function HomeLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen name="mapscreen" />
     </Stack>
   );
 }
