@@ -34,11 +34,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	// AWS 의존성 추가
-	dependencies {
-		implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1')
-		implementation 'io.awspring.cloud:spring-cloud-aws-starter'
-		implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
-	}
+	implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1')
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter'
+	implementation 'software.amazon.awssdk:aws-core:2.20.63'
+	implementation 'software.amazon.awssdk:ssm:2.20.63'
+//  implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'

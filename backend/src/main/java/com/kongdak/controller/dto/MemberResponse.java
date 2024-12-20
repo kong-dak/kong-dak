@@ -17,7 +17,7 @@ public record MemberResponse(
             member.getId(),
                 member.getEmail(),
                 member.getNickname(),
-                member.getOAuthProvider(),
+                member.getOauthProvider(),
                 member.isActive(),
                 member.getCouple() != null ? CoupleInfo.from(member.getCouple(), member.getId()) : null
         );

@@ -27,19 +27,20 @@ public class Member extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OAuthProvider oAuthProvider;
+    private OAuthProvider oauthProvider;
 
     @Column(nullable = false)
     private boolean isActive = true;
 
-    @OneToOne(mappedBy = "member")
+    @OneToOne
+    @JoinColumn(name = "couple_id")
     private Couple couple;
 
     @Builder
     public Member(String email, String nickname, OAuthProvider oAuthProvider) {
         this.email = email;
         this.nickname = nickname;
-        this.oAuthProvider = oAuthProvider;
+        this.oauthProvider = oAuthProvider;
     }
 
     public void updateNickname(String nickname) {
