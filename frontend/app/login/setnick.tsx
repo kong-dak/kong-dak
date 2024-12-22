@@ -1,3 +1,4 @@
+import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import Checkbox from "expo-checkbox";
@@ -14,13 +15,13 @@ export default function SetNicknameScreen() {
   const [isChecked2, setIsChecked2] = useState<boolean>(false);
   const [nickText, setNickText] = useState<string>("");
   return (
-    <View className="section">
+    <View className="section" style={styles.container}>
       <View className="h-[35%]"></View>
       <View className="h-[15%]">
         <View className="h-full flex items-center justify-between">
           <View className="flex items-center ">
-            <AppText className="font-size-big">별명 설정</AppText>
-            <AppText className="font-size-small text-gray-500">
+            <AppText className="text-2xl">별명 설정</AppText>
+            <AppText className="text-sm text-gray-500">
               미입력시 별명이 랜덤으로 정해집니다.
             </AppText>
           </View>
@@ -35,9 +36,9 @@ export default function SetNicknameScreen() {
           </GestureHandlerRootView>
         </View>
       </View>
-      <View className="h-[30%]"></View>
-      <View className="h-[20%]">
-        <View className="flex flex-row items-center my-1">
+      <View className="h-[25%]"></View>
+      <View className="h-[25%]">
+        <View className="flex flex-row items-center my-1 ml-14">
           <Checkbox
             style={styles.checkbox}
             value={isChecked}
@@ -46,7 +47,7 @@ export default function SetNicknameScreen() {
           />
           <AppText>이용약관(필수)</AppText>
         </View>
-        <View className="flex flex-row items-center my-1">
+        <View className="flex flex-row items-center my-1 ml-14 mb-8">
           <Checkbox
             style={styles.checkbox}
             value={isChecked2}
@@ -55,13 +56,12 @@ export default function SetNicknameScreen() {
           />
           <AppText>개인정보 수집동의(필수)</AppText>
         </View>
-        <View>
-          <TouchableOpacity
-            className=" color-bg-main flex items-center justify-center py-2 px-12 rounded-md my-2"
+        <View className="flex items-center justify-center">
+          <AppButton
+            text="시작하기"
+            type="main"
             onPress={() => router.push("/(tabs)")}
-          >
-            <AppText className="text-white">시작하기</AppText>
-          </TouchableOpacity>
+          />
         </View>
       </View>
     </View>
@@ -73,6 +73,12 @@ export default function SetNicknameScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#fefefe",
+    display: "flex",
+    padding: 2,
+    flex: 1,
+  },
   checkbox: {
     marginRight: 8,
   },
