@@ -2,8 +2,6 @@ package com.kongdak.global.security;
 
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
-import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
