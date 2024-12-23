@@ -1,5 +1,6 @@
 package com.kongdak.domain.calendar;
 
+import com.kongdak.domain.BaseTimeEntity;
 import com.kongdak.domain.couple.Couple;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Calendar {
+public class Calendar extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

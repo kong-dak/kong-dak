@@ -5,7 +5,6 @@ import com.kongdak.controller.dto.response.MonthlyScheduleResponse;
 import com.kongdak.controller.dto.response.ScheduleDetailResponse;
 import com.kongdak.controller.dto.response.ScheduleResponse;
 import com.kongdak.domain.calendar.CalendarService;
-import com.kongdak.domain.calendar.Schedule;
 import com.kongdak.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,9 +33,7 @@ public class CalendarController {
             @PathVariable Long calendarId,
             @RequestParam("datetime") @DateTimeFormat(pattern = "yyyyMMdd") LocalDateTime dateTime) {
         return ApiResponse.ok(
-                calendarService.getDailySchedules(calendarId, dateTime).stream()
-                        .map(ScheduleResponse::from)
-                        .collect(Collectors.toList())
+                calendarService.getDailySchedules(calendarId, dateTime)
         );
     }
 
@@ -45,16 +41,16 @@ public class CalendarController {
     public ApiResponse<ScheduleDetailResponse> getScheduleDetail(
             @PathVariable Long calendarId,
             @PathVariable Long scheduleId) {
-        Schedule schedule = calendarService.findScheduleById(calendarId, scheduleId);
-        return ApiResponse.ok(ScheduleDetailResponse.from(schedule));
+        ScheduleDetailResponse scheduleDetail = calendarService.getScheduleDetail(calendarId, scheduleId);
+        return ApiResponse.ok(scheduleDetail);
     }
 
     @PostMapping("/{calendarId}/schedules")
     public ApiResponse<ScheduleResponse> createSchedule(
             @PathVariable Long calendarId,
             @Valid @RequestBody ScheduleCreateRequest request) {
-        Schedule schedule = calendarService.createSchedule(calendarId, request);
-        return ApiResponse.created(ScheduleResponse.from(schedule));
+        ScheduleResponse response = calendarService.createSchedule(calendarId, request);
+        return ApiResponse.created(response);
     }
 
     @PatchMapping("/{calendarId}/schedules/{scheduleId}")
@@ -62,8 +58,8 @@ public class CalendarController {
             @PathVariable Long calendarId,
             @PathVariable Long scheduleId,
             @Valid @RequestBody ScheduleCreateRequest request) {
-        Schedule schedule = calendarService.updateSchedule(calendarId, scheduleId, request);
-        return ApiResponse.ok(ScheduleResponse.from(schedule));
+        ScheduleResponse scheduleResponse = calendarService.updateSchedule(calendarId, scheduleId, request);
+        return ApiResponse.ok(scheduleResponse);
     }
 
     @DeleteMapping("/{calendarId}/schedules/{scheduleId}")

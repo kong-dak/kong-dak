@@ -1,7 +1,7 @@
 package com.kongdak.domain.calendar;
 
 import com.kongdak.controller.dto.request.ScheduleCreateRequest;
-import com.kongdak.controller.dto.response.MonthlyScheduleResponse;
+import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.couple.Couple;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,7 @@ public class CalendarService {
 
     // 캘린더 생성 (커플 연결 시 자동 생성)
     @Transactional
-    public Calendar createCalendar(Couple couple) {
+    public CalendarResponse createCalendar(Couple couple) {
         if (calendarRepository.existsByCouple(couple)) {
             throw new BusinessException(ErrorCode.DUPLICATE_CALENDAR);
         }
@@ -35,8 +34,8 @@ public class CalendarService {
         Calendar calendar = Calendar.builder()
                 .couple(couple)
                 .build();
-
-        return calendarRepository.save(calendar);
+        Calendar savedCalendar = calendarRepository.save(calendar);
+        return CalendarResponse.from(savedCalendar);
     }
 
     // 월별 일정 조회
@@ -51,30 +50,46 @@ public class CalendarService {
         List<Schedule> schedules = scheduleRepository.findMonthlySchedules(calendarId, year, month);
         List<Holiday> holidays = holidayRepository.findByYearAndMonth(year, month);
 
-        schedules.addAll(convertHolidaysToSchedules(calendar, holidays));
-
         return MonthlyScheduleResponse.of(schedules, holidays);
     }
 
+    // 일정 상세 조회
+    public ScheduleDetailResponse getScheduleDetail(Long calendarId, Long scheduleId) {
+        Calendar calendar = findCalendarById(calendarId);
+        Schedule schedule = findScheduleById(scheduleId);
+
+        validateCalendarAccess(calendar);
+        validateScheduleForCalendar(schedule, calendarId);
+
+        return ScheduleDetailResponse.from(schedule);
+    }
+
     // 월별 휴일 조회
-    public List<Holiday> getMonthlyHolidays(LocalDateTime dateTime) {
+    public List<HolidayResponse> getMonthlyHolidays(LocalDateTime dateTime) {
+
         return holidayRepository.findByYearAndMonth(
                 dateTime.getYear(),
-                dateTime.getMonthValue());
+                dateTime.getMonthValue())
+                .stream()
+                .map(HolidayResponse::from)
+                .collect(Collectors.toList());
     }
 
     // 일별 일정 조회
-    public List<Schedule> getDailySchedules(Long calendarId, LocalDateTime dateTime) {
+    public List<ScheduleResponse> getDailySchedules(Long calendarId, LocalDateTime dateTime) {
         Calendar calendar = findCalendarById(calendarId);
         validateCalendarAccess(calendar);
 
-        return scheduleRepository.findDailySchedules(calendarId, dateTime.toLocalDate());
+        return scheduleRepository.findDailySchedules(calendarId, dateTime.toLocalDate())
+                .stream()
+                .map(ScheduleResponse::from)
+                .collect(Collectors.toList());
     }
 
     // 일정 생성
     @Transactional
-    public Schedule createSchedule(Long calendarId, ScheduleCreateRequest request) {
-        request.validate(); // Record의 validate 메서드 호출
+    public ScheduleResponse createSchedule(Long calendarId, ScheduleCreateRequest request) {
+        request.validate();
 
         Calendar calendar = findCalendarById(calendarId);
         Member currentMember = memberService.getCurrentMember();
@@ -92,12 +107,13 @@ public class CalendarService {
                 .emoji(request.emoji())
                 .build();
 
-        return scheduleRepository.save(schedule);
+        Schedule savedSchedule = scheduleRepository.save(schedule);
+        return ScheduleResponse.from(savedSchedule);
     }
 
     // 일정 수정
     @Transactional
-    public Schedule updateSchedule(Long calendarId, Long scheduleId, ScheduleCreateRequest request) {
+    public ScheduleResponse updateSchedule(Long calendarId, Long scheduleId, ScheduleCreateRequest request) {
         request.validate(); // Record의 validate 메서드 호출
 
         Calendar calendar = findCalendarById(calendarId);
@@ -105,6 +121,7 @@ public class CalendarService {
 
         validateCalendarAccess(calendar);
         validateScheduleAccess(schedule);
+        validateScheduleForCalendar(schedule, calendarId);
 
         schedule.update(
                 request.title(),
@@ -115,7 +132,7 @@ public class CalendarService {
                 request.emoji()
         );
 
-        return schedule;
+        return ScheduleResponse.from(schedule);
     }
 
     // 일정 삭제
@@ -170,19 +187,10 @@ public class CalendarService {
         }
     }
 
-    private List<Schedule> convertHolidaysToSchedules(Calendar calendar, List<Holiday> holidays) {
-        return holidays.stream()
-                .map(holiday -> Schedule.builder()
-                        .calendar(calendar)
-                        .title(holiday.getName())
-                        .startTime(holiday.getDate().atStartOfDay())
-                        .endTime(holiday.getDate().atTime(LocalTime.MAX))
-                        .description(holiday.getDescription())
-                        .category(ScheduleCategory.SHARED)
-                        .isHoliday(true)
-                        .build())
-                .collect(Collectors.toList());
+    private void validateScheduleForCalendar(Schedule schedule, Long calendarId) {
+        if (!schedule.getCalendar().getId().equals(calendarId)) {
+            throw new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND);
+        }
     }
-
 
 }
