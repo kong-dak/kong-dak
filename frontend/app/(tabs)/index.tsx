@@ -28,12 +28,14 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      <View className="w-[95%] my-6 bg-gray-100 rounded py-3 px-6 flex flex-col items-center justify-center">
-        <AppText className="text-xl">Day 1</AppText>
-        <AppText className="text-xl my-2">
-          상대와 하고싶은 데이트는 무엇인가요?
-        </AppText>
-      </View>
+      <TouchableOpacity className="" onPress={() => router.push("/question")}>
+        <View className="w-[95%] my-6 bg-gray-100 rounded py-3 px-6 flex flex-col items-center justify-center">
+          <AppText className="text-xl">Day 1</AppText>
+          <AppText className="text-xl my-2">
+            상대와 하고싶은 데이트는 무엇인가요?
+          </AppText>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
