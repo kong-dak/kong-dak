@@ -1,3 +1,4 @@
+import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import { router } from "expo-router";
@@ -5,13 +6,13 @@ import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 
 export default function InputCodeScreen() {
   return (
-    <View className="section">
+    <View className="" style={styles.container}>
       <View className="h-[35%]"></View>
       <View className="h-[15%]">
         <View className="h-full flex items-center justify-between">
           <View className="flex items-center ">
-            <AppText className="font-size-title">코드 입력</AppText>
-            <AppText className="font-size-big my-2">
+            <AppText className="text-2xl">코드 입력</AppText>
+            <AppText className="text-xl my-2">
               상대방의 코드를 입력해주세요.
             </AppText>
           </View>
@@ -32,20 +33,23 @@ export default function InputCodeScreen() {
       <View className="h-[40%]"></View>
       <View className="h-[10%]">
         <View className="flex flex-col items-center">
-          <TouchableOpacity
-            className="w-fit color-bg-main flex items-center justify-center py-2 px-6 rounded-md my-2"
+          <AppButton
+            text="연결하기"
+            type="main"
             onPress={() => router.push("/(tabs)")}
-          >
-            <AppText color={Colors.white} className="">
-              연결하기
-            </AppText>
-          </TouchableOpacity>
+          />
         </View>
       </View>
     </View>
   );
 }
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#fefefe",
+    display: "flex",
+    padding: 2,
+    flex: 1,
+  },
   TextInput: {
     padding: 4,
     marginBottom: 2, // 밑줄과의 간격
