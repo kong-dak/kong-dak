@@ -1,4 +1,4 @@
-package com.kongdak.controller.dto;
+package com.kongdak.controller.dto.request;
 
 import com.kongdak.domain.member.OAuthProvider;
 

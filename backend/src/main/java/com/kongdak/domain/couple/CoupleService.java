@@ -1,6 +1,6 @@
 package com.kongdak.domain.couple;
 
-import com.kongdak.controller.dto.CoupleResponse;
+import com.kongdak.controller.dto.response.CoupleResponse;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
 import com.kongdak.global.exception.BusinessException;
