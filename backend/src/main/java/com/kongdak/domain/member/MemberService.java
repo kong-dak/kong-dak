@@ -1,8 +1,9 @@
 package com.kongdak.domain.member;
 
-import com.kongdak.controller.dto.MemberCreateRequest;
+import com.kongdak.controller.dto.request.MemberCreateRequest;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
+import com.kongdak.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final SecurityUtil securityUtil;
 
     @Transactional
     public Member createmember(MemberCreateRequest request) {
@@ -49,5 +51,11 @@ public class MemberService {
     public void deactivateMember(Long memberId) {
         Member member = findMemberById(memberId);
         member.deactivate();
+    }
+
+    public Member getCurrentMember() {
+        String email = securityUtil.getCurrentUserEmail();
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

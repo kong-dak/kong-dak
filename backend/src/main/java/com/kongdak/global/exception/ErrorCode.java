@@ -17,6 +17,21 @@ public enum ErrorCode {
     NOT_COUPLE_MEMBER(403, "C004", "Not a member of this couple"),
     CANNOT_RESTORE_COUPLE(400, "C005", "Cannot restore couple relationship after grace period"),
 
+    // Calendar 관련 예외
+    CALENDAR_NOT_FOUND(404, "CL001", "Calendar not found"),
+    SCHEDULE_NOT_FOUND(404, "CL002", "Schedule not found"),
+    INVALID_SCHEDULE_TITLE(400, "CL003", "Invalid schedule title"),
+    INVALID_SCHEDULE_TIME(400, "CL004", "Schedule start time must be before end time"),
+    SCHEDULE_ACCESS_DENIED(403, "CL005", "No permission to access this schedule"),
+    CALENDAR_ACCESS_DENIED(403, "CL006", "No permission to access this calendar"),
+    INVALID_SCHEDULE_PERIOD(400, "CL007", "Invalid schedule period"),
+    INVALID_SCHEDULE_CATEGORY(400, "CL008", "Invalid schedule category"),
+    DUPLICATE_SCHEDULE(400, "CL009", "Schedule already exists for this time period"),
+    DUPLICATE_CALENDAR(400, "CL010", "Calendar already exists for this couple"),
+    MAX_SCHEDULE_TITLE_LENGTH(400, "CL011", "Schedule title must not exceed 30 characters"),
+
+
+
     // Auth 관련 예외
     INVALID_TOKEN(401, "A001", "Invalid token"),
     EXPIRED_TOKEN(401, "A002", "Token has expired"),

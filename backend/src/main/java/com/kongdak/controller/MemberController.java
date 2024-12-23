@@ -1,7 +1,7 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.MemberResponse;
-import com.kongdak.controller.dto.UpdateNicknameRequest;
+import com.kongdak.controller.dto.response.MemberResponse;
+import com.kongdak.controller.dto.request.UpdateNicknameRequest;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
 import jakarta.validation.Valid;
