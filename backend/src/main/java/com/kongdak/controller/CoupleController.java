@@ -1,7 +1,7 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.CoupleConnectRequest;
-import com.kongdak.controller.dto.CoupleResponse;
+import com.kongdak.controller.dto.request.CoupleConnectRequest;
+import com.kongdak.controller.dto.response.CoupleResponse;
 import com.kongdak.domain.couple.CoupleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.kongdak.controller.dto;
+package com.kongdak.controller.dto.response;
 
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.OAuthProvider;

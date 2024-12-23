@@ -1,18 +1,18 @@
-package com.kongdak.controller.dto;
+package com.kongdak.controller.dto.response;
 
 import com.kongdak.domain.couple.Couple;
 
 import java.time.LocalDateTime;
 
-public record CoupleInfo(
+public record CoupleResponse(
         Long coupleId,
         Long partnerId,
         LocalDateTime connectedAt,
         LocalDateTime anniversaryDate,
         boolean isConnected
 ) {
-    public static CoupleInfo from(Couple couple, Long memberId) {
-        return new CoupleInfo(
+    public static CoupleResponse from(Couple couple, Long memberId) {
+        return new CoupleResponse(
                 couple.getId(),
                 couple.getPartnerId(memberId),
                 couple.getConnectedAt(),

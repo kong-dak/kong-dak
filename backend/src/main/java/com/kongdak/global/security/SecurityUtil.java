@@ -1,4 +1,4 @@
-package com.kongdak.global.exception.security;
+package com.kongdak.global.security;
 
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;

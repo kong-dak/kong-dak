@@ -1,9 +1,9 @@
 package com.kongdak.domain.member;
 
-import com.kongdak.controller.dto.MemberCreateRequest;
+import com.kongdak.controller.dto.request.MemberCreateRequest;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
-import com.kongdak.global.exception.security.SecurityUtil;
+import com.kongdak.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

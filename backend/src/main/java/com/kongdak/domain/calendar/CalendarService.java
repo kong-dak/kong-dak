@@ -1,6 +1,7 @@
 package com.kongdak.domain.calendar;
 
-import com.kongdak.controller.dto.ScheduleCreateRequest;
+import com.kongdak.controller.dto.request.ScheduleCreateRequest;
+import com.kongdak.controller.dto.response.MonthlyScheduleResponse;
 import com.kongdak.domain.couple.Couple;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -40,7 +40,7 @@ public class CalendarService {
     }
 
     // 월별 일정 조회
-    public List<Schedule> getMonthlySchedules(Long calendarId, LocalDateTime dateTime) {
+    public MonthlyScheduleResponse getMonthlySchedules(Long calendarId, LocalDateTime dateTime) {
         Calendar calendar = findCalendarById(calendarId);
 
         validateCalendarAccess(calendar);
@@ -53,13 +53,19 @@ public class CalendarService {
 
         schedules.addAll(convertHolidaysToSchedules(calendar, holidays));
 
-        return schedules;
+        return MonthlyScheduleResponse.of(schedules, holidays);
+    }
+
+    // 월별 휴일 조회
+    public List<Holiday> getMonthlyHolidays(LocalDateTime dateTime) {
+        return holidayRepository.findByYearAndMonth(
+                dateTime.getYear(),
+                dateTime.getMonthValue());
     }
 
     // 일별 일정 조회
     public List<Schedule> getDailySchedules(Long calendarId, LocalDateTime dateTime) {
         Calendar calendar = findCalendarById(calendarId);
-
         validateCalendarAccess(calendar);
 
         return scheduleRepository.findDailySchedules(calendarId, dateTime.toLocalDate());
@@ -134,6 +140,19 @@ public class CalendarService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
     }
 
+    public Schedule findScheduleById(Long calendarId, Long scheduleId) {
+        Calendar calendar = findCalendarById(calendarId);
+        Schedule schedule = findScheduleById(scheduleId);
+
+        validateCalendarAccess(calendar);
+
+        if (!schedule.getCalendar().getId().equals(calendarId)) {
+            throw new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND);
+        }
+
+        return schedule;
+    }
+
     private void validateCalendarAccess(Calendar calendar) {
         Member currentMember = memberService.getCurrentMember();
         Couple couple = calendar.getCouple();
@@ -164,4 +183,6 @@ public class CalendarService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+
 }
