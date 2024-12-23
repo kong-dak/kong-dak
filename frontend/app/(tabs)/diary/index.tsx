@@ -1,13 +1,23 @@
+import { AppText } from "@/components/common/AppText";
+import HeaderIcons from "@/components/common/HeaderIcons";
+import DiaryItem from "@/components/ui/DiaryItem";
 import { Colors } from "@/constants/Colors";
-import { AntDesign } from "@expo/vector-icons";
-import { Link } from "expo-router";
-import { View, Text, StyleSheet, TextInput } from "react-native";
+import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Link, router } from "expo-router";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 
 export default function DiaryScreen() {
   return (
-    <View className="items-center" style={styles.container}>
+    <View className="items-center relative" style={styles.container}>
+      <HeaderIcons />
       <View
-        className="w-[90%] flex flex-row items-center mt-3 border rounded-full justify-between"
+        className="w-[90%] flex flex-row items-center mt-8 border rounded-full justify-between"
         style={{ borderColor: Colors.main }}
       >
         <TextInput
@@ -23,6 +33,51 @@ export default function DiaryScreen() {
           color={Colors.main}
         />
       </View>
+
+      <View
+        className="w-full flex flex-row items-center mt-8 justify-between py-1"
+        style={{ backgroundColor: Colors.lightgray2 }}
+      >
+        <AntDesign
+          className="m-2"
+          name="arrowleft"
+          size={24}
+          color={Colors.black}
+        />
+        <AppText className="text-lg">2024/11</AppText>
+
+        <AntDesign
+          className="m-2"
+          name="arrowright"
+          size={24}
+          color={Colors.black}
+        />
+      </View>
+
+      <View className="w-full flex flex-row items-center justify-center flex-wrap mt-8">
+        <View className="w-[34%] m-4">
+          <DiaryItem />
+        </View>
+        <View className="w-[34%] m-4">
+          <DiaryItem />
+        </View>
+        <View className="w-[34%] m-4">
+          <DiaryItem />
+        </View>
+        <View className="w-[34%] m-4"></View>
+      </View>
+
+      <TouchableOpacity
+        className=" absolute right-4 bottom-24 p-3 rounded-full flex items-center justify-center"
+        style={{ backgroundColor: Colors.main }}
+        onPress={() => router.push("/write")}
+      >
+        <MaterialCommunityIcons
+          name="pencil-plus-outline"
+          size={32}
+          color={Colors.white}
+        />
+      </TouchableOpacity>
     </View>
   );
 }
