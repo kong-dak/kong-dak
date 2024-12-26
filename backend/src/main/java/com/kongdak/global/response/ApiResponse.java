@@ -19,7 +19,6 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> ok(T data) {
         return new ApiResponse<>(200, true, data, null);
     }
-
     public static <T> ApiResponse<T> ok() {
         return new ApiResponse<>(200, true, null, null);
     }
@@ -28,6 +27,9 @@ public class ApiResponse<T> {
         return new ApiResponse<>(201, true, data, null);
     }
 
+    public static ApiResponse<Void> created() {
+        return new ApiResponse<>(201, true, null, null);
+    }
     public static <T> ApiResponse<T> error(int status, String code, String message) {
         return new ApiResponse<>(status, false, null, new Error(code, message));
     }
