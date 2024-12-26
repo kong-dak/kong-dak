@@ -30,7 +30,14 @@ public enum ErrorCode {
     DUPLICATE_CALENDAR(400, "CL010", "Calendar already exists for this couple"),
     MAX_SCHEDULE_TITLE_LENGTH(400, "CL011", "Schedule title must not exceed 30 characters"),
 
-
+    // DailyQuestion 관련 예외
+    QUESTION_NOT_FOUND(404, "Q001", "Daily question not found"),
+    ANSWER_NOT_FOUND(404, "Q002", "Answer not found"),
+    ALREADY_ANSWERED(400, "Q003", "Already answered today's question"),
+    CANNOT_REACT_TO_OWN_ANSWER(400, "Q004", "Cannot react to your own answer"),
+    BOTH_ANSWERS_REQUIRED(400, "Q005", "Both partners must answer before adding replies"),
+    REPLY_NOT_FOUND(404, "Q006", "Reply not found"),
+    NOT_YOUR_REPLY(403, "Q007", "Cannot delete other's reply"),
 
     // Auth 관련 예외
     INVALID_TOKEN(401, "A001", "Invalid token"),
