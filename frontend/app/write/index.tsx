@@ -21,7 +21,9 @@ export default function DiaryWriteScreen() {
         className="h-[5%] flex flex-row justify-between items-center border-b p-2"
         style={{ borderColor: Colors.gray }}
       >
-        <AppText className="text-base">취소</AppText>
+        <TouchableOpacity onPress={() => router.back()}>
+          <AppText className="text-base">취소</AppText>
+        </TouchableOpacity>
         <AppText className="text-xl">일기</AppText>
         <TouchableOpacity onPress={() => router.push("/(tabs)/diary")}>
           <AppText className="text-base">작성</AppText>

@@ -68,7 +68,7 @@ export default function DiaryScreen() {
       </View>
 
       <TouchableOpacity
-        className=" absolute right-4 bottom-24 p-3 rounded-full flex items-center justify-center"
+        className=" absolute right-4 bottom-4 p-3 rounded-full flex items-center justify-center"
         style={{ backgroundColor: Colors.main }}
         onPress={() => router.push("/write")}
       >
