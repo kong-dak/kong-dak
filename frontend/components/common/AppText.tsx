@@ -11,10 +11,7 @@ export function AppText(props: AppTextProps) {
   return (
     <Text
       {...props}
-      style={[
-        { fontFamily: "GowunDodum-Regular", color: props.color || "#2c1a1a" },
-        props.style,
-      ]}
+      style={[{ fontFamily: "GowunDodum-Regular" }, props.style]}
     >
       {props.children}
     </Text>

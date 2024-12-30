@@ -57,6 +57,10 @@ public class Member extends BaseTimeEntity {
         }
     }
 
+    public Long getCoupleId() {
+        return couple != null ? couple.getId() : null;
+    }
+
     public void deactivate(){
         this.isActive = false;
     }

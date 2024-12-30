@@ -16,7 +16,14 @@ export default function HomeLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "diary Screen", // index.tsx의 기본 이름을 변경
+          title: "Home Screen", // index.tsx의 기본 이름을 변경
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="edit"
+        options={{
+          title: "edit Screen",
           headerShown: false,
         }}
       />

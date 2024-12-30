@@ -1,52 +1,73 @@
 import React from "react";
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
-  TextStyle,
   ViewStyle,
   GestureResponderEvent,
 } from "react-native";
+import { AppText } from "./AppText";
+import { Colors } from "@/constants/Colors";
 
 interface AppButtonProps {
-  title: string; // 버튼 텍스트
+  text: string; // 버튼 텍스트
+  type: string;
   onPress: (event: GestureResponderEvent) => void; // 버튼 클릭 이벤트
   style?: ViewStyle; // 버튼의 스타일
-  textStyle?: TextStyle; // 버튼 텍스트의 스타일
   disabled?: boolean; // 버튼 비활성화 여부
+  outline?: boolean;
 }
 
 export function AppButton({
-  title,
+  text,
+  type,
   onPress,
   style,
-  textStyle,
   disabled,
+  outline,
 }: AppButtonProps) {
+  let btnColor;
+  let btnOutline;
+  let btnText;
+  if (type === "subbold") {
+    btnColor = Colors.subbold;
+    btnOutline = Colors.subbold;
+    btnText = Colors.white;
+  } else if (type === "sublight") {
+    btnColor = Colors.sublight;
+    btnOutline = Colors.sublight;
+    btnText = Colors.white;
+  } else {
+    btnColor = Colors.main;
+    btnOutline = Colors.main;
+    btnText = Colors.white;
+  }
+  if (outline === true) {
+    btnColor = btnText;
+    btnText = btnOutline;
+  }
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.button, style, disabled && styles.disabled]}
+      style={[
+        styles.button,
+        { backgroundColor: btnColor, borderColor: btnOutline },
+        style,
+        disabled && styles.disabled,
+      ]}
       disabled={disabled}
     >
-      <Text style={[styles.text, textStyle]}>{title}</Text>
+      <AppText style={{ color: btnText }}>{text}</AppText>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#b88c6f",
-    paddingVertical: 8,
-    paddingHorizontal: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
     borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
-  },
-  text: {
-    fontFamily: "GowunDodum-Regular",
-    fontSize: 16,
-    color: "#FFFFFF",
   },
   disabled: {
     backgroundColor: "#BDBDBD",
