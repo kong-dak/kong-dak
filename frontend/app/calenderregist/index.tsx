@@ -1,5 +1,6 @@
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
+import CustomCalendarMini from "@/components/ui/CustomCalendarMini";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -11,12 +12,14 @@ import {
   Image,
   TouchableOpacity,
   Switch,
+  Pressable,
 } from "react-native";
 
 export default function CalenderregistScreen() {
   const url = require("../../assets/images/diary-write-sample.png");
   const [scheduleTogether, setScheduleTogether] = useState<boolean>(false);
   const [showOnly, setShowOnly] = useState<boolean>(false);
+  const [calendarVisible, setCalendarVisible] = useState<boolean>(false);
   return (
     <View style={styles.container}>
       {/* 날씨 기분 날짜 */}
@@ -77,9 +80,16 @@ export default function CalenderregistScreen() {
         />
         <View className="w-full flex flex-row justify-between items-center my-2">
           <View className="flex flex-col items-center justify-center">
-            <AppText className="text-xl" color={Colors.lightgray1}>
-              11월 21일 (목)
-            </AppText>
+            <Pressable
+              onPress={() => {
+                setCalendarVisible(!calendarVisible);
+              }}
+            >
+              <AppText className="text-xl" color={Colors.lightgray1}>
+                11월 21일 (목)
+              </AppText>
+            </Pressable>
+
             <AppText className="text-xl" color={Colors.lightgray1}>
               오전 9시
             </AppText>
@@ -87,19 +97,27 @@ export default function CalenderregistScreen() {
 
           <AntDesign name="arrowright" size={24} color={Colors.black} />
           <View className="flex flex-col items-center justify-center">
-            <AppText className="text-xl" color={Colors.lightgray1}>
-              11월 21일 (목)
-            </AppText>
+            <Pressable
+              onPress={() => {
+                setCalendarVisible(!calendarVisible);
+              }}
+            >
+              <AppText className="text-xl" color={Colors.lightgray1}>
+                11월 21일 (목)
+              </AppText>
+            </Pressable>
             <AppText className="text-xl" color={Colors.lightgray1}>
               오전 9시
             </AppText>
           </View>
         </View>
-
         <View
           className="w-full border-b"
           style={{ borderColor: Colors.black }}
         />
+
+        {/* 캘린더 관련 */}
+        {calendarVisible ? <CustomCalendarMini /> : null}
         <View
           className="w-full flex flex-row items-center mt-8 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
