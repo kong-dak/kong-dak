@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/daily-question")
+@RequestMapping("/api/daily-questions")
 public class DailyQuestionController {
     private final DailyQuestionService dailyQuestionService;
 
