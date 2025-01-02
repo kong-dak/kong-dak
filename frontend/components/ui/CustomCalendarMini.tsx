@@ -1,47 +1,45 @@
-import { AppText } from "@/components/common/AppText";
-import { Colors } from "@/constants/Colors";
-import { AntDesign, Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { JSX, SetStateAction, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-  Pressable,
-  Modal,
-} from "react-native";
+  CalenderType,
+  DayProps,
+  MarkedDatesType,
+  ScheduleStyleProps,
+} from "@/assets/types/type";
+import { Colors } from "@/constants/Colors";
+import { Feather } from "@expo/vector-icons";
+import { useState } from "react";
+import { View, Text, ViewStyle, TextStyle, Pressable } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 
-interface CalenderType {
-  checkDate: string;
-  setCheckDate: React.Dispatch<React.SetStateAction<string>>;
-}
-interface DayProps {
-  date: {
-    day: number;
-    month: number;
-    year: number;
-    timestamp: number;
-    dateString: string;
-  };
-  marking?: {
-    marked?: boolean;
-    selected?: boolean;
-    customStyles?: {
-      container?: ViewStyle;
-      text?: TextStyle;
-    };
-  };
-  state?: "selected" | "disabled" | "today" | "";
-  onDayPress?: (date: DateData) => void; // DateData 타입으로 변경
-}
-export default function CalendarScreen() {
+export default function CustomCalendarMini() {
   const [checkDate, setCheckDate] = useState<string>("");
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  // 기본 마커 스타일을 객체로 정의
+  const scheduleStyle = {
+    marked: true,
+    customStyles: {
+      container: {
+        flexDirection: "column",
+        alignItems: "center",
+        height: 60,
+      },
+      wrapper: {
+        backgroundColor: Colors.sublight,
+        padding: 4,
+        borderRadius: 4,
+        marginTop: 4,
+      },
+      scheduleText: {
+        fontSize: 12,
+        color: Colors.white,
+      },
+    },
+  };
+
+  const [markedDates, setMarkedDates] = useState<MarkedDatesType>({
+    "2025-01-06": { ...scheduleStyle },
+    "2025-01-07": { ...scheduleStyle },
+    "2025-01-08": { ...scheduleStyle },
+  });
   LocaleConfig.locales["ko"] = {
     monthNames: [
       "01월",
@@ -85,35 +83,24 @@ export default function CalendarScreen() {
   };
   LocaleConfig.defaultLocale = "ko";
 
-  // 기본 마커 스타일을 객체로 정의
-  const scheduleStyle = {
-    marked: true,
-    customStyles: {
-      container: {
-        flexDirection: "column",
-        alignItems: "center",
-        height: 60,
-      },
-      wrapper: {
-        backgroundColor: Colors.sublight,
-        padding: 4,
-        borderRadius: 4,
-        marginTop: 4,
-      },
-      scheduleText: {
-        fontSize: 12,
-        color: Colors.white,
-      },
-    },
+  const changeSelectedDays = (day: string) => {
+    setMarkedDates((prev) => {
+      // 날짜가 이미 존재하는지 확인
+      if (prev[day]) {
+        // 존재하면 해당 날짜를 제외한 새로운 객체 생성
+        const { [day]: _, ...rest } = prev;
+        return rest;
+      } else {
+        // 존재하지 않으면 새로운 날짜 추가
+        return {
+          ...prev,
+          [day]: { ...scheduleStyle },
+        };
+      }
+    });
   };
 
   const CalendarView = ({ checkDate, setCheckDate }: CalenderType) => {
-    const markedDates: Record<string, any> = {
-      "2024-12-06": { ...scheduleStyle },
-      "2024-12-07": { ...scheduleStyle },
-      "2024-12-08": { ...scheduleStyle },
-    };
-
     const markedSelectedDates = {
       ...markedDates,
       [checkDate]: {
@@ -187,7 +174,7 @@ export default function CalendarScreen() {
                   textAlign: "center",
                 }}
               >
-                일정
+                선택
               </Text>
             </View>
           )}
@@ -248,8 +235,8 @@ export default function CalendarScreen() {
             {...props}
             onDayPress={(day: DateData) => {
               console.log(day);
+              changeSelectedDays(day.dateString);
               setCheckDate(day.dateString);
-              setIsModalVisible(true);
             }}
           />
         )}
@@ -269,70 +256,8 @@ export default function CalendarScreen() {
   };
 
   return (
-    <View className="items-center relative" style={styles.container}>
-      <Text>Calendar화면입니다</Text>
-      <View className="w-full h-[70%] bg-slate-200">
-        <CalendarView checkDate={checkDate} setCheckDate={setCheckDate} />
-      </View>
-      <View style={{ marginTop: 400 }}>
-        <Modal animationType="fade" visible={isModalVisible} transparent={true}>
-          <View
-            className="relative h-full w-full flex justify-center items-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
-          >
-            <View className="w-[80%] h-[60%] bg-white rounded-lg p-4">
-              <View className="flex flex-row justify-between">
-                <AppText className="text-xl">21일 목요일</AppText>
-                <Pressable
-                  className="right-6"
-                  onPress={() => {
-                    setIsModalVisible(false);
-                  }}
-                >
-                  <AntDesign name="close" size={24} color={Colors.black} />
-                </Pressable>
-              </View>
-              <View className="border-b py-2"></View>
-              <View className="py-4">
-                <AppText>음력 11월 21일</AppText>
-              </View>
-              {/* 여기 일정 컴포넌트 */}
-              <Pressable
-                className="absolute bottom-4 right-4 border p-2 rounded-full "
-                style={{
-                  borderColor: Colors.main,
-                  backgroundColor: Colors.main,
-                }}
-                onPress={() => {
-                  setIsModalVisible(false);
-                  router.push("/calenderregist");
-                }}
-              >
-                <AntDesign name="plus" size={24} color={Colors.white} />
-              </Pressable>
-            </View>
-          </View>
-        </Modal>
-      </View>
-      <Button
-        title="Go to Map Screen"
-        onPress={() => router.push("/calendar/mapscreen")}
-      />
+    <View className="w-full h-[70%] bg-slate-200">
+      <CalendarView checkDate={checkDate} setCheckDate={setCheckDate} />
     </View>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fefefe",
-    display: "flex",
-    padding: 2,
-    flex: 1,
-  },
-  TextInput: {
-    padding: 2,
-    outlineColor: Colors.main,
-    outline: "none",
-    fontSize: 16,
-    fontFamily: "GowunDodum-Regular",
-  },
-});
