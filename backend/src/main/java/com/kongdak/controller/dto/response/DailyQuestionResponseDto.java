@@ -5,7 +5,7 @@ import com.kongdak.domain.dailyquestion.DailyQuestion;
 import java.time.LocalDateTime;
 
 public record DailyQuestionResponseDto(
-        Long id,
+        Long DailyQuestionId,
         String title,
         boolean isAnswered,
         LocalDateTime createdAt
