@@ -1,8 +1,8 @@
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { JSX, SetStateAction, useState } from "react";
+import { router } from "expo-router";
+import { JSX, SetStateAction, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -107,7 +107,6 @@ export default function CalendarScreen() {
     },
   };
 
-  const router = useRouter();
   const CalendarView = ({ checkDate, setCheckDate }: CalenderType) => {
     const markedDates: Record<string, any> = {
       "2024-12-06": { ...scheduleStyle },
@@ -268,6 +267,7 @@ export default function CalendarScreen() {
       />
     );
   };
+
   return (
     <View className="items-center relative" style={styles.container}>
       <Text>Calendar화면입니다</Text>
@@ -281,8 +281,16 @@ export default function CalendarScreen() {
             style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
           >
             <View className="w-[80%] h-[60%] bg-white rounded-lg p-4">
-              <View>
+              <View className="flex flex-row justify-between">
                 <AppText className="text-xl">21일 목요일</AppText>
+                <Pressable
+                  className="right-6"
+                  onPress={() => {
+                    setIsModalVisible(false);
+                  }}
+                >
+                  <AntDesign name="close" size={24} color={Colors.black} />
+                </Pressable>
               </View>
               <View className="border-b py-2"></View>
               <View className="py-4">
@@ -297,6 +305,7 @@ export default function CalendarScreen() {
                 }}
                 onPress={() => {
                   setIsModalVisible(false);
+                  router.push("/calenderregist");
                 }}
               >
                 <AntDesign name="plus" size={24} color={Colors.white} />

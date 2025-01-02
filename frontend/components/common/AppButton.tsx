@@ -50,7 +50,7 @@ export function AppButton({
       onPress={onPress}
       style={[
         styles.button,
-        { backgroundColor: btnColor, borderColor: btnOutline },
+        { backgroundColor: btnColor, borderWidth: 1, borderColor: btnOutline },
         style,
         disabled && styles.disabled,
       ]}
