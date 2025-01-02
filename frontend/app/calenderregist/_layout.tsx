@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-export default function HomeLayout() {
+export default function CalendarRegistLayout() {
   return (
     <Stack
       screenOptions={{
@@ -21,13 +21,12 @@ export default function HomeLayout() {
         }}
       />
       <Stack.Screen
-        name="regist"
+        name="edit"
         options={{
-          title: "Regist Screen", // index.tsx의 기본 이름을 변경
+          title: "edit Screen",
           headerShown: false,
         }}
       />
-      <Stack.Screen name="mapscreen" />
     </Stack>
   );
 }
