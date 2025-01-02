@@ -39,6 +39,12 @@ public enum ErrorCode {
     REPLY_NOT_FOUND(404, "Q006", "Reply not found"),
     NOT_YOUR_REPLY(403, "Q007", "Cannot delete other's reply"),
 
+    // Diary 관련 예외
+    DIARY_NOT_FOUND(404, "D001", "Diary not found"),
+    DIARY_ALREADY_EXISTS(400, "D002", "Diary already exists for the given date"),
+    DIARY_BEING_EDITED(400, "D003", "Diary is currently being edited by another user"),
+    DIARY_ACCESS_DENIED(403, "D004", "No permission to access this diary"),
+
     // Auth 관련 예외
     INVALID_TOKEN(401, "A001", "Invalid token"),
     EXPIRED_TOKEN(401, "A002", "Token has expired"),
