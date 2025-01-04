@@ -1,6 +1,8 @@
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import CustomCalendarMini from "@/components/ui/CustomCalendarMini";
+import MapScreen from "@/components/ui/MapScreen";
+import MapSearchBar from "@/components/ui/MapSearchBar";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -118,18 +120,10 @@ export default function CalenderregistScreen() {
 
         {/* 캘린더 관련 */}
         {calendarVisible ? <CustomCalendarMini /> : null}
-        <View
-          className="w-full flex flex-row items-center mt-8 border-2 rounded-md justify-between"
-          style={{ borderColor: Colors.main }}
-        >
-          <TextInput
-            className="w-[80%] text-start ms-2"
-            style={[styles.TextInput, { color: Colors.black, fontSize: 18 }]}
-            placeholder="목적지를 입력해주세요. (선택)"
-            placeholderTextColor={Colors.gray}
-          />
-          <Fontisto className="m-2" name="zoom" size={24} color={Colors.main} />
-        </View>
+        {/* 지도 검색 */}
+        <MapSearchBar />
+        {/* 지도 */}
+        <MapScreen />
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
