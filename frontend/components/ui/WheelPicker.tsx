@@ -7,6 +7,7 @@ import {
   Text,
   View,
   ViewStyle,
+  StyleSheet,
 } from "react-native";
 
 interface Props {
@@ -18,76 +19,159 @@ interface Props {
 }
 
 const WheelPicker: React.FC<Props> = (props) => {
-  const { items, onItemChange, itemHeight, initValue } = props;
+  const { items, onItemChange, itemHeight, initValue, containerStyle } = props;
   const scrollY = useRef(new Animated.Value(0)).current;
-  const initValueIndex = initValue ? items.indexOf(initValue) : -1;
-  const [selectedIndex, setSelectedIndex] = useState(
-    initValueIndex >= 0 ? items[initValueIndex] : items[0]
-  );
+  const flatListRef = useRef<Animated.FlatList>(null);
+  const initValueIndex = initValue ? items.indexOf(initValue) : 0;
+  const [selectedIndex, setSelectedIndex] = useState(initValueIndex);
+
+  // 패딩을 위해 위아래로 더미 아이템 추가
+  const paddedItems = ["", "", ...items, "", ""];
+  const visibleItems = 3; // 한 번에 보이는 아이템 수
+
+  const getItemTransform = (index: number) => {
+    const itemOffset = index * itemHeight;
+    return scrollY.interpolate({
+      inputRange: [
+        itemOffset - itemHeight,
+        itemOffset,
+        itemOffset + itemHeight,
+      ],
+      outputRange: [0.8, 1, 0.8],
+      extrapolate: "clamp",
+    });
+  };
 
   const renderItem = ({ item, index }: ListRenderItemInfo<string>) => {
-    const inputRange = [
-      (index - 2) * itemHeight,
-      (index - 1) * itemHeight,
-      index * itemHeight,
-    ];
-    const scale = scrollY.interpolate({
-      inputRange,
-      outputRange: [0.8, 1, 0.8],
-    });
+    const actualIndex = index - 2; // 패딩을 고려한 실제 인덱스
+    const scale = getItemTransform(index);
+    const opacity = getItemTransform(index);
 
     return (
       <Animated.View
         style={[
+          styles.itemContainer,
           {
             height: itemHeight,
             transform: [{ scale }],
-            alignItems: "center",
-            justifyContent: "center",
+            opacity,
           },
         ]}
       >
-        <Text>{item}</Text>
+        <Text
+          style={[
+            styles.itemText,
+            actualIndex === selectedIndex && styles.selectedItemText,
+          ]}
+        >
+          {item}
+        </Text>
       </Animated.View>
     );
   };
 
-  const modifiedItems = ["", ...items, ""];
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: true }
+  );
 
-  const momentumScrollEnd = (
+  const onMomentumScrollEnd = (
     event: NativeSyntheticEvent<NativeScrollEvent>
   ) => {
-    const y = event.nativeEvent.contentOffset.y;
-    const index = Math.round(y / itemHeight);
-    setSelectedIndex(items[index]);
+    const offsetY = event.nativeEvent.contentOffset.y;
+
+    //target 설정
+    const newIndex = Math.round(offsetY / itemHeight) - 1; // 패딩 보정
+    const clampedIndex = Math.max(0, Math.min(newIndex, items.length - 1));
+
+    setSelectedIndex(clampedIndex);
+
+    // 정확한 위치로 스냅
+    const targetOffset = (clampedIndex + 1) * itemHeight;
+    flatListRef.current?.scrollToOffset({
+      offset: targetOffset,
+      animated: true,
+    });
   };
 
   useEffect(() => {
-    onItemChange(selectedIndex);
+    if (selectedIndex >= 0 && selectedIndex < items.length) {
+      onItemChange(items[selectedIndex]);
+    }
   }, [selectedIndex]);
 
+  // 초기 스크롤 위치 설정
+  useEffect(() => {
+    const initialOffset = (initValueIndex + 2) * itemHeight;
+    setTimeout(() => {
+      flatListRef.current?.scrollToOffset({
+        offset: initialOffset,
+        animated: false,
+      });
+    }, 0);
+  }, []);
+
   return (
-    <View style={[{ height: itemHeight * 3 }, props.containerStyle]}>
+    <View
+      style={[
+        styles.container,
+        { height: itemHeight * visibleItems },
+        containerStyle,
+      ]}
+    >
       <Animated.FlatList
-        data={modifiedItems}
+        ref={flatListRef}
+        data={paddedItems}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         snapToInterval={itemHeight}
-        onMomentumScrollEnd={momentumScrollEnd}
+        decelerationRate="fast"
+        onScroll={onScroll}
+        onMomentumScrollEnd={onMomentumScrollEnd}
         scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
         getItemLayout={(_, index) => ({
           length: itemHeight,
           offset: itemHeight * index,
           index,
         })}
-        initialScrollIndex={initValueIndex}
+        style={styles.flatList}
+      />
+      <View
+        pointerEvents="none"
+        style={[styles.highlight, { height: itemHeight }]}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    overflow: "hidden",
+  },
+  flatList: {
+    flexGrow: 0,
+  },
+  itemContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  itemText: {
+    fontSize: 16,
+    color: "#666",
+  },
+  selectedItemText: {
+    color: "#000",
+    fontWeight: "600",
+  },
+  highlight: {
+    position: "absolute",
+    top: "33.33%",
+    left: 0,
+    right: 0,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: "#ccc",
+  },
+});
 
 export default WheelPicker;

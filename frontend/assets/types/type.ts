@@ -50,3 +50,10 @@ export interface ScheduleStyleProps {
 export interface MarkedDatesType {
   [key: string]: ScheduleStyleProps;
 }
+export interface DiaryItemProps {
+  content: string;
+  datetime: string;
+  diaryId: number;
+  photos: string;
+  weather: string;
+}

@@ -4,6 +4,7 @@ import DiaryItem from "@/components/ui/DiaryItem";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,8 +12,43 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import jsonData from "../../../assets/dummydata/diarylist.json";
+import { DiaryItemProps } from "@/assets/types/type";
 
 export default function DiaryScreen() {
+  const [diaryYear, setDiaryYear] = useState<number>(2025);
+  const [diaryMonth, setDiaryMonth] = useState<number>(1);
+
+  const [diaryItemList, setDiaryItemList] = useState<DiaryItemProps[]>([]);
+  useEffect(() => {
+    if (diaryYear === 2025 && diaryMonth === 1) {
+      setDiaryItemList(jsonData.data);
+    } else {
+      setDiaryItemList([]);
+    }
+  }, [diaryYear, diaryMonth]);
+
+  const changeMonth = (type: "plus" | "minus") => {
+    if (type === "plus") {
+      const monthValue = diaryMonth + 1;
+      if (monthValue > 12) {
+        const yearValue = diaryYear;
+        setDiaryYear(yearValue + 1);
+        setDiaryMonth(1);
+      } else {
+        setDiaryMonth(monthValue);
+      }
+    } else {
+      const monthValue = diaryMonth - 1;
+      if (monthValue < 1) {
+        const yearValue = diaryYear;
+        setDiaryYear(yearValue - 1);
+        setDiaryMonth(12);
+      } else {
+        setDiaryMonth(monthValue);
+      }
+    }
+  };
   return (
     <View className="items-center relative" style={styles.container}>
       <HeaderIcons />
@@ -43,27 +79,39 @@ export default function DiaryScreen() {
           name="arrowleft"
           size={24}
           color={Colors.black}
+          onPress={() => {
+            changeMonth("minus");
+          }}
         />
-        <AppText className="text-lg">2024/11</AppText>
+        <AppText className="text-lg">
+          {diaryYear}/{diaryMonth}
+        </AppText>
 
         <AntDesign
           className="m-2"
           name="arrowright"
           size={24}
           color={Colors.black}
+          onPress={() => {
+            changeMonth("plus");
+          }}
         />
       </View>
 
       <View className="w-full flex flex-row items-center justify-center flex-wrap mt-8">
-        <View className="w-[34%] m-4">
-          <DiaryItem />
-        </View>
-        <View className="w-[34%] m-4">
-          <DiaryItem />
-        </View>
-        <View className="w-[34%] m-4">
-          <DiaryItem />
-        </View>
+        {diaryItemList.map((item, index) => {
+          return (
+            <View key={index} className="w-[34%] m-4">
+              <DiaryItem
+                diaryId={item.diaryId}
+                datetime={item.datetime}
+                content={item.content}
+                weather={item.weather}
+                photos={item.photos}
+              />
+            </View>
+          );
+        })}
         <View className="w-[34%] m-4"></View>
       </View>
 

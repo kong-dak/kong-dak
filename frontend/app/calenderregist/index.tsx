@@ -1,6 +1,7 @@
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import CustomCalendarMini from "@/components/ui/CustomCalendarMini";
+import TimePicker from "@/components/ui/TimePicker";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -13,6 +14,9 @@ export default function CalenderregistScreen() {
   const [showOnly, setShowOnly] = useState<boolean>(false);
   const [isCalendarStart, setIsCalendarStart] = useState<boolean>(false);
   const [isCalendarEnd, setIsCalendarEnd] = useState<boolean>(false);
+  const [isTimePickerStart, setIsTimePickerStart] = useState<boolean>(false);
+  const [isTimePickerEnd, setIsTimePickerEnd] = useState<boolean>(false);
+
   return (
     <View style={styles.container}>
       {/* 날씨 기분 날짜 */}
@@ -77,6 +81,8 @@ export default function CalenderregistScreen() {
               onPress={() => {
                 setIsCalendarStart(!isCalendarStart);
                 setIsCalendarEnd(false);
+                setIsTimePickerStart(false);
+                setIsTimePickerEnd(false);
               }}
             >
               <AppText className="text-xl" color={Colors.lightgray1}>
@@ -84,9 +90,18 @@ export default function CalenderregistScreen() {
               </AppText>
             </Pressable>
 
-            <AppText className="text-xl" color={Colors.lightgray1}>
-              오전 9시
-            </AppText>
+            <Pressable
+              onPress={() => {
+                setIsCalendarStart(false);
+                setIsCalendarEnd(false);
+                setIsTimePickerStart(!isTimePickerStart);
+                setIsTimePickerEnd(false);
+              }}
+            >
+              <AppText className="text-xl" color={Colors.lightgray1}>
+                오전 9시
+              </AppText>
+            </Pressable>
           </View>
 
           <AntDesign name="arrowright" size={24} color={Colors.black} />
@@ -95,15 +110,26 @@ export default function CalenderregistScreen() {
               onPress={() => {
                 setIsCalendarStart(false);
                 setIsCalendarEnd(!isCalendarEnd);
+                setIsTimePickerStart(false);
+                setIsTimePickerEnd(false);
               }}
             >
               <AppText className="text-xl" color={Colors.lightgray1}>
                 11월 21일 (목)
               </AppText>
             </Pressable>
-            <AppText className="text-xl" color={Colors.lightgray1}>
-              오전 9시
-            </AppText>
+            <Pressable
+              onPress={() => {
+                setIsCalendarStart(false);
+                setIsCalendarEnd(false);
+                setIsTimePickerStart(false);
+                setIsTimePickerEnd(!isTimePickerEnd);
+              }}
+            >
+              <AppText className="text-xl" color={Colors.lightgray1}>
+                오전 9시
+              </AppText>
+            </Pressable>
           </View>
         </View>
         <View
@@ -119,6 +145,15 @@ export default function CalenderregistScreen() {
             isCalendarEnd={!isCalendarStart}
           />
         ) : null}
+        {isTimePickerStart || isTimePickerEnd ? (
+          <TimePicker
+            itemHeight={36}
+            onTimeChange={(time) => {
+              console.log(time);
+            }}
+          />
+        ) : null}
+
         <View
           className="w-full flex flex-row items-center mt-8 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
