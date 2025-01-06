@@ -5,21 +5,14 @@ import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  Image,
-  TouchableOpacity,
-  Switch,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
 
 export default function CalenderregistScreen() {
   const url = require("../../assets/images/diary-write-sample.png");
   const [scheduleTogether, setScheduleTogether] = useState<boolean>(false);
   const [showOnly, setShowOnly] = useState<boolean>(false);
-  const [calendarVisible, setCalendarVisible] = useState<boolean>(false);
+  const [isCalendarStart, setIsCalendarStart] = useState<boolean>(false);
+  const [isCalendarEnd, setIsCalendarEnd] = useState<boolean>(false);
   return (
     <View style={styles.container}>
       {/* 날씨 기분 날짜 */}
@@ -82,7 +75,8 @@ export default function CalenderregistScreen() {
           <View className="flex flex-col items-center justify-center">
             <Pressable
               onPress={() => {
-                setCalendarVisible(!calendarVisible);
+                setIsCalendarStart(!isCalendarStart);
+                setIsCalendarEnd(false);
               }}
             >
               <AppText className="text-xl" color={Colors.lightgray1}>
@@ -99,7 +93,8 @@ export default function CalenderregistScreen() {
           <View className="flex flex-col items-center justify-center">
             <Pressable
               onPress={() => {
-                setCalendarVisible(!calendarVisible);
+                setIsCalendarStart(false);
+                setIsCalendarEnd(!isCalendarEnd);
               }}
             >
               <AppText className="text-xl" color={Colors.lightgray1}>
@@ -116,8 +111,14 @@ export default function CalenderregistScreen() {
           style={{ borderColor: Colors.black }}
         />
 
-        {/* 캘린더 관련 */}
-        {calendarVisible ? <CustomCalendarMini /> : null}
+        {/* 캘린더 관련 isCalendarEnd의 값이 !isCalendarStart인 이유는 하나만 true 상태로 놔두기 위해.*/}
+        {isCalendarStart || isCalendarEnd ? (
+          <CustomCalendarMini
+            currentDay={"2025-01-06"}
+            isCalendarStart={isCalendarStart}
+            isCalendarEnd={!isCalendarStart}
+          />
+        ) : null}
         <View
           className="w-full flex flex-row items-center mt-8 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
