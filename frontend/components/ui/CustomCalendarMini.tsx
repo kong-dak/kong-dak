@@ -6,12 +6,25 @@ import {
 } from "@/assets/types/type";
 import { Colors } from "@/constants/Colors";
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, ViewStyle, TextStyle, Pressable } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 
-export default function CustomCalendarMini() {
+interface CustomCalendarMiniProps {
+  currentDay: string;
+  isCalendarStart: boolean;
+  isCalendarEnd: boolean;
+}
+
+export default function CustomCalendarMini({
+  currentDay,
+  isCalendarStart,
+  isCalendarEnd,
+}: CustomCalendarMiniProps) {
   const [checkDate, setCheckDate] = useState<string>("");
+  const [startDay, setStartDay] = useState<string>(currentDay);
+  const [endDay, setEndDay] = useState<string>(currentDay);
+  const [selectedDay, setSelectedDay] = useState<string>(currentDay);
 
   // 기본 마커 스타일을 객체로 정의
   const scheduleStyle = {
@@ -36,10 +49,16 @@ export default function CustomCalendarMini() {
   };
 
   const [markedDates, setMarkedDates] = useState<MarkedDatesType>({
-    "2025-01-06": { ...scheduleStyle },
-    "2025-01-07": { ...scheduleStyle },
     "2025-01-08": { ...scheduleStyle },
   });
+
+  useEffect(() => {
+    console.log(currentDay);
+    setMarkedDates({ currentDay: { ...scheduleStyle } });
+  }, []);
+  useEffect(() => {
+    console.log(markedDates);
+  }, [markedDates]);
   LocaleConfig.locales["ko"] = {
     monthNames: [
       "01월",
@@ -83,21 +102,132 @@ export default function CustomCalendarMini() {
   };
   LocaleConfig.defaultLocale = "ko";
 
-  const changeSelectedDays = (day: string) => {
-    setMarkedDates((prev) => {
-      // 날짜가 이미 존재하는지 확인
-      if (prev[day]) {
-        // 존재하면 해당 날짜를 제외한 새로운 객체 생성
-        const { [day]: _, ...rest } = prev;
-        return rest;
-      } else {
-        // 존재하지 않으면 새로운 날짜 추가
-        return {
-          ...prev,
-          [day]: { ...scheduleStyle },
-        };
+  //Date 뽑기
+  const changeDate = (changeDay: Date) => {
+    const year = changeDay.getFullYear();
+    const month = String(changeDay.getMonth() + 1).padStart(2, "0");
+    const day = String(changeDay.getDate()).padStart(2, "0");
+    const dateString = `${year}-${month}-${day}`;
+    return dateString;
+  };
+  const addCalendarDay = (start: string, end: string, type: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const newDates: MarkedDatesType = {};
+
+    const currentDate = new Date(startDate);
+
+    while (currentDate.getTime() <= endDate.getTime()) {
+      // YYYY-MM-DD 형식으로 변환
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const dateString = `${year}-${month}-${day}`;
+
+      newDates[dateString] = { ...scheduleStyle };
+
+      // 다음 날짜로 이동
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    //startDay조정
+    if (startDay > changeDate(startDate)) {
+      setStartDay(changeDate(startDate));
+    }
+    if (endDay < changeDate(endDate)) {
+      setEndDay(changeDate(endDate));
+    }
+
+    setMarkedDates((prev) => ({
+      ...prev,
+      ...newDates,
+    }));
+  };
+  const removeCalendarDay = (start: string, end: string, type: string) => {
+    console.log(start + " 부터 " + end + " 까지 삭제합니다.");
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    // 현재 markedDates를 복사
+    const updatedDates: MarkedDatesType = { ...markedDates };
+    const currentDate = new Date(startDate);
+
+    while (currentDate.getTime() <= endDate.getTime()) {
+      // YYYY-MM-DD 형식으로 변환
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const dateString = `${year}-${month}-${day}`;
+
+      // 해당 날짜 삭제
+      if (updatedDates[dateString]) {
+        delete updatedDates[dateString];
       }
-    });
+
+      //startDay조정
+      if (type === "start") {
+        const setupDay = changeDate(endDate);
+        setStartDay(setupDay);
+        if (endDay < changeDate(endDate)) {
+          setEndDay(changeDate(endDate));
+        }
+        updatedDates[setupDay] = { ...scheduleStyle };
+      } else {
+        const setupDay = changeDate(startDate);
+        setEndDay(setupDay);
+        if (startDay > changeDate(startDate)) {
+          setStartDay(changeDate(startDate));
+        }
+        updatedDates[setupDay] = { ...scheduleStyle };
+      }
+      // 다음 날짜로 이동
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // 업데이트된 날짜들로 상태 변경
+    setMarkedDates(updatedDates);
+  };
+  const changeSelectedDays = (day: string) => {
+    // 시작 기간 설정을 눌렀을 때
+    if (isCalendarStart) {
+      console.log("시작 날짜." + day);
+      console.log("종료 날짜." + startDay);
+      //시작 날짜보다 이전 구간을 눌렀을 때 이전 구간들을 추가.
+      if (day < startDay) {
+        addCalendarDay(day, startDay, "start");
+      }
+      //시작 날짜보다 이후 구간을 눌렀을 때 사이의 날짜들을 삭제.
+      else if (day > startDay) {
+        removeCalendarDay(startDay, day, "start");
+      }
+    }
+    // 종료 기간 설정을 눌렀을 때
+    else {
+      console.log("시작 날짜." + day);
+      console.log("종료 날짜." + endDay);
+      //종료 날짜보다 이후 구간을 눌렀을 때 이전 구간들을 추가.
+      if (day >= endDay) {
+        addCalendarDay(endDay, day, "end");
+      }
+      //종료 날짜보다 이전 구간을 눌렀을 때 사이의 날짜들을 삭제.
+      else if (day < endDay) {
+        removeCalendarDay(day, endDay, "end");
+      }
+    }
+    // setMarkedDates((prev) => {
+    //   // 날짜가 이미 존재하는지 확인
+    //   if (prev[day]) {
+    //     // 존재하면 해당 날짜를 제외한 새로운 객체 생성
+    //     const { [day]: _, ...rest } = prev;
+    //     return rest;
+    //   } else {
+    //     // 존재하지 않으면 새로운 날짜 추가
+    //     return {
+    //       ...prev,
+    //       [day]: { ...scheduleStyle },
+    //     };
+    //   }
+    // });
   };
 
   const CalendarView = ({ checkDate, setCheckDate }: CalenderType) => {

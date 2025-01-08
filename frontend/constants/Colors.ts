@@ -19,7 +19,7 @@ export const Colors = {
   brown1: "#b09677",
   blue2: "#65a6f2",
   blue3: "#2c75e2",
-  yellow1: "#fffacf",
+  yellow1: "#F4E44F",
   yellow2: "#fff593",
   orange1: "#ff8126",
   yellow4: "#f0df86",

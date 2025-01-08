@@ -1,8 +1,9 @@
 import { AppText } from "@/components/common/AppText";
+import LongBarButton from "@/components/common/LongBarButton";
 import { router } from "expo-router";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-
 export default function KakaoLoginScreen() {
+  const googleIcon = require("../../assets/images/react-logo.png");
   return (
     <View
       className="section justify-between flex flex-col"
@@ -18,24 +19,23 @@ export default function KakaoLoginScreen() {
 
       <View className="w-full flex items-center">
         <View className="mb-4 w-[80%] flex flex-col justify-center">
-          <TouchableOpacity
-            className=" bg-yellow-300 flex items-center justify-center py-2 rounded-md my-2"
+          <LongBarButton
+            text="카카오로 계속하기"
+            color="yellow"
             onPress={() => router.push("/login/kakao")}
-          >
-            <Text>카카오로 계속하기</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="border-[1px] flex items-center justify-center py-2 rounded-md my-2"
+          />
+          <LongBarButton
+            text="Apple로 계속하기"
+            color="white"
             onPress={() => router.push("/login/kakao")}
-          >
-            <Text>Apple로 계속하기</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="border-[1px] flex items-center justify-center py-2 rounded-md my-2"
+            style={{ marginVertical: 12 }}
+          />
+          <LongBarButton
+            text="구글로 계속하기"
+            color="white"
+            imgSrc={googleIcon}
             onPress={() => router.push("/login/kakao")}
-          >
-            <Text>Google 계속하기</Text>
-          </TouchableOpacity>
+          />
         </View>
       </View>
     </View>
