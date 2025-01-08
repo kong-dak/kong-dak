@@ -1,4 +1,9 @@
-import { TextStyle, ViewStyle } from "react-native";
+import {
+  GestureResponderEvent,
+  ImageSourcePropType,
+  TextStyle,
+  ViewStyle,
+} from "react-native";
 import { DateData } from "react-native-calendars";
 
 export type BucketType = "all" | "trip" | "food" | "do";
@@ -56,4 +61,22 @@ export interface DiaryItemProps {
   diaryId: number;
   photos: string;
   weather: string;
+}
+
+export interface AppButtonProps {
+  text: string; // 버튼 텍스트
+  type: string;
+  onPress: (event: GestureResponderEvent) => void; // 버튼 클릭 이벤트
+  style?: ViewStyle; // 버튼의 스타일
+  disabled?: boolean; // 버튼 비활성화 여부
+  outline?: boolean;
+}
+
+export type BarType = "white" | "yellow";
+export interface BarButtonProps {
+  text: string; // 버튼 텍스트
+  color?: BarType;
+  imgSrc?: ImageSourcePropType;
+  onPress: (event: GestureResponderEvent) => void; // 버튼 클릭 이벤트
+  style?: ViewStyle; // 버튼의 스타일
 }

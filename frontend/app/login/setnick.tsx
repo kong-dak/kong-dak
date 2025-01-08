@@ -18,49 +18,54 @@ export default function SetNicknameScreen() {
     <View className="section" style={styles.container}>
       <View className="h-[35%]"></View>
       <View className="h-[15%]">
-        <View className="h-full flex items-center justify-between">
-          <View className="flex items-center ">
-            <AppText className="text-2xl">별명 설정</AppText>
-            <AppText className="text-sm text-gray-500">
+        <View className="w-full h-full flex items-center">
+          <View className="h-[40%] flex items-center ">
+            <AppText className="text-3xl">별명 설정</AppText>
+            <AppText className="text-lg text-gray-500">
               미입력시 별명이 랜덤으로 정해집니다.
             </AppText>
           </View>
-          <GestureHandlerRootView className="flex items-center">
-            <TextInput
-              className="text-center"
-              style={[styles.TextInput, { outline: "none" }]}
-              placeholder="사용할 별명을 입력해주세요"
-              placeholderTextColor={Colors.gray}
-            />
-            <View style={styles.underline} />
-          </GestureHandlerRootView>
+          <View className="h-[35%]"></View>
+          <View className="h-[25%] flex items-center justify-center">
+            <GestureHandlerRootView className="w-full flex items-center">
+              <TextInput
+                className="text-center text-xl"
+                style={[styles.TextInput, { outline: "none" }]}
+                placeholder="사용할 별명을 입력해주세요"
+                placeholderTextColor={Colors.gray}
+              />
+            </GestureHandlerRootView>
+          </View>
+          <View className="w-full " style={styles.underline} />
         </View>
       </View>
       <View className="h-[25%]"></View>
-      <View className="h-[25%]">
-        <View className="flex flex-row items-center my-1 ml-14">
+      <View className="h-[25%] flex items-center">
+        <View className="flex flex-row items-center justify-start my-1 w-[60%]">
           <Checkbox
             style={styles.checkbox}
             value={isChecked}
             onValueChange={setIsChecked}
             color={isChecked ? Colors.main : "#929292"}
           />
-          <AppText>이용약관(필수)</AppText>
+          <AppText style={{ fontSize: 18 }}>이용약관(필수)</AppText>
         </View>
-        <View className="flex flex-row items-center my-1 ml-14 mb-8">
+        <View className="flex flex-row items-center justify-start my-2 mb-8 w-[60%]">
           <Checkbox
             style={styles.checkbox}
             value={isChecked2}
             onValueChange={setIsChecked2}
             color={isChecked2 ? Colors.main : "#929292"}
           />
-          <AppText>개인정보 수집동의(필수)</AppText>
+          <AppText style={{ fontSize: 18 }}>개인정보 수집동의(필수)</AppText>
         </View>
-        <View className="flex items-center justify-center">
+        <View className="flex items-center justify-center w-[50%]">
           <AppButton
             text="시작하기"
             type="main"
             onPress={() => router.push("/(tabs)")}
+            style={{ width: "100%" }}
+            size="big"
           />
         </View>
       </View>
@@ -90,9 +95,10 @@ const styles = StyleSheet.create({
     outlineColor: "#929292",
   },
   underline: {
-    width: "120%", // 텍스트 길이의 2배
+    width: "70%", // 텍스트 길이의 2배
     height: 1,
-    backgroundColor: Colors.gray,
     alignSelf: "center", // 중앙 정렬
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray,
   },
 });
