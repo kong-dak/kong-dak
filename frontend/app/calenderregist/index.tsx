@@ -2,6 +2,8 @@ import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import CustomCalendarMini from "@/components/ui/CustomCalendarMini";
 import TimePicker from "@/components/ui/TimePicker";
+import MapScreen from "@/components/ui/MapScreen";
+import MapSearchBar from "@/components/ui/MapSearchBar";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -166,6 +168,12 @@ export default function CalenderregistScreen() {
           />
           <Fontisto className="m-2" name="zoom" size={24} color={Colors.main} />
         </View>
+        {/* 캘린더 관련 */}
+        {calendarVisible ? <CustomCalendarMini /> : null}
+        {/* 지도 검색 */}
+        <MapSearchBar />
+        {/* 지도 */}
+        <MapScreen />
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
