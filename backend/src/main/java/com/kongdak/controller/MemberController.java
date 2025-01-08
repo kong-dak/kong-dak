@@ -4,6 +4,7 @@ import com.kongdak.controller.dto.response.MemberResponse;
 import com.kongdak.controller.dto.request.UpdateNicknameRequest;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
+import com.kongdak.global.security.jwt.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +20,14 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping
-    public ResponseEntity<MemberResponse> getMemberInfo(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<MemberResponse> getMemberInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = memberService.findMemberById(Long.parseLong(userDetails.getUsername()));
         return ResponseEntity.ok(MemberResponse.from(member));
     }
 
     @PatchMapping("/nickname")
     public ResponseEntity<MemberResponse> updateNickname(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid UpdateNicknameRequest request) {
 
         Member member = memberService.updateNickname(
@@ -37,7 +38,7 @@ public class MemberController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deactivateMember(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Void> deactivateMember(@AuthenticationPrincipal CustomUserDetails userDetails) {
         memberService.deactivateMember(Long.parseLong(userDetails.getUsername()));
         return ResponseEntity.ok().build();
     }
