@@ -1,0 +1,19 @@
+{
+  "data": [
+    {
+      "question_id": 1,
+      "title": "함께 먹고싶은 음식은 무엇인가요?",
+      "isAnswered": true
+    },
+    {
+      "question_id": 2,
+      "title": "상대의 첫인상은?",
+      "isAnswered": true
+    },
+    {
+      "question_id": 1,
+      "title": "가장 최근에 함께 간 곳은 어디인가요?",
+      "isAnswered": false
+    }
+  ]
+}

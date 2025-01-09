@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "bucketId": 1,
+      "title": "경복궁에서 놀기",
+      "category": "PLACE",
+      "isCompleted": false,
+      "createdAt": "2025-01-09",
+      "updatedAt": "2025-01-09",
+      "order": 0
+    },
+    {
+      "bucketId": 2,
+      "title": "일본여행에서 놀기",
+      "category": "PLACE",
+      "isCompleted": false,
+      "createdAt": "2025-01-09",
+      "updatedAt": "2025-01-09",
+      "order": 0
+    },
+    {
+      "bucketId": 3,
+      "title": "떡볶이 먹기",
+      "category": "EAT",
+      "isCompleted": true,
+      "createdAt": "2025-01-09",
+      "updatedAt": "2025-01-09",
+      "order": 0
+    },
+    {
+      "bucketId": 4,
+      "title": "자격증 같이 따기",
+      "category": "TODO",
+      "isCompleted": false,
+      "createdAt": "2025-01-09",
+      "updatedAt": "2025-01-09",
+      "order": 0
+    }
+  ]
+}
