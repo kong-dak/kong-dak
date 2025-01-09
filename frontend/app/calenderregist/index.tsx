@@ -1,27 +1,24 @@
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import CustomCalendarMini from "@/components/ui/CustomCalendarMini";
+import TimePicker from "@/components/ui/TimePicker";
 import MapScreen from "@/components/ui/MapScreen";
 import MapSearchBar from "@/components/ui/MapSearchBar";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  Image,
-  TouchableOpacity,
-  Switch,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
 
 export default function CalenderregistScreen() {
   const url = require("../../assets/images/diary-write-sample.png");
   const [scheduleTogether, setScheduleTogether] = useState<boolean>(false);
   const [showOnly, setShowOnly] = useState<boolean>(false);
-  const [calendarVisible, setCalendarVisible] = useState<boolean>(false);
+  const [isCalendarStart, setIsCalendarStart] = useState<boolean>(false);
+  const [isCalendarEnd, setIsCalendarEnd] = useState<boolean>(false);
+  const [isTimePickerStart, setIsTimePickerStart] = useState<boolean>(false);
+  const [isTimePickerEnd, setIsTimePickerEnd] = useState<boolean>(false);
+
   return (
     <View style={styles.container}>
       {/* 날씨 기분 날짜 */}
@@ -84,7 +81,10 @@ export default function CalenderregistScreen() {
           <View className="flex flex-col items-center justify-center">
             <Pressable
               onPress={() => {
-                setCalendarVisible(!calendarVisible);
+                setIsCalendarStart(!isCalendarStart);
+                setIsCalendarEnd(false);
+                setIsTimePickerStart(false);
+                setIsTimePickerEnd(false);
               }}
             >
               <AppText className="text-xl" color={Colors.lightgray1}>
@@ -92,25 +92,46 @@ export default function CalenderregistScreen() {
               </AppText>
             </Pressable>
 
-            <AppText className="text-xl" color={Colors.lightgray1}>
-              오전 9시
-            </AppText>
+            <Pressable
+              onPress={() => {
+                setIsCalendarStart(false);
+                setIsCalendarEnd(false);
+                setIsTimePickerStart(!isTimePickerStart);
+                setIsTimePickerEnd(false);
+              }}
+            >
+              <AppText className="text-xl" color={Colors.lightgray1}>
+                오전 9시
+              </AppText>
+            </Pressable>
           </View>
 
           <AntDesign name="arrowright" size={24} color={Colors.black} />
           <View className="flex flex-col items-center justify-center">
             <Pressable
               onPress={() => {
-                setCalendarVisible(!calendarVisible);
+                setIsCalendarStart(false);
+                setIsCalendarEnd(!isCalendarEnd);
+                setIsTimePickerStart(false);
+                setIsTimePickerEnd(false);
               }}
             >
               <AppText className="text-xl" color={Colors.lightgray1}>
                 11월 21일 (목)
               </AppText>
             </Pressable>
-            <AppText className="text-xl" color={Colors.lightgray1}>
-              오전 9시
-            </AppText>
+            <Pressable
+              onPress={() => {
+                setIsCalendarStart(false);
+                setIsCalendarEnd(false);
+                setIsTimePickerStart(false);
+                setIsTimePickerEnd(!isTimePickerEnd);
+              }}
+            >
+              <AppText className="text-xl" color={Colors.lightgray1}>
+                오전 9시
+              </AppText>
+            </Pressable>
           </View>
         </View>
         <View
@@ -118,6 +139,35 @@ export default function CalenderregistScreen() {
           style={{ borderColor: Colors.black }}
         />
 
+        {/* 캘린더 관련 isCalendarEnd의 값이 !isCalendarStart인 이유는 하나만 true 상태로 놔두기 위해.*/}
+        {isCalendarStart || isCalendarEnd ? (
+          <CustomCalendarMini
+            currentDay={"2025-01-06"}
+            isCalendarStart={isCalendarStart}
+            isCalendarEnd={!isCalendarStart}
+          />
+        ) : null}
+        {isTimePickerStart || isTimePickerEnd ? (
+          <TimePicker
+            itemHeight={36}
+            onTimeChange={(time) => {
+              console.log(time);
+            }}
+          />
+        ) : null}
+
+        <View
+          className="w-full flex flex-row items-center mt-8 border-2 rounded-md justify-between"
+          style={{ borderColor: Colors.main }}
+        >
+          <TextInput
+            className="w-[80%] text-start ms-2"
+            style={[styles.TextInput, { color: Colors.black, fontSize: 18 }]}
+            placeholder="목적지를 입력해주세요. (선택)"
+            placeholderTextColor={Colors.gray}
+          />
+          <Fontisto className="m-2" name="zoom" size={24} color={Colors.main} />
+        </View>
         {/* 캘린더 관련 */}
         {calendarVisible ? <CustomCalendarMini /> : null}
         {/* 지도 검색 */}

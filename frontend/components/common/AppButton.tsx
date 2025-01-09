@@ -1,9 +1,9 @@
 import React from "react";
 import {
-  TouchableOpacity,
   StyleSheet,
   ViewStyle,
   GestureResponderEvent,
+  Pressable,
 } from "react-native";
 import { AppText } from "./AppText";
 import { Colors } from "@/constants/Colors";
@@ -15,6 +15,7 @@ interface AppButtonProps {
   style?: ViewStyle; // 버튼의 스타일
   disabled?: boolean; // 버튼 비활성화 여부
   outline?: boolean;
+  size?: "big" | "middle" | "small";
 }
 
 export function AppButton({
@@ -24,6 +25,7 @@ export function AppButton({
   style,
   disabled,
   outline,
+  size = "middle",
 }: AppButtonProps) {
   let btnColor;
   let btnOutline;
@@ -45,25 +47,36 @@ export function AppButton({
     btnColor = btnText;
     btnText = btnOutline;
   }
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[
-        styles.button,
-        { backgroundColor: btnColor, borderWidth: 1, borderColor: btnOutline },
-        style,
-        disabled && styles.disabled,
-      ]}
-      disabled={disabled}
-    >
-      <AppText style={{ color: btnText }}>{text}</AppText>
-    </TouchableOpacity>
-  );
+  let fontSize = 14;
+  if (size === "big") {
+    fontSize = 18;
+  } else if (size === "small") {
+    fontSize = 12;
+  }
+  if (fontSize)
+    return (
+      <Pressable
+        onPress={onPress}
+        style={[
+          styles.button,
+          {
+            backgroundColor: btnColor,
+            borderWidth: 1,
+            borderColor: btnOutline,
+          },
+          style,
+          disabled && styles.disabled,
+        ]}
+        disabled={disabled}
+      >
+        <AppText style={{ color: btnText, fontSize }}>{text}</AppText>
+      </Pressable>
+    );
 }
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 32,
     borderRadius: 4,
     alignItems: "center",

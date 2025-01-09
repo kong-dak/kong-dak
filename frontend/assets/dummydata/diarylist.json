@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "diaryId": 1,
+      "content": "나는 너를 믿었던만큼 내 친구도 믿엇긱에",
+      "datetime": "2025-01-02",
+      "weather": "맑음",
+      "photos": ""
+    },
+    {
+      "diaryId": 2,
+      "content": "아무런 의심도없이 그녀에게 멀 소개시켜줬고",
+      "datetime": "2025-01-03",
+      "weather": "맑음",
+      "photos": ""
+    },
+    {
+      "diaryId": 3,
+      "content": "처음만났던 어쩌구",
+      "datetime": "2025-01-04",
+      "weather": "맑음",
+      "photos": ""
+    }
+  ]
+}

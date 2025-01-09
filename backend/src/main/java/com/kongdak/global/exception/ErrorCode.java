@@ -46,6 +46,12 @@ public enum ErrorCode {
     DIARY_BEING_EDITED(400, "D003", "Diary is currently being edited by another user"),
     DIARY_ACCESS_DENIED(403, "D004", "No permission to access this diary"),
 
+    // Diary 관련 예외
+    DIARY_NOT_FOUND(404, "D001", "Diary not found"),
+    DIARY_ALREADY_EXISTS(400, "D002", "Diary already exists for the given date"),
+    DIARY_BEING_EDITED(400, "D003", "Diary is currently being edited by another user"),
+    DIARY_ACCESS_DENIED(403, "D004", "No permission to access this diary"),
+
     // Auth 관련 예외
     INVALID_REFRESH_TOKEN(401, "A001", "유효하지 않은 리프레시 토큰입니다"),
     INVALID_ACCESS_TOKEN(401, "A002", "유효하지 않은 액세스 토큰입니다"),

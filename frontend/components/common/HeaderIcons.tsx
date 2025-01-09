@@ -22,13 +22,13 @@ export default function HeaderIcons({ isBack = false }: HeaderProps) {
         <View></View>
       )}
       <View className="flex flex-row items-center">
+        <Feather className="m-2" name="bell" size={24} color={Colors.main} />
         <AntDesign
           className="m-2"
           name="setting"
           size={24}
           color={Colors.main}
         />
-        <Feather className="m-2" name="bell" size={24} color={Colors.main} />
       </View>
     </View>
   );
