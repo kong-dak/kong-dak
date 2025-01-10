@@ -168,8 +168,6 @@ export default function CalenderregistScreen() {
           />
           <Fontisto className="m-2" name="zoom" size={24} color={Colors.main} />
         </View>
-        {/* 캘린더 관련 */}
-        {calendarVisible ? <CustomCalendarMini /> : null}
         {/* 지도 검색 */}
         <MapSearchBar />
         {/* 지도 */}
