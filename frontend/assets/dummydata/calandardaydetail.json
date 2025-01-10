@@ -1,0 +1,13 @@
+{
+  "data": {
+    "scheduleId": 1,
+    "memberId": 2,
+    "category": "shared",
+    "title": "일본여행",
+    "startTime": "2025-01-07",
+    "endTime": "2025-01-09",
+    "description": "일본 여행을 위한 메모입니다",
+    "emoji": "이모지입니다",
+    "isHoliday": true
+  }
+}
