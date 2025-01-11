@@ -1,10 +1,10 @@
 package com.kongdak.domain.dailyquestion;
 
-import com.kongdak.controller.dto.request.DailyAnswerRequestDto;
-import com.kongdak.controller.dto.request.EmojiRequestDto;
-import com.kongdak.controller.dto.request.ReplyRequestDto;
-import com.kongdak.controller.dto.response.DailyAnswerResponseDto;
-import com.kongdak.controller.dto.response.DailyQuestionResponseDto;
+import com.kongdak.controller.dto.request.DailyAnswerRequest;
+import com.kongdak.controller.dto.request.EmojiRequest;
+import com.kongdak.controller.dto.request.ReplyRequest;
+import com.kongdak.controller.dto.response.DailyAnswerResponse;
+import com.kongdak.controller.dto.response.DailyQuestionResponse;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberRepository;
 import com.kongdak.global.exception.BusinessException;
@@ -28,19 +28,19 @@ public class DailyQuestionService {
     private final MemberRepository memberRepository;
 
     // 오늘의 질문 조회
-    public DailyQuestionResponseDto getDailyQuestion() {
+    public DailyQuestionResponse getDailyQuestion() {
         LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime endOfDay = startOfDay.plusDays(1);
 
         DailyQuestion question = dailyQuestionRepository.findByCreatedAtBetween(startOfDay, endOfDay)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
-        return DailyQuestionResponseDto.from(question);
+        return DailyQuestionResponse.from(question);
     }
 
     // 답변 작성
     @Transactional
-    public DailyAnswerResponseDto createAnswer(Long memberId, Long questionId, DailyAnswerRequestDto request) {
+    public DailyAnswerResponse createAnswer(Long memberId, Long questionId, DailyAnswerRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -59,11 +59,11 @@ public class DailyQuestionService {
                 .build();
 
         DailyAnswer savedAnswer = dailyAnswerRepository.save(answer);
-        return DailyAnswerResponseDto.from(savedAnswer);
+        return DailyAnswerResponse.from(savedAnswer);
     }
 
     // 답변 조회 (커플 둘 다 답변했을 때만 상대방 답변 보이도록)
-    public List<DailyAnswerResponseDto> getAnswers(Long memberId, Long questionId) {
+    public List<DailyAnswerResponse> getAnswers(Long memberId, Long questionId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -78,20 +78,20 @@ public class DailyQuestionService {
         // 둘 다 답변했는지 확인
         if (answers.size() == 2) {
             return answers.stream()
-                    .map(DailyAnswerResponseDto::from)
+                    .map(DailyAnswerResponse::from)
                     .collect(Collectors.toList());
         }
 
         // 한 명만 답변했을 경우 자신의 답변만 반환
         return answers.stream()
                 .filter(answer -> answer.getMember().getId().equals(memberId))
-                .map(DailyAnswerResponseDto::from)
+                .map(DailyAnswerResponse::from)
                 .collect(Collectors.toList());
     }
 
     // 이모지 반응 추가
     @Transactional
-    public void addEmoji(Long memberId, Long answerId, EmojiRequestDto request) {
+    public void addEmoji(Long memberId, Long answerId, EmojiRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -114,7 +114,7 @@ public class DailyQuestionService {
 
     // 댓글 작성
     @Transactional
-    public void addReply(Long memberId, Long questionId, ReplyRequestDto request) {
+    public void addReply(Long memberId, Long questionId, ReplyRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
