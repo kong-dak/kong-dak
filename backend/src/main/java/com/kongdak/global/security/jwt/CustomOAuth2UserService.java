@@ -1,4 +1,4 @@
-package com.kongdak.config;
+package com.kongdak.global.security.jwt;
 
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberRepository;
