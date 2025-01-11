@@ -1,45 +1,65 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.response.MemberResponse;
 import com.kongdak.controller.dto.request.UpdateNicknameRequest;
+import com.kongdak.controller.dto.response.MemberResponse;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
+import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/members")
+@RequestMapping("/members")
 @RequiredArgsConstructor
+@Tag(name = "회원", description = "회원 관련 API")
 public class MemberController {
 
     private final MemberService memberService;
 
+    @Operation(summary = "회원 정보 조회", description = "현재 로그인한 회원의 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @GetMapping
-    public ResponseEntity<MemberResponse> getMemberInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public BaseResponse<MemberResponse> getMemberInfo(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = memberService.findMemberById(Long.parseLong(userDetails.getUsername()));
-        return ResponseEntity.ok(MemberResponse.from(member));
+        return BaseResponse.ok(MemberResponse.from(member));
     }
 
+    @Operation(summary = "닉네임 수정", description = "회원의 닉네임을 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공",
+            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @PatchMapping("/nickname")
-    public ResponseEntity<MemberResponse> updateNickname(
+    public BaseResponse<MemberResponse> updateNickname(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(description = "변경할 닉네임 정보")
             @RequestBody @Valid UpdateNicknameRequest request) {
-
         Member member = memberService.updateNickname(
                 Long.parseLong(userDetails.getUsername()),
                 request.nickname()
         );
-        return ResponseEntity.ok(MemberResponse.from(member));
+        return BaseResponse.ok(MemberResponse.from(member));
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원 계정을 비활성화합니다.")
+    @ApiResponse(responseCode = "200", description = "탈퇴 성공",
+            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @DeleteMapping
-    public ResponseEntity<Void> deactivateMember(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public BaseResponse<Void> deactivateMember(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         memberService.deactivateMember(Long.parseLong(userDetails.getUsername()));
-        return ResponseEntity.ok().build();
+        return BaseResponse.ok();
     }
 }
