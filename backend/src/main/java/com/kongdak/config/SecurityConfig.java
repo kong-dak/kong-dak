@@ -1,5 +1,6 @@
 package com.kongdak.config;
 
+import com.kongdak.global.security.jwt.CustomOAuth2UserService;
 import com.kongdak.global.security.jwt.JwtAuthenticationFilter;
 import com.kongdak.global.security.jwt.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,15 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/oauth2/**", "/oauth2/**").permitAll()
+//                        .requestMatchers("/api/auth/**", "/api/oauth2/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/auth/**", "/oauth2/**", "/oauth2/**").permitAll()
+                        // Swagger UI 관련 경로 허용
+                        .requestMatchers(
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 );
 
