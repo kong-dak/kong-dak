@@ -52,13 +52,18 @@ public class MemberService {
     }
 
     @Transactional
-    public void deactivateMember(Long memberId) {
-        Member member = findMemberById(memberId);
+    public void deactivateMember(String email) {
+        Member member = findByEmail(email);
         member.deactivate();
     }
 
     public Member getCurrentMember() {
         String email = securityUtil.getCurrentUserEmail();
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    public Member findByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
