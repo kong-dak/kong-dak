@@ -1,7 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply from: rootProject.file("../dotenv.gradle") // 추가: dotenv.gradle 로드
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -31,7 +30,7 @@ android {
         versionName "1.0.0"
 
         // dotenv에서 NAVER_MAP_CLIENT_ID 가져오기
-        resValue "string", "naver_map_client_id", "\"${env.NAVER_MAP_CLIENT_ID}\""
+        // resValue "string", "naver_map_client_id", "\"${env.NAVER_MAP_CLIENT_ID}\""
     }
     signingConfigs {
         debug {
