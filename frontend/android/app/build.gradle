@@ -16,6 +16,14 @@ react {
 def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInReleaseBuilds') ?: false).toBoolean()
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+// Local properties에서 NAVER_MAP_CLIENT_ID 읽기
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+def naverMapClientId = localProperties.getProperty("NAVER_MAP_CLIENT_ID") ?: ""
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -29,8 +37,8 @@ android {
         versionCode 1
         versionName "1.0.0"
 
-        // dotenv에서 NAVER_MAP_CLIENT_ID 가져오기
-        // resValue "string", "naver_map_client_id", "\"${env.NAVER_MAP_CLIENT_ID}\""
+        // gradle.properties에서 NAVER_MAP_CLIENT_ID 가져오기
+        resValue "string", "NAVER_MAP_CLIENT_ID", naverMapClientId
     }
     signingConfigs {
         debug {
