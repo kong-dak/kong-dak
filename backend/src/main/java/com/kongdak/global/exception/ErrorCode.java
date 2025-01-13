@@ -11,6 +11,9 @@ public enum ErrorCode {
     INVALID_NICKNAME_LENGTH(400, "M004", "닉네임은 2자 이상 20자 이하여야 합니다"),
     INACTIVE_MEMBER(404, "M005", "비활성화된 회원입니다"),
 
+    // OAUTH2.0 관련 예외
+    INVALID_PROVIDER(400, "O001", "옳지 않은 PROVIDER 입니다."),
+
     // Couple 관련 예외
     COUPLE_NOT_FOUND(404, "C001", "커플을 찾을 수 없습니다"),
     MEMBER_ALREADY_COUPLED(400, "C002", "이미 커플 관계가 있는 회원입니다"),

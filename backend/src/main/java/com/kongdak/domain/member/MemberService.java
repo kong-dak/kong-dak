@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -17,7 +19,7 @@ public class MemberService {
     private final SecurityUtil securityUtil;
 
     @Transactional
-    public Member createmember(MemberCreateRequest request) {
+    public Member createMember(MemberCreateRequest request) {
         validateDuplicateEmail(request.email());
 
         Member member = Member.builder()
@@ -41,8 +43,10 @@ public class MemberService {
     }
 
     @Transactional
-    public Member updateNickname(long memberId, String nickname) {
-        Member member = findMemberById(memberId);
+    public Member updateNickname(String email, String nickname) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(
+                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND)
+        );
         member.updateNickname(nickname);
         return member;
     }

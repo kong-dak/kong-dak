@@ -17,6 +17,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,8 +47,14 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidityInMilliseconds);
 
+        // attributes 확인을 위한 로그
+        log.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
+
+        // 카카오 계정의 이메일 정보 가져오기
+        String email = ((Map<String, Object>) oAuth2User.getAttribute("kakao_account")).get("email").toString();
+
         return Jwts.builder()
-                .setSubject(oAuth2User.getAttribute("email"))
+                .setSubject(email)
                 .claim("id", oAuth2User.getAttribute("id"))
                 .claim("auth", oAuth2User.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
@@ -74,6 +81,11 @@ public class JwtTokenProvider {
     // 토큰에서 Authentication 객체 추출
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
+
+        log.info("Token claims: {}", claims);
+        log.info("id claim value: {}", claims.get("id"));
+        log.info("subject value: {}", claims.getSubject());
+        log.info("auth claim value: {}", claims.get("auth"));
 
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("auth").toString().split(","))
