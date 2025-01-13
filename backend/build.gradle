@@ -65,6 +65,9 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// AOP
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 	// Dev Tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
