@@ -8,6 +8,7 @@ import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomOAuth2UserService;
 import com.kongdak.global.security.jwt.JwtTokenProvider;
 import com.kongdak.global.security.jwt.RefreshTokenRepository;
+import com.kongdak.global.security.jwt.TokenPairResponse;
 import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "인증", description = "인증 관련 API")
 public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
@@ -50,35 +53,45 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public BaseResponse<TokenRefreshResponse> refreshToken(@RequestBody TokenRefreshRequest request) {
+        log.info("Received refresh token: {}", request.refreshToken());
         // RefreshToken 검증
         if (!jwtTokenProvider.validateToken(request.refreshToken())) {
+            log.error("Token validation failed");
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // 토큰에서 이메일 추출
         Claims claims = jwtTokenProvider.parseClaims(request.refreshToken());
         String email = claims.getSubject();
+        log.info("Email from token: {}", email);
 
         // Redis에 저장된 RefreshToken 확인
         String savedToken = refreshTokenRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
+                .orElseThrow(() -> {
+                    log.error("No refresh token found in Redis for email: {}", email);
+                return new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+                });
 
+        log.info("Token from Redis: {}", savedToken);
         if (!savedToken.equals(request.refreshToken())) {
+            log.error("Tokens do not match. Stored: {}, Received: {}",
+                    savedToken.substring(0, 10) + "...",
+                    request.refreshToken().substring(0, 10) + "...");
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
+
         // CustomOAuth2UserService를 통해 OAuth2User 정보 가져오기
         OAuth2User oAuth2User = customOAuth2UserService.loadUserByEmail(email);
         // 새로운 토큰 발급
-        String newAccessToken = jwtTokenProvider.createToken(oAuth2User);
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(oAuth2User);
+        TokenPairResponse tokens = jwtTokenProvider.reissueTokens(request.refreshToken());
 
         // 새로운 RefreshToken을 Redis에 저장
-        refreshTokenRepository.save(email, newRefreshToken,
+        refreshTokenRepository.save(email, tokens.refreshToken(),
                 jwtTokenProvider.getRefreshTokenValidityInMilliseconds());
 
         TokenRefreshResponse response = TokenRefreshResponse.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
+                .accessToken(tokens.accessToken())
+                .refreshToken(tokens.refreshToken())
                 .build();
 
         return BaseResponse.ok(response);
