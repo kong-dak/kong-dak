@@ -6,15 +6,8 @@ import "../constants/common.css";
 import { useState } from "react";
 
 const { width, height } = Dimensions.get("window");
-const [isLogin, setIsLogin] = useState<boolean>(false);
+
 export default function App() {
+  const [isLogin, setIsLogin] = useState<boolean>(false);
   return <Redirect href={isLogin ? "/(tabs)" : "/login"} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    maxWidth: width,
-    height: height,
-  },
-});
