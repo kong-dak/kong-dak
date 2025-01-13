@@ -4,7 +4,7 @@
       "bucketId": 1,
       "title": "경복궁에서 놀기",
       "category": "PLACE",
-      "isCompleted": false,
+      "isCompleted": true,
       "createdAt": "2025-01-09",
       "updatedAt": "2025-01-09",
       "order": 0

@@ -1,4 +1,3 @@
-
 import {
   GestureResponderEvent,
   ImageSourcePropType,
@@ -7,7 +6,7 @@ import {
 } from "react-native";
 import { DateData } from "react-native-calendars";
 
-export type BucketType = "all" | "trip" | "food" | "do";
+export type BucketType = "ALL" | "PLACE" | "EAT" | "TODO";
 
 export interface CalenderType {
   checkDate: string;
@@ -80,4 +79,14 @@ export interface BarButtonProps {
   imgSrc?: ImageSourcePropType;
   onPress: (event: GestureResponderEvent) => void; // 버튼 클릭 이벤트
   style?: ViewStyle; // 버튼의 스타일
+}
+
+export interface BucketListItem {
+  bucketId: number;
+  title: string;
+  category: string;
+  isCompleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  order: number;
 }
