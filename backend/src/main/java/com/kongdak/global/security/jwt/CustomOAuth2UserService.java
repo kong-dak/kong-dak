@@ -1,7 +1,10 @@
 package com.kongdak.global.security.jwt;
 
+import com.kongdak.controller.dto.request.MemberCreateRequest;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberRepository;
+import com.kongdak.domain.member.MemberService;
+import com.kongdak.domain.member.OAuthProvider;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +17,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -29,6 +34,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = extractEmail(registrationId, attributes);
+
+        // UUID로 임시 닉네임 생성
+        String tempNickname = "User" + UUID.randomUUID().toString().substring(0, 8);
+
+        // 회원가입 처리
+        Member member = memberRepository.findByEmail(email)
+                .orElseGet(() -> memberService.createMember(new MemberCreateRequest(email, tempNickname, OAuthProvider.from(registrationId))));
+
+        // 멤버가 비활성 상태인 경우 예외 처리
+        if (!member.isActive()) {
+            throw new OAuth2AuthenticationException("Inactive member");
+        }
 
         return new CustomOAuth2User(
                 oauth2User.getAuthorities(),

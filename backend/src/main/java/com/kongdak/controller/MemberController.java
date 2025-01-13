@@ -46,7 +46,7 @@ public class MemberController {
             @Parameter(description = "변경할 닉네임 정보")
             @RequestBody @Valid UpdateNicknameRequest request) {
         Member member = memberService.updateNickname(
-                Long.parseLong(userDetails.getUsername()),
+                userDetails.getUsername(),
                 request.nickname()
         );
         return BaseResponse.ok(MemberResponse.from(member));
