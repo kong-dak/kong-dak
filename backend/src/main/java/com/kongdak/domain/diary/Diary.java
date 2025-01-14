@@ -15,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "diaries")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Diary extends BaseTimeEntity {
     @Id

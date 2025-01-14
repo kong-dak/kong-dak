@@ -14,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "calendars")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Calendar extends BaseTimeEntity {
     @Id

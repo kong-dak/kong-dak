@@ -7,6 +7,7 @@ import com.kongdak.controller.dto.response.ScheduleResponse;
 import com.kongdak.domain.calendar.CalendarService;
 import com.kongdak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -99,7 +100,8 @@ public class CalendarController {
     })
     @PostMapping("/{calendarId}/schedules")
     public BaseResponse<ScheduleResponse> createSchedule(
-            @PathVariable Long calendarId,
+            @Parameter(description = "캘린더 ID", example = "1")
+            @PathVariable("calendarId") Long calendarId,
             @Valid @RequestBody ScheduleCreateRequest request) {
         ScheduleResponse response = calendarService.createSchedule(calendarId, request);
         return BaseResponse.created(response);
