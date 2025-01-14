@@ -32,7 +32,7 @@ public class MemberController {
     public BaseResponse<MemberResponse> getMemberInfo(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Member member = memberService.findMemberById(Long.parseLong(userDetails.getUsername()));
+        Member member = memberService.findByEmail(userDetails.getEmail());
         return BaseResponse.ok(MemberResponse.from(member));
     }
 
@@ -59,7 +59,7 @@ public class MemberController {
     public BaseResponse<Void> deactivateMember(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        memberService.deactivateMember(Long.parseLong(userDetails.getUsername()));
+        memberService.deactivateMember(userDetails.getUsername());
         return BaseResponse.ok();
     }
 }

@@ -26,7 +26,7 @@ public class Member extends BaseTimeEntity {
     private String nickname;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "oauth_provider", nullable = false)
     private OAuthProvider oauthProvider;
 
     @Column(nullable = false)

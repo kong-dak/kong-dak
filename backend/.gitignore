@@ -43,3 +43,7 @@ application.properties
 
 ### MacOS
 .DS_Store
+
+## logs/ 폴더
+logs/
+*.log

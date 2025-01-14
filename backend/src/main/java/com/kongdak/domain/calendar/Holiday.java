@@ -11,6 +11,7 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
+@Table(name = "holidays")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Holiday extends BaseTimeEntity {
     @Id

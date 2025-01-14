@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "diary_decorations")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DiaryDecoration extends BaseTimeEntity {
 
