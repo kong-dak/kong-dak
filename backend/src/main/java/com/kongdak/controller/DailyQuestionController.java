@@ -7,6 +7,7 @@ import com.kongdak.controller.dto.response.DailyAnswerResponse;
 import com.kongdak.controller.dto.response.DailyQuestionResponse;
 import com.kongdak.domain.dailyquestion.DailyQuestionService;
 import com.kongdak.global.response.BaseResponse;
+import com.kongdak.global.security.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,11 +42,11 @@ public class DailyQuestionController {
     @GetMapping("/{questionId}/answers")
     public BaseResponse<List<DailyAnswerResponse>> getAnswers(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable Long questionId) {
         return BaseResponse.ok(
-                dailyQuestionService.getAnswers(memberId, questionId)
+                dailyQuestionService.getAnswers(userDetails.getId(), questionId)
         );
     }
 
@@ -55,12 +56,12 @@ public class DailyQuestionController {
     @PostMapping("/{questionId}/answers")
     public BaseResponse<DailyAnswerResponse> createAnswer(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable Long questionId,
             @Parameter(description = "답변 내용")
             @RequestBody @Valid DailyAnswerRequest request) {
-        return BaseResponse.created(dailyQuestionService.createAnswer(memberId, questionId, request));
+        return BaseResponse.created(dailyQuestionService.createAnswer(userDetails.getId(), questionId, request));
     }
 
     @PatchMapping("/{questionId}/answers/{answerId}/emoji")
@@ -69,14 +70,14 @@ public class DailyQuestionController {
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     public BaseResponse<Void> addEmoji(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable Long questionId,
             @Parameter(description = "답변 ID", required = true)
             @PathVariable Long answerId,
             @Parameter(description = "이모지 정보")
             @RequestBody @Valid EmojiRequest request) {
-        dailyQuestionService.addEmoji(memberId, answerId, request);
+        dailyQuestionService.addEmoji(userDetails.getId(), answerId, request);
         return BaseResponse.ok();
     }
 
@@ -86,12 +87,12 @@ public class DailyQuestionController {
     @PostMapping("/{questionId}/replies")
     public BaseResponse<Void> addReply(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable Long questionId,
             @Parameter(description = "댓글 내용")
             @RequestBody @Valid ReplyRequest request) {
-        dailyQuestionService.addReply(memberId, questionId, request);
+        dailyQuestionService.addReply(userDetails.getId(), questionId, request);
         return BaseResponse.created();
     }
 
@@ -101,12 +102,12 @@ public class DailyQuestionController {
     @DeleteMapping("/{questionId}/replies/{replyId}")
     public BaseResponse<Void> deleteReply(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable Long questionId,
             @Parameter(description = "댓글 ID", required = true)
             @PathVariable Long replyId) {
-        dailyQuestionService.deleteReply(memberId, questionId, replyId);
+        dailyQuestionService.deleteReply(userDetails.getId(), questionId, replyId);
         return BaseResponse.ok();
     }
 }
