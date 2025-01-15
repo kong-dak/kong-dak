@@ -15,6 +15,7 @@ import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
+@Table(name = "couples")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Couple extends BaseTimeEntity {
     @Id
