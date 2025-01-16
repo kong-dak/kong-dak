@@ -1,26 +1,19 @@
 package com.kongdak.global.security.jwt;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
+    private final Long memberId;
     private final Collection<? extends GrantedAuthority> authorities;
     private final Map<String, Object> attributes;
     private final String provider;
     private final String email;
-
-    public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
-                            Map<String, Object> attributes,
-                            String provider,
-                            String email) {
-        this.authorities = authorities;
-        this.attributes = attributes;
-        this.provider = provider;
-        this.email = email;
-    }
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -43,5 +36,9 @@ public class CustomOAuth2User implements OAuth2User {
 
     public String getEmail() {
         return email;
+    }
+
+    public Long getId() {
+        return memberId;
     }
 }
