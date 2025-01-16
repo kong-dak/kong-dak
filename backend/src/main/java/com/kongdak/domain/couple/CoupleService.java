@@ -12,6 +12,7 @@ import com.kongdak.domain.notification.SseEmitterService;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CoupleService {
@@ -58,12 +60,15 @@ public class CoupleService {
     // 매칭 수락
     @Transactional
     public void acceptMatch(String requestId, Long memberId) {
+        log.info("[CoupleService - acceptMatch] - requestId : {} , memberId : {}", requestId, memberId);
         CoupleMatchRequest request = coupleMatchRedisRepository.findCoupleMatchRequest(requestId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COUPLE_MATCH_REQUEST_NOT_FOUND));
 
         if (!request.targetId().equals(memberId)) {
             throw new BusinessException(ErrorCode.CANNOT_MATCH_TO_OWN);
         }
+
+        log.info("[CoupleService - acceptMatch] - request.requesterId : {} , memberId : {}", request.requesterId(), memberId);
         // 커플 연결 처리
         connect(request.requesterId(), memberId, LocalDateTime.now());
 
@@ -102,16 +107,20 @@ public class CoupleService {
 
     @Transactional
     public CoupleResponse connect(Long memberId, Long partnerId, LocalDateTime anniversaryDate) {
+
         Member member = memberService.findMemberById(memberId);
         Member partner = memberService.findMemberById(partnerId);
 
         validateConnection(member, partner);
 
-        Couple couple = Couple.builder()
-                .member1(member)
-                .member2(partner)
-                .anniversaryDate(anniversaryDate)
-                .build();
+        // 먼저 Couple을 저장
+        Couple couple = coupleRepository.save(
+                Couple.builder()
+                        .member1(member)
+                        .member2(partner)
+                        .anniversaryDate(anniversaryDate)
+                        .build()
+        );
 
         // Calendar도 생성되어야 한다.
         Calendar calendar = Calendar.builder()
