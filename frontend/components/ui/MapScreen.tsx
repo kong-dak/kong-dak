@@ -5,9 +5,7 @@ import { View, StyleSheet } from "react-native";
 export default function MapScreen() {
   return (
     <View style={styles.container}>
-      <NaverMapView
-        style={styles.map}
-        />
+      <NaverMapView style={styles.map} />
     </View>
   );
 }
