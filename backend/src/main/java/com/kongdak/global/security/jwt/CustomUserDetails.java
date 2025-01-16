@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null; // OAuth2 로그인이므로 비밀번호 불필요
+        return null;
     }
 
     @Override

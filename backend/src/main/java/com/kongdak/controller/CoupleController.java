@@ -1,6 +1,9 @@
 package com.kongdak.controller;
 
+import com.kongdak.controller.dto.request.ConnectCodeRequest;
 import com.kongdak.controller.dto.request.CoupleConnectRequest;
+import com.kongdak.controller.dto.request.CoupleMatchRequest;
+import com.kongdak.controller.dto.response.CoupleMatchCodeResponse;
 import com.kongdak.controller.dto.response.CoupleResponse;
 import com.kongdak.domain.couple.CoupleService;
 import com.kongdak.global.exception.ErrorResponse;
@@ -25,6 +28,44 @@ import org.springframework.web.bind.annotation.*;
 public class CoupleController {
 
     private final CoupleService coupleService;
+
+    @GetMapping("/code")
+    @Operation(summary = "연결 코드 조회", description = "현재 사용자의 연결 코드를 조회합니다.")
+    public BaseResponse<CoupleMatchCodeResponse> getConnectCode(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String code = coupleService.getConnectCode(Long.parseLong(userDetails.getUsername()));
+        return BaseResponse.ok(new CoupleMatchCodeResponse(code));
+    }
+
+    @PostMapping("/match")
+    @Operation(summary = "커플 매칭 요청", description = "상대방의 연결 코드로 커플 매칭을 요청합니다.")
+    public BaseResponse<Void> requestMatch(
+            @RequestBody @Valid ConnectCodeRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        coupleService.requestMatch(
+                Long.parseLong(userDetails.getUsername()),
+                request.code()
+        );
+        return BaseResponse.ok();
+    }
+
+    @PostMapping("/match/{requestId}/accept")
+    @Operation(summary = "매칭 수락", description = "커플 매칭 요청을 수락합니다.")
+    public BaseResponse<Void> acceptMatch(
+            @PathVariable String requestId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        coupleService.acceptMatch(requestId, Long.parseLong(userDetails.getUsername()));
+        return BaseResponse.ok();
+    }
+
+    @PostMapping("/match/{requestId}/reject")
+    @Operation(summary = "매칭 거절", description = "커플 매칭 요청을 거절합니다.")
+    public BaseResponse<Void> rejectMatch(
+            @PathVariable String requestId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        coupleService.rejectMatch(requestId, Long.parseLong(userDetails.getUsername()));
+        return BaseResponse.ok();
+    }
 
     @Operation(
             summary = "커플 연결",
