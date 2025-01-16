@@ -2,6 +2,7 @@ package com.kongdak.domain.couple;
 
 import com.kongdak.controller.dto.request.CoupleMatchRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @Repository
+@Slf4j
 @RequiredArgsConstructor
 public class CoupleMatchRedisRepository {
     private static final String CONNECT_CODE_PREFIX = "couple:connect:code:";
@@ -57,11 +59,15 @@ public class CoupleMatchRedisRepository {
     // 매칭 요청 조회
     public Optional<CoupleMatchRequest> findCoupleMatchRequest(String requestId) {
         String value = redisTemplate.opsForValue().get(MATCH_REQUEST_PREFIX + requestId);
+        log.info("[CoupleMatchRedisRepository-findCoupleMatchRequest] - MATCH_REQUEST_PREFIX + requestId : {}", MATCH_REQUEST_PREFIX + requestId);
+        log.info("[CoupleMatchRedisRepository-findCoupleMatchRequest] - value : {}", value);
         if (value == null) {
             return Optional.empty();
         }
 
         String[] parts = value.split(":");
+        log.info("[CoupleMatchRedisRepository-findCoupleMatchRequest] - parts[0] : {}", parts[0]);
+        log.info("[CoupleMatchRedisRepository-findCoupleMatchRequest] - parts[1] : {}", parts[1]);
         return Optional.of(new CoupleMatchRequest(
                 Long.parseLong(parts[0]),
                 Long.parseLong(parts[1])

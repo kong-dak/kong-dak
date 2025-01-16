@@ -48,6 +48,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         return new CustomOAuth2User(
+                member.getId(),
                 oauth2User.getAuthorities(),
                 attributes,
                 registrationId,
@@ -81,6 +82,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         );
 
         return new CustomOAuth2User(
+                member.getId(),
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 attributes,
                 member.getOauthProvider().toString(),

@@ -51,17 +51,34 @@ public class JwtTokenProvider {
         log.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
         String email;
         Long id;
-
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        if (attributes.containsKey("kakao_account")) {
-            // 카카오 로그인
-            email = ((Map<String, Object>) attributes.get("kakao_account")).get("email").toString();
-            id = Long.valueOf(attributes.get("id").toString());
+        if (oAuth2User instanceof CustomOAuth2User) {
+            id = ((CustomOAuth2User) oAuth2User).getId();
+            log.info("JwtTokenProvider에서 id : {}", id);
+            email = ((CustomOAuth2User) oAuth2User).getEmail();
         } else {
-            // 구글 로그인
-            email = attributes.get("email").toString();
-            id = Long.valueOf(attributes.get("sub").toString()); // Google uses 'sub' as unique identifier
+            // 기본 OAuth2User의 경우 attributes에서 id를 추출
+            Map<String, Object> attributes = oAuth2User.getAttributes();
+            if (attributes.containsKey("kakao_account")) {
+                email = ((Map<String, Object>) attributes.get("kakao_account")).get("email").toString();
+                id = Long.valueOf(attributes.get("id").toString());
+                log.info("JwtTokenProvider에서 카카오로 갔음. id : {}", id);
+            } else {
+                email = attributes.get("email").toString();
+                id = Long.valueOf(attributes.get("sub").toString());
+            }
         }
+
+
+//        Map<String, Object> attributes = oAuth2User.getAttributes();
+//        if (attributes.containsKey("kakao_account")) {
+//            // 카카오 로그인
+//            email = ((Map<String, Object>) attributes.get("kakao_account")).get("email").toString();
+//            id = Long.valueOf(attributes.get("id").toString());
+//        } else {
+//            // 구글 로그인
+//            email = attributes.get("email").toString();
+//            id = Long.valueOf(attributes.get("sub").toString()); // Google uses 'sub' as unique identifier
+//        }
 
         return Jwts.builder()
                 .setSubject(email)

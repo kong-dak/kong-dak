@@ -44,6 +44,8 @@ public class Couple extends BaseTimeEntity {
     public Couple(Member member1, Member member2, LocalDateTime anniversaryDate) {
         this.member1 = member1;
         this.member2 = member2;
+        this.connectedAt = LocalDateTime.now();
+        this.isConnected = true;
         this.anniversaryDate = anniversaryDate;
     }
 
