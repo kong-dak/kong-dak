@@ -36,13 +36,8 @@ public record DiaryDetailResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "수정 시간", example = "2024-01-10T12:30:00")
-        LocalDateTime updatedAt,
+        LocalDateTime updatedAt
 
-        @Schema(description = "편집 중 여부", example = "true")
-        Boolean isEditing,
-
-        @Schema(description = "현재 편집자 ID", example = "1", nullable = true)
-        Long editorId
 ) {
     public static DiaryDetailResponse from(Diary diary) {
         return new DiaryDetailResponse(
@@ -58,9 +53,7 @@ public record DiaryDetailResponse(
                         .map(DecorationResponse::from)
                         .toList(),
                 diary.getCreatedAt(),
-                diary.getUpdatedAt(),
-                diary.isEditing(),
-                diary.getEditor() != null ? diary.getEditor().getId() : null
+                diary.getUpdatedAt()
         );
     }
 }

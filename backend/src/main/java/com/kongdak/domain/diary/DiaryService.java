@@ -70,6 +70,7 @@ public class DiaryService {
                 DiaryDecoration decoration = DiaryDecoration.builder()
                         .type(dec.type())
                         .content(dec.content())
+
                         .positionX(dec.positionX())
                         .positionY(dec.positionY())
                         .style(dec.style())
@@ -124,21 +125,13 @@ public class DiaryService {
     @Transactional
     public boolean acquireLock(Long diaryId, Long memberId) {
         String lockKey = "diary:" + diaryId;
-        if (redisLockRepository.acquireLock(lockKey, memberId.toString(), LOCK_DURATION)) {
-            Diary diary = getDiaryByIdAndMemberId(diaryId, memberId);
-            diary.startEditing(getMemberById(memberId));
-            return true;
-        }
-        return false;
+        return redisLockRepository.acquireLock(lockKey, memberId.toString(), LOCK_DURATION);
     }
 
     @Transactional
     public void releaseLock(Long diaryId, Long memberId) {
         String lockKey = "diary:" + diaryId;
-        if (redisLockRepository.releaseLock(lockKey, memberId.toString())) {
-            Diary diary = getDiaryByIdAndMemberId(diaryId, memberId);
-            diary.finishEditing();
-        }
+        redisLockRepository.releaseLock(lockKey, memberId.toString());
     }
 
     // Private 헬퍼 메서드
@@ -149,7 +142,9 @@ public class DiaryService {
     }
 
     private void validateDiaryEditable(Diary diary, Long memberId) {
-        if (diary.isEditing() && !memberId.equals(diary.getEditor().getId())) {
+        String lockKey = "diary:" + diary.getId();
+        String lockHolder = redisLockRepository.getLockHolder(lockKey);
+        if (lockHolder != null && !lockHolder.equals(memberId.toString())) {
             throw new BusinessException(ErrorCode.DIARY_BEING_EDITED);
         }
     }
