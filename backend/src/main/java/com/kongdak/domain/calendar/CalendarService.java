@@ -174,7 +174,7 @@ public class CalendarService {
         Member currentMember = memberService.getCurrentMember();
         Couple couple = calendar.getCouple();
 
-        if (!couple.getMember1().equals(currentMember) && !couple.getMember2().equals(currentMember)) {
+        if (!couple.containsMember(currentMember.getId())) {
             throw new BusinessException(ErrorCode.CALENDAR_ACCESS_DENIED);
         }
     }

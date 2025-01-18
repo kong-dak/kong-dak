@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,13 +24,8 @@ public class Couple extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member1_id")
-    private Member member1;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member2_id")
-    private Member member2;
+    @OneToMany(mappedBy = "couple")
+    private List<Member> members = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime connectedAt;
@@ -42,27 +39,49 @@ public class Couple extends BaseTimeEntity {
 
     @Builder
     public Couple(Member member1, Member member2, LocalDateTime anniversaryDate) {
-        this.member1 = member1;
-        this.member2 = member2;
+        validateMemberNotNull(member1, member2);
         this.connectedAt = LocalDateTime.now();
         this.isConnected = true;
         this.anniversaryDate = anniversaryDate;
+        connectMembers(member1, member2);
+    }
+
+    private void validateMemberNotNull(Member member1, Member member2) {
+        if (member1 == null || member2 == null) {
+            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+    }
+
+    // 연관관계 편의 메서드
+    private void connectMembers(Member member1, Member member2) {
+        validateMemberSize();
+        this.members.add(member1);
+        this.members.add(member2);
+    }
+
+    // 커플 멤버 수 검증
+    private void validateMemberSize() {
+        if (!members.isEmpty()) {
+            throw new BusinessException(ErrorCode.COUPLE_ALREADY_EXISTS);
+        }
     }
 
     // 파트너 ID를 가져오는 메서드
     public Long getPartnerId(Long memberId) {
-        if (member1.getId().equals(memberId)) {
-            return member2.getId();
-        }
-        return member1.getId();
+        return members.stream()
+                .filter(member -> !member.getId().equals(memberId))
+                .map(Member::getId)
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.PARTNER_NOT_FOUND));
     }
 
-    public void disconnect(){
+    public void disconnect() {
+        validateConnected();
         this.isConnected = false;
         this.disconnectedAt = LocalDateTime.now();
     }
 
-    public void restore(){
+    public void restore() {
         validateCanRestore();
         this.isConnected = true;
         this.disconnectedAt = null;
@@ -79,5 +98,17 @@ public class Couple extends BaseTimeEntity {
         if (!canRestore()) {
             throw new BusinessException(ErrorCode.CANNOT_RESTORE_COUPLE);
         }
+    }
+
+    private void validateConnected() {
+        if (!isConnected) {
+            throw new BusinessException(ErrorCode.COUPLE_ALREADY_DISCONNECTED);
+        }
+    }
+
+    // 멤버가 이 커플에 속해있는지 확인
+    public boolean containsMember(Long memberId) {
+        return members.stream()
+                .anyMatch(member -> member.getId().equals(memberId));
     }
 }

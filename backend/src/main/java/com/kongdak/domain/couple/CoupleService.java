@@ -162,8 +162,7 @@ public class CoupleService {
     }
 
     private void validateMemberInCouple(Couple couple, Long memberId) {
-        if (!couple.getMember1().getId().equals(memberId) &&
-                !couple.getMember2().getId().equals(memberId)) {
+        if (!couple.containsMember(memberId)) {
             throw new BusinessException(ErrorCode.NOT_COUPLE_MEMBER);
         }
     }
