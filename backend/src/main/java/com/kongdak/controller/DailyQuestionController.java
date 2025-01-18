@@ -32,8 +32,11 @@ public class DailyQuestionController {
     @Operation(summary = "오늘의 질문 조회", description = "오늘의 데일리 질문을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
-    public BaseResponse<DailyQuestionResponse> getDailyQuestion() {
-        return BaseResponse.ok(dailyQuestionService.getDailyQuestion());
+    public BaseResponse<DailyQuestionResponse> getDailyQuestion(
+            @Parameter(description = "인증된 사용자 ID", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return BaseResponse.ok(dailyQuestionService.getDailyQuestion(userDetails.getId()));
     }
 
     @Operation(summary = "답변 목록 조회", description = "특정 질문에 대한 답변 목록을 조회합니다.")
@@ -44,7 +47,7 @@ public class DailyQuestionController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
-            @PathVariable Long questionId) {
+            @PathVariable("questionId") Long questionId) {
         return BaseResponse.ok(
                 dailyQuestionService.getAnswers(userDetails.getId(), questionId)
         );
@@ -58,7 +61,7 @@ public class DailyQuestionController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
-            @PathVariable Long questionId,
+            @PathVariable("questionId") Long questionId,
             @Parameter(description = "답변 내용")
             @RequestBody @Valid DailyAnswerRequest request) {
         return BaseResponse.created(dailyQuestionService.createAnswer(userDetails.getId(), questionId, request));
@@ -72,9 +75,9 @@ public class DailyQuestionController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
-            @PathVariable Long questionId,
+            @PathVariable("questionId") Long questionId,
             @Parameter(description = "답변 ID", required = true)
-            @PathVariable Long answerId,
+            @PathVariable("answerId") Long answerId,
             @Parameter(description = "이모지 정보")
             @RequestBody @Valid EmojiRequest request) {
         dailyQuestionService.addEmoji(userDetails.getId(), answerId, request);
@@ -89,7 +92,7 @@ public class DailyQuestionController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
-            @PathVariable Long questionId,
+            @PathVariable("questionId") Long questionId,
             @Parameter(description = "댓글 내용")
             @RequestBody @Valid ReplyRequest request) {
         dailyQuestionService.addReply(userDetails.getId(), questionId, request);
@@ -104,7 +107,7 @@ public class DailyQuestionController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
-            @PathVariable Long questionId,
+            @PathVariable("questionId") Long questionId,
             @Parameter(description = "댓글 ID", required = true)
             @PathVariable Long replyId) {
         dailyQuestionService.deleteReply(userDetails.getId(), questionId, replyId);

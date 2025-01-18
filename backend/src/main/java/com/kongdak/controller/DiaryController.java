@@ -52,7 +52,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
         return BaseResponse.ok(diaryService.getDiary(userDetails.getId(), diaryId));
     }
@@ -79,7 +79,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId,
+            @PathVariable("diaryId") Long diaryId,
             @Parameter(description = "다이어리 수정 정보")
             @RequestBody @Valid UpdateDiaryRequest request
     ) {
@@ -95,7 +95,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
         diaryService.deleteDiary(userDetails.getId(), diaryId);
         return BaseResponse.ok();
@@ -109,7 +109,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
         return BaseResponse.ok(diaryService.acquireLock(diaryId, userDetails.getId()));
     }
@@ -122,7 +122,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
         diaryService.releaseLock(diaryId, userDetails.getId());
         return BaseResponse.ok();
