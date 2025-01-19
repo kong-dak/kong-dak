@@ -137,14 +137,23 @@ public class CalendarService {
 
     // 일정 삭제
     @Transactional
-    public void deleteSchedule(Long calendarId, Long scheduleId) {
+    public ScheduleDeleteResponse deleteSchedule(Long calendarId, Long scheduleId) {
         Calendar calendar = findCalendarById(calendarId);
         Schedule schedule = findScheduleById(scheduleId);
 
         validateCalendarAccess(calendar);
         validateScheduleAccess(schedule);
 
+        String scheduleTitle = schedule.getTitle();
+
         scheduleRepository.delete(schedule);
+
+        return ScheduleDeleteResponse.of(
+                scheduleId,
+                calendarId,
+                scheduleTitle,
+                LocalDateTime.now()
+        );
     }
 
     private Calendar findCalendarById(Long calendarId) {
@@ -174,7 +183,7 @@ public class CalendarService {
         Member currentMember = memberService.getCurrentMember();
         Couple couple = calendar.getCouple();
 
-        if (!couple.containsMember(currentMember.getId())) {
+        if (!currentMember.getCouple().equals(couple)) {
             throw new BusinessException(ErrorCode.CALENDAR_ACCESS_DENIED);
         }
     }

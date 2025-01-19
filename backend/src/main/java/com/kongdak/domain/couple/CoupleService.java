@@ -1,10 +1,11 @@
 package com.kongdak.domain.couple;
 
 import com.kongdak.controller.dto.request.CoupleMatchRequest;
-import com.kongdak.controller.dto.response.CoupleResponse;
+import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.calendar.Calendar;
 import com.kongdak.domain.calendar.CalendarRepository;
 import com.kongdak.domain.member.Member;
+import com.kongdak.domain.member.MemberRepository;
 import com.kongdak.domain.member.MemberService;
 import com.kongdak.domain.notification.NotificationMessage;
 import com.kongdak.domain.notification.NotificationType;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -26,6 +29,7 @@ import java.util.Random;
 public class CoupleService {
     private final CoupleRepository coupleRepository;
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final CalendarRepository calendarRepository;
     private final CoupleMatchRedisRepository coupleMatchRedisRepository;
     private final SseEmitterService sseEmitterService;
@@ -37,7 +41,7 @@ public class CoupleService {
 
     // 매칭 요청
     @Transactional
-    public void requestMatch(Long requesterId, String targetCode) {
+    public MatchRequestResponse requestMatch(Long requesterId, String targetCode) {
         Long targetId = coupleMatchRedisRepository.findMemberIdByCode(targetCode)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_MATCH_REQUEST_CODE));
 
@@ -54,12 +58,19 @@ public class CoupleService {
                 requesterId
         );
         sseEmitterService.sendToMember(targetId, notification);
+
+        return new MatchRequestResponse(
+                requestId,
+                requesterId,
+                targetId,
+                LocalDateTime.now()
+        );
     }
 
 
     // 매칭 수락
     @Transactional
-    public void acceptMatch(String requestId, Long memberId) {
+    public MatchAcceptResponse acceptMatch(String requestId, Long memberId) {
         log.info("[CoupleService - acceptMatch] - requestId : {} , memberId : {}", requestId, memberId);
         CoupleMatchRequest request = coupleMatchRedisRepository.findCoupleMatchRequest(requestId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COUPLE_MATCH_REQUEST_NOT_FOUND));
@@ -69,8 +80,10 @@ public class CoupleService {
         }
 
         log.info("[CoupleService - acceptMatch] - request.requesterId : {} , memberId : {}", request.requesterId(), memberId);
+
+        LocalDateTime matchedAt = LocalDateTime.now();
         // 커플 연결 처리
-        connect(request.requesterId(), memberId, LocalDateTime.now());
+        connect(request.requesterId(), memberId, matchedAt);
 
         // 매칭 요청 삭제
         coupleMatchRedisRepository.deleteMatchRequest(requestId);
@@ -83,10 +96,12 @@ public class CoupleService {
         );
         sseEmitterService.sendToMember(request.requesterId(), notification);
         sseEmitterService.sendToMember(memberId, notification);
+
+        return MatchAcceptResponse.of(request.requesterId(), memberId, matchedAt);
     }
 
     // 매칭 거절
-    public void rejectMatch(String requestId, Long memberId) {
+    public MatchRejectResponse rejectMatch(String requestId, Long memberId) {
         CoupleMatchRequest request = coupleMatchRedisRepository.findCoupleMatchRequest(requestId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COUPLE_MATCH_REQUEST_NOT_FOUND));
 
@@ -103,6 +118,12 @@ public class CoupleService {
                 null
         );
         sseEmitterService.sendToMember(request.requesterId(), notification);
+
+        return MatchRejectResponse.of(
+                request.requesterId(),
+                memberId,
+                LocalDateTime.now()
+        );
     }
 
     @Transactional
@@ -116,11 +137,11 @@ public class CoupleService {
         // 먼저 Couple을 저장
         Couple couple = coupleRepository.save(
                 Couple.builder()
-                        .member1(member)
-                        .member2(partner)
                         .anniversaryDate(anniversaryDate)
                         .build()
         );
+        member.setCouple(couple);
+        partner.setCouple(couple);
 
         // Calendar도 생성되어야 한다.
         Calendar calendar = Calendar.builder()
@@ -128,22 +149,42 @@ public class CoupleService {
                 .build();
         calendarRepository.save(calendar);
 
-        coupleRepository.save(couple);
-        return CoupleResponse.from(couple, memberId);
+        return CoupleResponse.from(couple, memberId, memberRepository);
     }
 
     @Transactional
-    public void disconnect(Long coupleId, Long memberId) {
+    public CoupleDisconnectResponse disconnect(Long coupleId, Long memberId) {
         Couple couple = findCoupleById(coupleId);
         validateMemberInCouple(couple, memberId);
+
+        LocalDateTime disconnectedAt = LocalDateTime.now();
+        Long durationDays = ChronoUnit.DAYS.between(couple.getConnectedAt(), disconnectedAt);
         couple.disconnect();
+
+        return CoupleDisconnectResponse.of(
+                coupleId,
+                memberId,
+                disconnectedAt,
+                durationDays
+        );
     }
 
     @Transactional
-    public void restore(Long coupleId, Long memberId) {
+    public CoupleRestoreResponse restore(Long coupleId, Long memberId) {
         Couple couple = findCoupleById(coupleId);
         validateMemberInCouple(couple, memberId);
+
+        LocalDateTime restoredAt = LocalDateTime.now();
+        LocalDateTime originalConnectedAt = couple.getConnectedAt();
+
         couple.restore();
+
+        return CoupleRestoreResponse.of(
+                coupleId,
+                memberId,
+                restoredAt,
+                originalConnectedAt
+        );
     }
 
     public Couple findCoupleById(Long coupleId) {
@@ -153,16 +194,16 @@ public class CoupleService {
     }
 
     private void validateConnection(Member member, Member partner) {
-        if (coupleRepository.existsByMember1OrMember2(member, member)) {
+        if (coupleRepository.existsByMemberIn(List.of(member, partner))) {
             throw new BusinessException(ErrorCode.MEMBER_ALREADY_COUPLED);
-        }
-        if (coupleRepository.existsByMember1OrMember2(partner, partner)) {
-            throw new BusinessException(ErrorCode.PARTNER_ALREADY_COUPLED);
         }
     }
 
     private void validateMemberInCouple(Couple couple, Long memberId) {
-        if (!couple.containsMember(memberId)) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!couple.equals(member.getCouple())) {
             throw new BusinessException(ErrorCode.NOT_COUPLE_MEMBER);
         }
     }

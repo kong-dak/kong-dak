@@ -3,8 +3,7 @@ package com.kongdak.domain.dailyquestion;
 import com.kongdak.controller.dto.request.DailyAnswerRequest;
 import com.kongdak.controller.dto.request.EmojiRequest;
 import com.kongdak.controller.dto.request.ReplyRequest;
-import com.kongdak.controller.dto.response.DailyAnswerResponse;
-import com.kongdak.controller.dto.response.DailyQuestionResponse;
+import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.couple.Couple;
 import com.kongdak.domain.couple.CoupleRepository;
 import com.kongdak.domain.member.Member;
@@ -117,7 +116,7 @@ public class DailyQuestionService {
 
     // 이모지 반응 추가
     @Transactional
-    public void addEmoji(Long memberId, Long answerId, EmojiRequest request) {
+    public AnswerEmojiResponse addEmoji(Long memberId, Long answerId, EmojiRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -135,12 +134,13 @@ public class DailyQuestionService {
                 .emoji(request.emoji())
                 .build();
 
-        answerEmojiRepository.save(answerEmoji);
+        AnswerEmoji savedEmoji = answerEmojiRepository.save(answerEmoji);
+        return AnswerEmojiResponse.from(savedEmoji);
     }
 
     // 댓글 작성
     @Transactional
-    public void addReply(Long memberId, Long questionId, ReplyRequest request) {
+    public ReplyCreateResponse addReply(Long memberId, Long questionId, ReplyRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -160,11 +160,13 @@ public class DailyQuestionService {
                 .build();
 
         answerReplyRepository.save(reply);
+
+        return ReplyCreateResponse.from(reply);
     }
 
     // 댓글 삭제
     @Transactional
-    public void deleteReply(Long memberId, Long questionId, Long replyId) {
+    public ReplyDeleteResponse deleteReply(Long memberId, Long questionId, Long replyId) {
         AnswerReply reply = answerReplyRepository.findById(replyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REPLY_NOT_FOUND));
 
@@ -172,7 +174,9 @@ public class DailyQuestionService {
         if (!reply.getMember().getId().equals(memberId)) {
             throw new BusinessException(ErrorCode.NOT_YOUR_REPLY);
         }
-
+        ReplyDeleteResponse response = ReplyDeleteResponse.of(reply);
         answerReplyRepository.delete(reply);
+
+        return response;
     }
 }

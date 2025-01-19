@@ -1,6 +1,8 @@
 package com.kongdak.domain.member;
 
 import com.kongdak.controller.dto.request.MemberCreateRequest;
+import com.kongdak.controller.dto.response.DeactivateResponse;
+import com.kongdak.controller.dto.response.MemberResponse;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.security.SecurityUtil;
@@ -8,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional(readOnly = true)
@@ -43,18 +45,32 @@ public class MemberService {
     }
 
     @Transactional
-    public Member updateNickname(String email, String nickname) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(
-                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND)
-        );
+    public MemberResponse updateNickname(String email, String nickname) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
         member.updateNickname(nickname);
-        return member;
+
+        // 파트너 정보 조회
+        Member partner = null;
+        if (member.getCouple() != null) {
+            partner = memberRepository.findPartnerByCouple(member.getCouple(), member.getId())
+                    .orElse(null);
+        }
+
+        return MemberResponse.from(member, partner);
     }
 
     @Transactional
-    public void deactivateMember(String email) {
+    public DeactivateResponse deactivateMember(String email) {
         Member member = findByEmail(email);
         member.deactivate();
+
+        return new DeactivateResponse(
+                email,
+                LocalDateTime.now(),
+                "회원 탈퇴가 완료되었습니다."
+        );
     }
 
     public Member getCurrentMember() {
@@ -67,4 +83,21 @@ public class MemberService {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
+
+    @Transactional(readOnly = true)
+    public MemberResponse getMemberInfo(String email) {
+        Member member = findByEmail(email);
+        Member partner = null;
+
+        if (member.getCouple() != null) {
+            partner = memberRepository.findByCouple(member.getCouple()).stream()
+                    .filter(m -> !m.getId().equals(member.getId()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        return MemberResponse.from(member, partner);
+    }
+
+
 }

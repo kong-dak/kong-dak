@@ -3,8 +3,7 @@ package com.kongdak.controller;
 import com.kongdak.controller.dto.request.DailyAnswerRequest;
 import com.kongdak.controller.dto.request.EmojiRequest;
 import com.kongdak.controller.dto.request.ReplyRequest;
-import com.kongdak.controller.dto.response.DailyAnswerResponse;
-import com.kongdak.controller.dto.response.DailyQuestionResponse;
+import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.dailyquestion.DailyQuestionService;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
@@ -71,7 +70,7 @@ public class DailyQuestionController {
     @Operation(summary = "답변에 이모지 추가", description = "답변에 이모지 반응을 추가합니다.")
     @ApiResponse(responseCode = "200", description = "이모지 추가 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
-    public BaseResponse<Void> addEmoji(
+    public BaseResponse<AnswerEmojiResponse> addEmoji(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
@@ -80,37 +79,37 @@ public class DailyQuestionController {
             @PathVariable("answerId") Long answerId,
             @Parameter(description = "이모지 정보")
             @RequestBody @Valid EmojiRequest request) {
-        dailyQuestionService.addEmoji(userDetails.getId(), answerId, request);
-        return BaseResponse.ok();
+
+        return BaseResponse.ok(dailyQuestionService.addEmoji(userDetails.getId(), answerId, request));
     }
 
     @Operation(summary = "댓글 작성", description = "답변에 댓글을 작성합니다.")
     @ApiResponse(responseCode = "200", description = "댓글 작성 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @PostMapping("/{questionId}/replies")
-    public BaseResponse<Void> addReply(
+    public BaseResponse<ReplyCreateResponse> addReply(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable("questionId") Long questionId,
             @Parameter(description = "댓글 내용")
             @RequestBody @Valid ReplyRequest request) {
-        dailyQuestionService.addReply(userDetails.getId(), questionId, request);
-        return BaseResponse.created();
+
+        return BaseResponse.created(dailyQuestionService.addReply(userDetails.getId(), questionId, request));
     }
 
     @Operation(summary = "댓글 삭제", description = "작성한 댓글을 삭제합니다.")
     @ApiResponse(responseCode = "200", description = "댓글 삭제 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @DeleteMapping("/{questionId}/replies/{replyId}")
-    public BaseResponse<Void> deleteReply(
+    public BaseResponse<ReplyDeleteResponse> deleteReply(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable("questionId") Long questionId,
             @Parameter(description = "댓글 ID", required = true)
             @PathVariable Long replyId) {
-        dailyQuestionService.deleteReply(userDetails.getId(), questionId, replyId);
-        return BaseResponse.ok();
+
+        return BaseResponse.ok(dailyQuestionService.deleteReply(userDetails.getId(), questionId, replyId));
     }
 }
