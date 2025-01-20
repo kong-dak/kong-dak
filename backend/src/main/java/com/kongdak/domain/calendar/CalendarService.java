@@ -56,6 +56,7 @@ public class CalendarService {
     // 일정 상세 조회
     public ScheduleDetailResponse getScheduleDetail(Long calendarId, Long scheduleId) {
         Calendar calendar = findCalendarById(calendarId);
+        Calendar calendar = getCurrentCalendar();
         Schedule schedule = findScheduleById(scheduleId);
 
         validateCalendarAccess(calendar);
