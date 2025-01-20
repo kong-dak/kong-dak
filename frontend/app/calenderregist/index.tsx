@@ -7,8 +7,10 @@ import MapSearchBar from "@/components/ui/MapSearchBar";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
+import { SearchResponse } from "@/assets/types/map/mapModels";
+import { useSearch } from "@/hooks/useSearch";
 
 export default function CalenderregistScreen() {
   const url = require("../../assets/images/diary-write-sample.png");
@@ -18,6 +20,22 @@ export default function CalenderregistScreen() {
   const [isCalendarEnd, setIsCalendarEnd] = useState<boolean>(false);
   const [isTimePickerStart, setIsTimePickerStart] = useState<boolean>(false);
   const [isTimePickerEnd, setIsTimePickerEnd] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<
+    SearchResponse["data"]["documents"]
+  >([]);
+  const { handleSearch } = useSearch(searchResults, setSearchResults);
+
+  useEffect(() => {
+    if (searchQuery) {
+      handleSearch(searchQuery);
+    }
+  }, [searchQuery]);
+
+  // 검색 결과를 콘솔에 출력
+  useEffect(() => {
+    console.log("검색 결과:", searchResults);
+  }, [searchResults]);
 
   return (
     <View style={styles.container}>
@@ -156,22 +174,11 @@ export default function CalenderregistScreen() {
           />
         ) : null}
 
-        <View
-          className="w-full flex flex-row items-center mt-8 border-2 rounded-md justify-between"
-          style={{ borderColor: Colors.main }}
-        >
-          <TextInput
-            className="w-[80%] text-start ms-2"
-            style={[styles.TextInput, { color: Colors.black, fontSize: 18 }]}
-            placeholder="목적지를 입력해주세요. (선택)"
-            placeholderTextColor={Colors.gray}
-          />
-          <Fontisto className="m-2" name="zoom" size={24} color={Colors.main} />
-        </View>
         {/* 지도 검색 */}
-        <MapSearchBar />
+
+        <MapSearchBar onSearch={(query) => setSearchQuery(query)} />
         {/* 지도 */}
-        <MapScreen />
+        <MapScreen searchResults={searchResults} />
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
