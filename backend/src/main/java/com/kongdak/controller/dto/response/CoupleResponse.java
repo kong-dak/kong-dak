@@ -1,6 +1,9 @@
 package com.kongdak.controller.dto.response;
 
 import com.kongdak.domain.couple.Couple;
+import com.kongdak.domain.member.MemberRepository;
+import com.kongdak.global.exception.BusinessException;
+import com.kongdak.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -22,10 +25,10 @@ public record CoupleResponse(
         @Schema(description = "연결 상태", example = "true")
         boolean isConnected
 ) {
-    public static CoupleResponse from(Couple couple, Long memberId) {
+    public static CoupleResponse of(Couple couple, Long partnerId) {
         return new CoupleResponse(
                 couple.getId(),
-                couple.getPartnerId(memberId),
+                partnerId,
                 couple.getConnectedAt(),
                 couple.getAnniversaryDate(),
                 couple.isConnected()

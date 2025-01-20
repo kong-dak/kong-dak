@@ -21,7 +21,7 @@ public record UpdateDiaryRequest(
         @NotNull
         Weather weather,
 
-        @Schema(description = "첨부된 사진 URL 목록", example = "['photo1.jpg', 'photo2.jpg']")
+        @Schema(description = "첨부된 사진 URL 목록", example = "[\"photo1.jpg\", \"photo2.jpg\"]")
         List<String> photoUrls,
 
         @Schema(description = "데코레이션 목록")

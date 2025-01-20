@@ -3,7 +3,9 @@ package com.kongdak.domain.diary;
 import com.kongdak.controller.dto.request.CreateDiaryRequest;
 import com.kongdak.controller.dto.request.DecorationUpdateRequest;
 import com.kongdak.controller.dto.request.UpdateDiaryRequest;
+import com.kongdak.controller.dto.response.DiaryDeleteResponse;
 import com.kongdak.controller.dto.response.DiaryDetailResponse;
+import com.kongdak.controller.dto.response.DiaryUpdateResponse;
 import com.kongdak.controller.dto.response.SearchDiaryResponse;
 import com.kongdak.domain.couple.CoupleRepository;
 import com.kongdak.domain.member.Member;
@@ -18,8 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.kongdak.domain.couple.Couple;
 
@@ -70,6 +76,7 @@ public class DiaryService {
                 DiaryDecoration decoration = DiaryDecoration.builder()
                         .type(dec.type())
                         .content(dec.content())
+
                         .positionX(dec.positionX())
                         .positionY(dec.positionY())
                         .style(dec.style())
@@ -82,24 +89,80 @@ public class DiaryService {
     }
 
     @Transactional
-    public void updateDiary(Long memberId, Long diaryId, UpdateDiaryRequest request) {
+    public DiaryUpdateResponse updateDiary(Long memberId, Long diaryId, UpdateDiaryRequest request) {
         Diary diary = getDiaryByIdAndMemberId(diaryId, memberId);
         validateDiaryEditable(diary, memberId);
 
         try {
+            Map<String, Object> changedFields = new HashMap<>();
+
+            // 기본 필드들 변경 확인
+            if (!diary.getContent().equals(request.content())) {
+                changedFields.put("content", request.content());
+            }
+            if (!diary.getEmotion().equals(request.emotion())) {
+                changedFields.put("emotion", request.emotion());
+            }
+            if (!diary.getWeather().equals(request.weather())) {
+                changedFields.put("weather", request.weather());
+            }
+
             // 기본 정보 업데이트
             diary.update(request.content(), request.emotion(), request.weather());
 
-            // 사진 업데이트
-            updatePhotos(diary, request.photoUrls());
+            // 사진 업데이트가 필요한지 확인
+            List<String> currentPhotoUrls = diary.getPhotos().stream()
+                    .map(DiaryPhoto::getPhotoUrl)
+                    .toList();
 
-            // 꾸미기 요소 업데이트
-            updateDecorations(diary, request.decorations());
+            if (!currentPhotoUrls.equals(request.photoUrls())) {
+                // 사진 목록이 변경됨
+                updatePhotos(diary, request.photoUrls());
+                Map<String, Object> photoInfo = new HashMap<>();
+                photoInfo.put("urls", request.photoUrls());
+                photoInfo.put("thumbnails", diary.getPhotos().stream()
+                        .map(DiaryPhoto::getThumbnailUrl)
+                        .collect(Collectors.toList()));
+                changedFields.put("photos", photoInfo);
+            }
+
+            // 꾸미기 요소 업데이트가 필요한지 확인
+            if (!compareDecorations(diary.getDecorations(), request.decorations())) {
+                updateDecorations(diary, request.decorations());
+                changedFields.put("decorations", request.decorations());
+            }
+
+            return DiaryUpdateResponse.of(
+                    diaryId,
+                    changedFields
+            );
         } finally {
-            // 편집 잠금 해제
             releaseLock(diaryId, memberId);
         }
     }
+
+    private boolean compareDecorations(List<DiaryDecoration> currentDecorations, List<DecorationUpdateRequest> requestDecorations) {
+        if (currentDecorations.size() != requestDecorations.size()) {
+            return false;
+        }
+
+        // 모든 속성이 동일한지 확인
+        for (int i = 0; i < currentDecorations.size(); i++) {
+            DiaryDecoration current = currentDecorations.get(i);
+            DecorationUpdateRequest request = requestDecorations.get(i);
+
+            if (!current.getType().equals(request.type()) ||
+                    !Objects.equals(current.getContent(), request.content()) ||
+                    !Objects.equals(current.getPositionX(), request.positionX()) ||
+                    !Objects.equals(current.getPositionY(), request.positionY()) ||
+                    !Objects.equals(current.getStyle(), request.style())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     public DiaryDetailResponse getDiary(Long memberId, Long diaryId) {
         Couple couple = getCoupleByMemberId(memberId);
@@ -114,31 +177,28 @@ public class DiaryService {
     }
 
     @Transactional
-    public void deleteDiary(Long memberId, Long diaryId) {
+    public DiaryDeleteResponse deleteDiary(Long memberId, Long diaryId) {
         Couple couple = getCoupleByMemberId(memberId);
         Diary diary = getDiaryByIdAndCoupleId(diaryId, couple.getId());
         validateDiaryEditable(diary, memberId);
+
+        // 삭제 전에 응답 DTO 생성
+        DiaryDeleteResponse response = DiaryDeleteResponse.of(diary);
         diaryRepository.delete(diary);
+
+        return response;
     }
 
     @Transactional
     public boolean acquireLock(Long diaryId, Long memberId) {
         String lockKey = "diary:" + diaryId;
-        if (redisLockRepository.acquireLock(lockKey, memberId.toString(), LOCK_DURATION)) {
-            Diary diary = getDiaryByIdAndMemberId(diaryId, memberId);
-            diary.startEditing(getMemberById(memberId));
-            return true;
-        }
-        return false;
+        return redisLockRepository.acquireLock(lockKey, memberId.toString(), LOCK_DURATION);
     }
 
     @Transactional
     public void releaseLock(Long diaryId, Long memberId) {
         String lockKey = "diary:" + diaryId;
-        if (redisLockRepository.releaseLock(lockKey, memberId.toString())) {
-            Diary diary = getDiaryByIdAndMemberId(diaryId, memberId);
-            diary.finishEditing();
-        }
+        redisLockRepository.releaseLock(lockKey, memberId.toString());
     }
 
     // Private 헬퍼 메서드
@@ -149,7 +209,9 @@ public class DiaryService {
     }
 
     private void validateDiaryEditable(Diary diary, Long memberId) {
-        if (diary.isEditing() && !memberId.equals(diary.getEditor().getId())) {
+        String lockKey = "diary:" + diary.getId();
+        String lockHolder = redisLockRepository.getLockHolder(lockKey);
+        if (lockHolder != null && !lockHolder.equals(memberId.toString())) {
             throw new BusinessException(ErrorCode.DIARY_BEING_EDITED);
         }
     }

@@ -15,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "diaries")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Diary extends BaseTimeEntity {
     @Id
@@ -29,7 +30,6 @@ public class Diary extends BaseTimeEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Emotion emotion;
 
     @Enumerated(EnumType.STRING)
@@ -38,12 +38,6 @@ public class Diary extends BaseTimeEntity {
 
     @Column(nullable = false)
     private LocalDate diaryDate;
-
-    private boolean isEditing;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "editor_id")
-    private Member editor;
 
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryPhoto> photos = new ArrayList<>();
@@ -65,18 +59,6 @@ public class Diary extends BaseTimeEntity {
         this.content = content;
         this.emotion = emotion;
         this.weather = weather;
-    }
-
-    // 편집 잠금
-    public void startEditing(Member editor) {
-        this.isEditing = true;
-        this.editor = editor;
-    }
-
-    // 편집 잠금 해제
-    public void finishEditing() {
-        this.isEditing = false;
-        this.editor = null;
     }
 
     // 사진 추가

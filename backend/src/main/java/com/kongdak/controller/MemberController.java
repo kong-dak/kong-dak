@@ -1,8 +1,8 @@
 package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.UpdateNicknameRequest;
+import com.kongdak.controller.dto.response.DeactivateResponse;
 import com.kongdak.controller.dto.response.MemberResponse;
-import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
@@ -32,8 +32,7 @@ public class MemberController {
     public BaseResponse<MemberResponse> getMemberInfo(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Member member = memberService.findMemberById(Long.parseLong(userDetails.getUsername()));
-        return BaseResponse.ok(MemberResponse.from(member));
+        return BaseResponse.ok(memberService.getMemberInfo(userDetails.getEmail()));
     }
 
     @Operation(summary = "닉네임 수정", description = "회원의 닉네임을 수정합니다.")
@@ -45,21 +44,20 @@ public class MemberController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "변경할 닉네임 정보")
             @RequestBody @Valid UpdateNicknameRequest request) {
-        Member member = memberService.updateNickname(
+        return BaseResponse.ok(memberService.updateNickname(
                 userDetails.getUsername(),
                 request.nickname()
-        );
-        return BaseResponse.ok(MemberResponse.from(member));
+        ));
     }
 
     @Operation(summary = "회원 탈퇴", description = "회원 계정을 비활성화합니다.")
     @ApiResponse(responseCode = "200", description = "탈퇴 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @DeleteMapping
-    public BaseResponse<Void> deactivateMember(
+    public BaseResponse<DeactivateResponse> deactivateMember(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        memberService.deactivateMember(Long.parseLong(userDetails.getUsername()));
-        return BaseResponse.ok();
+
+        return BaseResponse.ok(memberService.deactivateMember(userDetails.getUsername()));
     }
 }

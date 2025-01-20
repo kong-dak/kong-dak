@@ -14,13 +14,14 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "calendars")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Calendar extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "couple_id", nullable = false)
     private Couple couple;
 

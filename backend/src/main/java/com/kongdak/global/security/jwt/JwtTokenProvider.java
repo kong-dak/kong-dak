@@ -49,13 +49,40 @@ public class JwtTokenProvider {
 
         // attributes 확인을 위한 로그
         log.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
+        String email;
+        Long id;
+        if (oAuth2User instanceof CustomOAuth2User) {
+            id = ((CustomOAuth2User) oAuth2User).getId();
+            log.info("JwtTokenProvider에서 id : {}", id);
+            email = ((CustomOAuth2User) oAuth2User).getEmail();
+        } else {
+            // 기본 OAuth2User의 경우 attributes에서 id를 추출
+            Map<String, Object> attributes = oAuth2User.getAttributes();
+            if (attributes.containsKey("kakao_account")) {
+                email = ((Map<String, Object>) attributes.get("kakao_account")).get("email").toString();
+                id = Long.valueOf(attributes.get("id").toString());
+                log.info("JwtTokenProvider에서 카카오로 갔음. id : {}", id);
+            } else {
+                email = attributes.get("email").toString();
+                id = Long.valueOf(attributes.get("sub").toString());
+            }
+        }
 
-        // 카카오 계정의 이메일 정보 가져오기
-        String email = ((Map<String, Object>) oAuth2User.getAttribute("kakao_account")).get("email").toString();
+
+//        Map<String, Object> attributes = oAuth2User.getAttributes();
+//        if (attributes.containsKey("kakao_account")) {
+//            // 카카오 로그인
+//            email = ((Map<String, Object>) attributes.get("kakao_account")).get("email").toString();
+//            id = Long.valueOf(attributes.get("id").toString());
+//        } else {
+//            // 구글 로그인
+//            email = attributes.get("email").toString();
+//            id = Long.valueOf(attributes.get("sub").toString()); // Google uses 'sub' as unique identifier
+//        }
 
         return Jwts.builder()
                 .setSubject(email)
-                .claim("id", oAuth2User.getAttribute("id"))
+                .claim("id", id)
                 .claim("auth", oAuth2User.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(",")))
@@ -70,8 +97,24 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
 
+        // attributes 확인을 위한 로그
+        log.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
+        String email;
+        Long id;
+
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        if (attributes.containsKey("kakao_account")) {
+            // 카카오 로그인
+            email = ((Map<String, Object>) attributes.get("kakao_account")).get("email").toString();
+            id = Long.valueOf(attributes.get("id").toString());
+        } else {
+            // 구글 로그인
+            email = attributes.get("email").toString();
+            id = Long.valueOf(attributes.get("sub").toString()); // Google uses 'sub' as unique identifier
+        }
+
         return Jwts.builder()
-                .setSubject(oAuth2User.getAttribute("email"))
+                .setSubject(email)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -121,21 +164,48 @@ public class JwtTokenProvider {
         return false;
     }
 
-    // Refresh Token으로부터 새로운 Access Token 생성
-    public String refreshAccessToken(String refreshToken) {
+    // Access Token과 Refresh Token을 함께 재발급
+    public TokenPairResponse reissueTokens(String oldRefreshToken) {
         // Refresh Token 검증
-        if (!validateToken(refreshToken)) {
+        if (!validateToken(oldRefreshToken)) {
             throw new JwtException("Invalid refresh token");
         }
 
         // Refresh Token에서 사용자 정보 추출
-        Claims claims = parseClaims(refreshToken);
+        Claims claims = parseClaims(oldRefreshToken);
         String email = claims.getSubject();
 
         // CustomOAuth2UserService를 통해 사용자 정보를 다시 조회
         CustomOAuth2User oAuth2User = customOAuth2UserService.loadUserByEmail(email);
 
-        return createToken(oAuth2User);
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
+
+        // attributes 확인을 위한 로그
+        log.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
+        Long id;
+
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        id = Long.valueOf(attributes.get("id").toString());
+        String newRefreshToken = Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        String newAccessToken = Jwts.builder()
+                .setSubject(email)
+                .claim("id", id)
+                .claim("auth", oAuth2User.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(",")))
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return new TokenPairResponse(newAccessToken, newRefreshToken);
     }
 
     // Claims 파싱

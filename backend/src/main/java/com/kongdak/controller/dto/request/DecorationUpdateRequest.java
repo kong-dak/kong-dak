@@ -20,6 +20,6 @@ public record DecorationUpdateRequest(
         @Schema(description = "Y 좌표", example = "100")
         Integer positionY,
 
-        @Schema(description = "스타일 정보", example = "size: 2rem;")
+        @Schema(description = "스타일 정보", example = "{\"fontSize\": \"2rem\", \"color\": \"red\"}")
         String style
 ) {}

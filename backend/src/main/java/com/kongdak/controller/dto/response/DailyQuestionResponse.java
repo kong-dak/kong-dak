@@ -2,9 +2,11 @@ package com.kongdak.controller.dto.response;
 
 import com.kongdak.domain.dailyquestion.DailyQuestion;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Schema(description = "데일리 질문 응답")
 public record DailyQuestionResponse(
         @Schema(description = "질문 ID", example = "1")

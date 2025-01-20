@@ -1,7 +1,8 @@
 package com.kongdak.controller;
 
+import com.kongdak.controller.dto.request.ConnectCodeRequest;
 import com.kongdak.controller.dto.request.CoupleConnectRequest;
-import com.kongdak.controller.dto.response.CoupleResponse;
+import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.couple.CoupleService;
 import com.kongdak.global.exception.ErrorResponse;
 import com.kongdak.global.response.BaseResponse;
@@ -15,16 +16,59 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Slf4j
 @RequestMapping("/couples")
 @RequiredArgsConstructor
 @Tag(name = "커플", description = "커플 관련 API")
 public class CoupleController {
 
     private final CoupleService coupleService;
+
+    @GetMapping("/code")
+    @Operation(summary = "연결 코드 조회", description = "현재 사용자의 연결 코드를 조회합니다.")
+    public BaseResponse<CoupleMatchCodeResponse> getConnectCode(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String code = coupleService.getConnectCode(userDetails.getId());
+        return BaseResponse.ok(new CoupleMatchCodeResponse(code));
+    }
+
+    @PostMapping("/match")
+    @Operation(summary = "커플 매칭 요청", description = "상대방의 연결 코드로 커플 매칭을 요청합니다.")
+    public BaseResponse<MatchRequestResponse> requestMatch(
+            @RequestBody @Valid ConnectCodeRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return BaseResponse.ok(coupleService.requestMatch(
+                userDetails.getId(),
+                request.code()
+        ));
+    }
+
+    @PostMapping("/match/{requestId}/accept")
+    @Operation(summary = "매칭 수락", description = "커플 매칭 요청을 수락합니다.")
+    public BaseResponse<MatchAcceptResponse> acceptMatch(
+            @Parameter(description = "매칭 요청 ID", required = true)
+            @PathVariable("requestId") String requestId,
+            @Parameter(description = "인증된 사용자 ID", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return BaseResponse.ok(coupleService.acceptMatch(requestId, userDetails.getId()));
+    }
+
+    @PostMapping("/match/{requestId}/reject")
+    @Operation(summary = "매칭 거절", description = "커플 매칭 요청을 거절합니다.")
+    public BaseResponse<MatchRejectResponse> rejectMatch(
+            @Parameter(description = "매칭 요청 ID", required = true)
+            @PathVariable("requestId") String requestId,
+            @Parameter(description = "인증된 사용자 ID", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("Received requestId: {}", requestId);  // 로그 추가
+
+        return BaseResponse.ok(coupleService.rejectMatch(requestId, userDetails.getId()));
+    }
 
     @Operation(
             summary = "커플 연결",
@@ -43,12 +87,13 @@ public class CoupleController {
             )
     })
     @PostMapping
-    public BaseResponse<CoupleResponse> connect(@RequestBody @Valid
-                                                @Parameter(description = "커플 연결 요청") CoupleConnectRequest request,
-                                                @Parameter(description = "인증된 사용자 정보", hidden = true)
-                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public BaseResponse<CoupleResponse> connect(
+            @RequestBody @Valid
+            @Parameter(description = "커플 연결 요청") CoupleConnectRequest request,
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         CoupleResponse response = coupleService.connect(
-                Long.parseLong(userDetails.getUsername()),
+                userDetails.getId(),
                 request.partnerId(),
                 request.anniversaryDate()
         );
@@ -71,13 +116,12 @@ public class CoupleController {
             )
     })
     @PatchMapping("/{coupleId}/disconnect")
-    public BaseResponse<Void> disconnect(
-                                            @Parameter(description = "커플 ID", required = true)
-                                            @PathVariable Long coupleId,
-                                           @Parameter(description = "인증된 사용자 정보", hidden = true)
-                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        coupleService.disconnect(coupleId, Long.parseLong(userDetails.getUsername()));
-        return BaseResponse.ok();
+    public BaseResponse<CoupleDisconnectResponse> disconnect(
+            @Parameter(description = "커플 ID", required = true)
+            @PathVariable("coupleId") Long coupleId,
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return BaseResponse.ok(coupleService.disconnect(coupleId, userDetails.getId()));
     }
 
     @Operation(
@@ -96,9 +140,12 @@ public class CoupleController {
             )
     })
     @PatchMapping("/{coupleId}/restore")
-    public BaseResponse<Void> restore(@PathVariable Long coupleId,
-                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        coupleService.restore(coupleId, Long.parseLong(userDetails.getUsername()));
-        return BaseResponse.ok();
+    public BaseResponse<CoupleRestoreResponse> restore(
+            @Parameter(description = "커플 ID", required = true)
+            @PathVariable("coupleId") Long coupleId,
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return BaseResponse.ok(coupleService.restore(coupleId, userDetails.getId()));
     }
 }

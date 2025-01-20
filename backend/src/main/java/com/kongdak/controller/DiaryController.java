@@ -2,11 +2,10 @@ package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.CreateDiaryRequest;
 import com.kongdak.controller.dto.request.UpdateDiaryRequest;
-import com.kongdak.controller.dto.response.DiaryCreateResponse;
-import com.kongdak.controller.dto.response.DiaryDetailResponse;
-import com.kongdak.controller.dto.response.SearchDiaryResponse;
+import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.diary.DiaryService;
 import com.kongdak.global.response.BaseResponse;
+import com.kongdak.global.security.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,12 +33,12 @@ public class DiaryController {
     @PostMapping
     public BaseResponse<DiaryCreateResponse> createDiary(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 작성 정보")
             @RequestBody @Valid CreateDiaryRequest request
     ) {
         return BaseResponse.created(
-                DiaryCreateResponse.of(diaryService.createDiary(memberId, request))
+                DiaryCreateResponse.of(diaryService.createDiary(userDetails.getId(), request))
         );
     }
 
@@ -49,11 +48,11 @@ public class DiaryController {
     @GetMapping("/{diaryId}")
     public BaseResponse<DiaryDetailResponse> getDiary(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
-        return BaseResponse.ok(diaryService.getDiary(memberId, diaryId));
+        return BaseResponse.ok(diaryService.getDiary(userDetails.getId(), diaryId));
     }
 
     @Operation(summary = "다이어리 목록 조회", description = "다이어리 목록을 페이징하여 조회합니다.")
@@ -62,11 +61,11 @@ public class DiaryController {
     @GetMapping
     public BaseResponse<SearchDiaryResponse> searchDiaries(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "페이징 정보")
             @PageableDefault Pageable pageable
     ) {
-        SearchDiaryResponse response = diaryService.searchDiaries(memberId, pageable);
+        SearchDiaryResponse response = diaryService.searchDiaries(userDetails.getId(), pageable);
         return BaseResponse.ok(response);
     }
 
@@ -74,30 +73,30 @@ public class DiaryController {
     @ApiResponse(responseCode = "200", description = "수정 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @PutMapping("/{diaryId}")
-    public BaseResponse<Void> updateDiary(
+    public BaseResponse<DiaryUpdateResponse> updateDiary(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId,
+            @PathVariable("diaryId") Long diaryId,
             @Parameter(description = "다이어리 수정 정보")
             @RequestBody @Valid UpdateDiaryRequest request
     ) {
-        diaryService.updateDiary(memberId, diaryId, request);
-        return BaseResponse.ok();
+
+        return BaseResponse.ok(diaryService.updateDiary(userDetails.getId(), diaryId, request));
     }
 
     @Operation(summary = "다이어리 삭제", description = "작성된 다이어리를 삭제합니다.")
     @ApiResponse(responseCode = "200", description = "삭제 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @DeleteMapping("/{diaryId}")
-    public BaseResponse<Void> deleteDiary(
+    public BaseResponse<DiaryDeleteResponse> deleteDiary(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
-        diaryService.deleteDiary(memberId, diaryId);
-        return BaseResponse.ok();
+
+        return BaseResponse.ok(diaryService.deleteDiary(userDetails.getId(), diaryId));
     }
 
     @Operation(summary = "다이어리 락 획득", description = "다이어리 편집을 위한 락을 획득합니다.")
@@ -106,11 +105,11 @@ public class DiaryController {
     @PostMapping("/{diaryId}/lock")
     public BaseResponse<Boolean> acquireLock(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
-        return BaseResponse.ok(diaryService.acquireLock(diaryId, memberId));
+        return BaseResponse.ok(diaryService.acquireLock(diaryId, userDetails.getId()));
     }
 
     @Operation(summary = "다이어리 락 해제", description = "획득한 다이어리 락을 해제합니다.")
@@ -119,11 +118,11 @@ public class DiaryController {
     @DeleteMapping("/{diaryId}/lock")
     public BaseResponse<Void> releaseLock(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
-            @AuthenticationPrincipal Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
-        diaryService.releaseLock(diaryId, memberId);
+        diaryService.releaseLock(diaryId, userDetails.getId());
         return BaseResponse.ok();
     }
 }
