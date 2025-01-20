@@ -22,10 +22,10 @@ public record CoupleInfo(
         @Schema(description = "연결 상태", example = "true")
         boolean isConnected
 ) {
-    public static CoupleInfo from(Couple couple, Long memberId) {
+    public static CoupleInfo from(Couple couple, Long partnerId) {
         return new CoupleInfo(
                 couple.getId(),
-                couple.getPartnerId(memberId),
+                partnerId,
                 couple.getConnectedAt(),
                 couple.getAnniversaryDate(),
                 couple.isConnected()

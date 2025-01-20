@@ -1,6 +1,7 @@
 package com.kongdak.controller.dto.response;
 
 import com.kongdak.domain.member.Member;
+import com.kongdak.domain.member.MemberRepository;
 import com.kongdak.domain.member.OAuthProvider;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -29,7 +30,7 @@ public record MemberResponse(
         CoupleInfo coupleInfo
 
 ) {
-    public static MemberResponse from(Member member){
+    public static MemberResponse from(Member member, Member partner){
         return new MemberResponse(
             member.getId(),
                 member.getNickname(),
@@ -37,7 +38,7 @@ public record MemberResponse(
                 member.getOauthProvider(),
                 member.getCreatedAt(),
                 member.isActive(),
-                member.getCouple() != null ? CoupleInfo.from(member.getCouple(), member.getId()) : null
+                member.getCouple() != null ? CoupleInfo.from(member.getCouple(), partner.getId()) : null
         );
     }
 }

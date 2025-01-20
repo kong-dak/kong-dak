@@ -149,7 +149,7 @@ public class CoupleService {
                 .build();
         calendarRepository.save(calendar);
 
-        return CoupleResponse.from(couple, memberId, memberRepository);
+        return CoupleResponse.of(couple, partnerId);
     }
 
     @Transactional

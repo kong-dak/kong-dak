@@ -29,7 +29,8 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean isActive = true;
 
-    @ManyToOne
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "couple_id")
     private Couple couple;
 
@@ -65,6 +66,5 @@ public class Member extends BaseTimeEntity {
     public void activate(){
         this.isActive = true;
     }
-
 
 }

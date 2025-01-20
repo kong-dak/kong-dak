@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,9 +22,6 @@ public class Couple extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToMany(mappedBy = "couple")
-    private List<Member> members = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime connectedAt;
@@ -38,41 +34,16 @@ public class Couple extends BaseTimeEntity {
     private LocalDateTime disconnectedAt;
 
     @Builder
-    public Couple(Member member1, Member member2, LocalDateTime anniversaryDate) {
-        validateMemberNotNull(member1, member2);
+    public Couple(LocalDateTime anniversaryDate) {
         this.connectedAt = LocalDateTime.now();
         this.isConnected = true;
         this.anniversaryDate = anniversaryDate;
-        connectMembers(member1, member2);
     }
 
-    private void validateMemberNotNull(Member member1, Member member2) {
-        if (member1 == null || member2 == null) {
+    private void validateMemberNotNull(List<Member> members) {
+        if (members == null || members.size() != 2) {
             throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
         }
-    }
-
-    // 연관관계 편의 메서드
-    private void connectMembers(Member member1, Member member2) {
-        validateMemberSize();
-        this.members.add(member1);
-        this.members.add(member2);
-    }
-
-    // 커플 멤버 수 검증
-    private void validateMemberSize() {
-        if (!members.isEmpty()) {
-            throw new BusinessException(ErrorCode.COUPLE_ALREADY_EXISTS);
-        }
-    }
-
-    // 파트너 ID를 가져오는 메서드
-    public Long getPartnerId(Long memberId) {
-        return members.stream()
-                .filter(member -> !member.getId().equals(memberId))
-                .map(Member::getId)
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(ErrorCode.PARTNER_NOT_FOUND));
     }
 
     public void disconnect() {
@@ -106,9 +77,4 @@ public class Couple extends BaseTimeEntity {
         }
     }
 
-    // 멤버가 이 커플에 속해있는지 확인
-    public boolean containsMember(Long memberId) {
-        return members.stream()
-                .anyMatch(member -> member.getId().equals(memberId));
-    }
 }
