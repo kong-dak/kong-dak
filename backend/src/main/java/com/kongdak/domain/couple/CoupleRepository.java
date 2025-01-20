@@ -6,15 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CoupleRepository extends JpaRepository<Couple, Long> {
-    Optional<Couple> findByMember1OrMember2(Member member1, Member member2);
 
-    @Query("SELECT c FROM Couple c WHERE c.member1.id = :memberId OR c.member2.id = :memberId")
+    @Query("SELECT m.couple FROM Member m WHERE m.id = :memberId")
     Optional<Couple> findByMemberId(@Param("memberId") Long memberId);
 
-    boolean existsByMember1OrMember2(Member member1, Member member2);
-
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Member m WHERE m IN (:members) AND m.couple IS NOT NULL")
+    boolean existsByMemberIn(@Param("members") List<Member> members);
 }

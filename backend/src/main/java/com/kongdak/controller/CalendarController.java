@@ -2,6 +2,7 @@ package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.ScheduleCreateRequest;
 import com.kongdak.controller.dto.response.MonthlyScheduleResponse;
+import com.kongdak.controller.dto.response.ScheduleDeleteResponse;
 import com.kongdak.controller.dto.response.ScheduleDetailResponse;
 import com.kongdak.controller.dto.response.ScheduleResponse;
 import com.kongdak.domain.calendar.CalendarService;
@@ -140,10 +141,9 @@ public class CalendarController {
             )
     })
     @DeleteMapping("/{calendarId}/schedules/{scheduleId}")
-    public BaseResponse<Void> deleteSchedule(
+    public BaseResponse<ScheduleDeleteResponse> deleteSchedule(
             @PathVariable Long calendarId,
             @PathVariable Long scheduleId) {
-        calendarService.deleteSchedule(calendarId, scheduleId);
-        return BaseResponse.ok();
+        return BaseResponse.ok(calendarService.deleteSchedule(calendarId, scheduleId));
     }
 }

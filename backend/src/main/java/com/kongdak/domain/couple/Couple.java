@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,14 +22,6 @@ public class Couple extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member1_id")
-    private Member member1;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member2_id")
-    private Member member2;
 
     @Column(nullable = false)
     private LocalDateTime connectedAt;
@@ -41,28 +34,25 @@ public class Couple extends BaseTimeEntity {
     private LocalDateTime disconnectedAt;
 
     @Builder
-    public Couple(Member member1, Member member2, LocalDateTime anniversaryDate) {
-        this.member1 = member1;
-        this.member2 = member2;
+    public Couple(LocalDateTime anniversaryDate) {
         this.connectedAt = LocalDateTime.now();
         this.isConnected = true;
         this.anniversaryDate = anniversaryDate;
     }
 
-    // 파트너 ID를 가져오는 메서드
-    public Long getPartnerId(Long memberId) {
-        if (member1.getId().equals(memberId)) {
-            return member2.getId();
+    private void validateMemberNotNull(List<Member> members) {
+        if (members == null || members.size() != 2) {
+            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
         }
-        return member1.getId();
     }
 
-    public void disconnect(){
+    public void disconnect() {
+        validateConnected();
         this.isConnected = false;
         this.disconnectedAt = LocalDateTime.now();
     }
 
-    public void restore(){
+    public void restore() {
         validateCanRestore();
         this.isConnected = true;
         this.disconnectedAt = null;
@@ -80,4 +70,11 @@ public class Couple extends BaseTimeEntity {
             throw new BusinessException(ErrorCode.CANNOT_RESTORE_COUPLE);
         }
     }
+
+    private void validateConnected() {
+        if (!isConnected) {
+            throw new BusinessException(ErrorCode.COUPLE_ALREADY_DISCONNECTED);
+        }
+    }
+
 }

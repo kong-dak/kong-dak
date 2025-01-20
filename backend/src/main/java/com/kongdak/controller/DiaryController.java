@@ -2,9 +2,7 @@ package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.CreateDiaryRequest;
 import com.kongdak.controller.dto.request.UpdateDiaryRequest;
-import com.kongdak.controller.dto.response.DiaryCreateResponse;
-import com.kongdak.controller.dto.response.DiaryDetailResponse;
-import com.kongdak.controller.dto.response.SearchDiaryResponse;
+import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.diary.DiaryService;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
@@ -52,7 +50,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
         return BaseResponse.ok(diaryService.getDiary(userDetails.getId(), diaryId));
     }
@@ -75,30 +73,30 @@ public class DiaryController {
     @ApiResponse(responseCode = "200", description = "수정 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @PutMapping("/{diaryId}")
-    public BaseResponse<Void> updateDiary(
+    public BaseResponse<DiaryUpdateResponse> updateDiary(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId,
+            @PathVariable("diaryId") Long diaryId,
             @Parameter(description = "다이어리 수정 정보")
             @RequestBody @Valid UpdateDiaryRequest request
     ) {
-        diaryService.updateDiary(userDetails.getId(), diaryId, request);
-        return BaseResponse.ok();
+
+        return BaseResponse.ok(diaryService.updateDiary(userDetails.getId(), diaryId, request));
     }
 
     @Operation(summary = "다이어리 삭제", description = "작성된 다이어리를 삭제합니다.")
     @ApiResponse(responseCode = "200", description = "삭제 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @DeleteMapping("/{diaryId}")
-    public BaseResponse<Void> deleteDiary(
+    public BaseResponse<DiaryDeleteResponse> deleteDiary(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
-        diaryService.deleteDiary(userDetails.getId(), diaryId);
-        return BaseResponse.ok();
+
+        return BaseResponse.ok(diaryService.deleteDiary(userDetails.getId(), diaryId));
     }
 
     @Operation(summary = "다이어리 락 획득", description = "다이어리 편집을 위한 락을 획득합니다.")
@@ -109,7 +107,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
         return BaseResponse.ok(diaryService.acquireLock(diaryId, userDetails.getId()));
     }
@@ -122,7 +120,7 @@ public class DiaryController {
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "다이어리 ID", required = true)
-            @PathVariable Long diaryId
+            @PathVariable("diaryId") Long diaryId
     ) {
         diaryService.releaseLock(diaryId, userDetails.getId());
         return BaseResponse.ok();

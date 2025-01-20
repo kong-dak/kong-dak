@@ -5,10 +5,7 @@ import com.kongdak.domain.couple.Couple;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -32,7 +29,8 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean isActive = true;
 
-    @OneToOne
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "couple_id")
     private Couple couple;
 
@@ -68,4 +66,5 @@ public class Member extends BaseTimeEntity {
     public void activate(){
         this.isActive = true;
     }
+
 }

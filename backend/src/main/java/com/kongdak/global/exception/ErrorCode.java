@@ -23,6 +23,10 @@ public enum ErrorCode {
     COUPLE_MATCH_REQUEST_NOT_FOUND(404, "C006", "커플 요청을 찾을 수 없습니다."),
     INVALID_MATCH_REQUEST_CODE(400, "C007", "유효하지 않은 코드입니다."),
     CANNOT_MATCH_TO_OWN(400, "C008", "스스로에게 커플 요청을 할 수 없습니다."),
+    COUPLE_ALREADY_EXISTS(400, "C009", "이미 커플이 맺어져 있습니다."),
+    PARTNER_NOT_FOUND(404, "C010", "파트너를 찾을 수 없습니다."),
+    COUPLE_ALREADY_DISCONNECTED(400, "C011", "이미 끊긴 커플입니다."),
+
 
     // Calendar 관련 예외
     CALENDAR_NOT_FOUND(404, "CL001", "캘린더를 찾을 수 없습니다"),
