@@ -54,8 +54,8 @@ public class CalendarService {
     }
 
     // 일정 상세 조회
-    public ScheduleDetailResponse getScheduleDetail(Long calendarId, Long scheduleId) {
-        Calendar calendar = findCalendarById(calendarId);
+    public ScheduleDetailResponse getScheduleDetail(Long scheduleId) {
+
         Calendar calendar = getCurrentCalendar();
         Schedule schedule = findScheduleById(scheduleId);
 
