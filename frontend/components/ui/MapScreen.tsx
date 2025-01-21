@@ -25,9 +25,6 @@ export default function MapScreen({ searchResults }: searchResultProps) {
 
   return (
     <View style={styles.container}>
-<<<<<<< Updated upstream
-      <NaverMapView style={styles.map} />
-=======
       <NaverMapView
         ref={ref} // 지도 참조 연결
         style={styles.map}
@@ -55,7 +52,6 @@ export default function MapScreen({ searchResults }: searchResultProps) {
           caption={{ text: "내 위치" }}
         />
       </NaverMapView>
->>>>>>> Stashed changes
     </View>
   );
 }
@@ -75,16 +71,4 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-<<<<<<< Updated upstream
-=======
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: "red",
-  },
->>>>>>> Stashed changes
 });
