@@ -40,7 +40,7 @@ public class DailyQuestionService {
 
         // 현재 회원의 마지막 답변 조회
         Optional<DailyAnswer> lastAnswer =
-                dailyAnswerRepository.findLastAnswerByMemberId(memberId);
+                dailyAnswerRepository.findFirstByMemberIdOrderByQuestionIdDesc(memberId);
         // 다음 질문 조회
         DailyQuestion nextQuestion;
         if (lastAnswer.isEmpty()) {
@@ -81,11 +81,16 @@ public class DailyQuestionService {
                 .build();
 
         DailyAnswer savedAnswer = dailyAnswerRepository.save(answer);
-        return DailyAnswerResponse.from(savedAnswer);
+
+        // 현재 질문에 대한 전체 답변 수 확인
+        List<DailyAnswer> answers = dailyAnswerRepository.findByQuestionId(questionId);
+        boolean bothAnswered = answers.size() == 2;
+
+        return DailyAnswerResponse.from(savedAnswer, bothAnswered, memberId);
     }
 
     // 답변 조회 (커플 둘 다 답변했을 때만 상대방 답변 보이도록)
-    public List<DailyAnswerResponse> getAnswers(Long memberId, Long questionId) {
+    public DailyQuestionWithAnswersResponse getDailyQuestionDetail(Long memberId, Long questionId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -98,20 +103,21 @@ public class DailyQuestionService {
             throw new BusinessException(ErrorCode.COUPLE_NOT_FOUND);
         }
 
+        // 질문 조회
+        DailyQuestion question = dailyQuestionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
         List<DailyAnswer> answers = dailyAnswerRepository.findByQuestionId(questionId);
 
-        // 둘 다 답변했는지 확인
-        if (answers.size() == 2) {
-            return answers.stream()
-                    .map(DailyAnswerResponse::from)
-                    .collect(Collectors.toList());
-        }
+        boolean bothAnswered = answers.size() == 2;
 
-        // 한 명만 답변했을 경우 자신의 답변만 반환
-        return answers.stream()
-                .filter(answer -> answer.getMember().getId().equals(memberId))
-                .map(DailyAnswerResponse::from)
-                .collect(Collectors.toList());
+        return DailyQuestionWithAnswersResponse.builder()
+                .questionId(question.getId())
+                .title(question.getTitle())
+                .answers(answers.stream()
+                        .map(answer -> DailyAnswerResponse.from(answer, bothAnswered, memberId))
+                        .collect(Collectors.toList()))
+                .bothAnswered(bothAnswered)
+                .build();
     }
 
     // 이모지 반응 추가
@@ -179,4 +185,48 @@ public class DailyQuestionService {
 
         return response;
     }
+
+    public DailyQuestionWithAnswersResponse getDailyQuestionWithAnswers(Long memberId) {
+        // 현재 회원의 커플 정보 조회
+        Couple couple = coupleRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COUPLE_NOT_FOUND));
+
+        // 마지막 답변 조회
+        Optional<DailyAnswer> lastAnswer = dailyAnswerRepository.findFirstByMemberIdOrderByQuestionIdDesc(memberId);
+
+        // 현재/다음 질문 결정
+        DailyQuestion question;
+        if (lastAnswer.isEmpty()) {
+            question = dailyQuestionRepository.findFirstByOrderByIdAsc()
+                    .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+        } else {
+            DailyQuestion currentQuestion = lastAnswer.get().getQuestion();
+            long answerCount = dailyAnswerRepository.countByQuestionIdAndCoupleId(
+                    currentQuestion.getId(),
+                    couple.getId()
+            );
+
+            question = (answerCount < 2)
+                    ? currentQuestion
+                    : dailyQuestionRepository.findFirstByIdGreaterThanOrderByIdAsc(currentQuestion.getId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+        }
+
+        // 질문에 대한 답변들 조회
+        List<DailyAnswer> answers = dailyAnswerRepository.findByQuestionId(question.getId());
+
+        return DailyQuestionWithAnswersResponse.of(question, answers, memberId);
+    }
+
+    public List<DailyQuestionListResponse> getAllQuestions(Long memberId) {
+        Long todayQuestionId = getDailyQuestion(memberId).questionId();
+
+        // Id 1번부터 todayQuestionId까지 가져오는 메서드
+        return dailyQuestionRepository.findByIdLessThanEqualOrderByIdDesc(todayQuestionId)
+                .stream()
+                .map(DailyQuestionListResponse::from)
+                .collect(Collectors.toList());
+    }
+
+
 }

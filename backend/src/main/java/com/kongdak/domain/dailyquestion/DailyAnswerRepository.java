@@ -16,18 +16,11 @@ public interface DailyAnswerRepository extends JpaRepository<DailyAnswer, Long> 
     Optional<DailyAnswer> findByQuestionIdAndMemberId(Long questionId, Long memberId);
 
     // 특정 멤버의 마지막 답변 조회
-    @Query("SELECT da FROM DailyAnswer da " +
-            "WHERE da.member.id = :memberId " +
-            "ORDER BY da.question.id DESC")
-    Optional<DailyAnswer> findLastAnswerByMemberId(@Param("memberId") Long memberId);
+    Optional<DailyAnswer> findFirstByMemberIdOrderByQuestionIdDesc(Long memberId);
 
-    // 특정 커플(두 멤버)의 답변 여부 확인
+
     @Query("SELECT COUNT(da) FROM DailyAnswer da " +
             "WHERE da.question.id = :questionId " +
-            "AND da.member.id IN (:member1Id, :member2Id)")
-    long countAnswersByQuestionAndMembers(
-            @Param("questionId") Long questionId,
-            @Param("member1Id") Long member1Id,
-            @Param("member2Id") Long member2Id
-    );
+            "AND da.member.couple.id = :coupleId")
+    long countByQuestionIdAndCoupleId(@Param("questionId")Long questionId, @Param("coupleId")Long coupleId);
 }
