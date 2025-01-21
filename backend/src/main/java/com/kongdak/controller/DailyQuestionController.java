@@ -27,28 +27,28 @@ import java.util.List;
 public class DailyQuestionController {
     private final DailyQuestionService dailyQuestionService;
 
-    @GetMapping
-    @Operation(summary = "오늘의 질문 조회", description = "오늘의 데일리 질문을 조회합니다.")
+    @GetMapping("/current")
+    @Operation(summary = "오늘의 질문과 답변 조회", description = "현재 진행 중인 데일리 질문과 해당 질문에 대한 답변들을 함께 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
-    public BaseResponse<DailyQuestionResponse> getDailyQuestion(
+    public BaseResponse<DailyQuestionWithAnswersResponse> getDailyQuestion(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return BaseResponse.ok(dailyQuestionService.getDailyQuestion(userDetails.getId()));
+        return BaseResponse.ok(dailyQuestionService.getDailyQuestionWithAnswers(userDetails.getId()));
     }
 
-    @Operation(summary = "답변 목록 조회", description = "특정 질문에 대한 답변 목록을 조회합니다.")
+    @Operation(summary = "질문 및 답변 상세 조회", description = "특정 질문에 대한 제목과 답변을 상세 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
-    @GetMapping("/{questionId}/answers")
-    public BaseResponse<List<DailyAnswerResponse>> getAnswers(
+    @GetMapping("/{questionId}")
+    public BaseResponse<DailyQuestionWithAnswersResponse> getAnswers(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
             @PathVariable("questionId") Long questionId) {
         return BaseResponse.ok(
-                dailyQuestionService.getAnswers(userDetails.getId(), questionId)
+                dailyQuestionService.getDailyQuestionDetail(userDetails.getId(), questionId)
         );
     }
 
@@ -64,6 +64,17 @@ public class DailyQuestionController {
             @Parameter(description = "답변 내용")
             @RequestBody @Valid DailyAnswerRequest request) {
         return BaseResponse.created(dailyQuestionService.createAnswer(userDetails.getId(), questionId, request));
+    }
+
+    @Operation(summary = "질문 히스토리 조회", description = "첫 번째 질문부터 현재 진행 중인 질문까지의 모든 질문 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    @GetMapping("/history")
+    public BaseResponse<List<DailyQuestionListResponse>> getAllQuestions(
+            @Parameter(description = "인증된 사용자 ID", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return BaseResponse.ok(dailyQuestionService.getAllQuestions(userDetails.getId()));
     }
 
     @PatchMapping("/{questionId}/answers/{answerId}/emoji")
@@ -108,7 +119,7 @@ public class DailyQuestionController {
             @Parameter(description = "질문 ID", required = true)
             @PathVariable("questionId") Long questionId,
             @Parameter(description = "댓글 ID", required = true)
-            @PathVariable Long replyId) {
+            @PathVariable("replyId") Long replyId) {
 
         return BaseResponse.ok(dailyQuestionService.deleteReply(userDetails.getId(), questionId, replyId));
     }
