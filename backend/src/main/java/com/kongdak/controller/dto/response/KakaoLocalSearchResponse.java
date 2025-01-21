@@ -13,6 +13,7 @@ public record KakaoLocalSearchResponse (
     ) {}
 
     public record Document(
+            String id,
             String place_name,
             String address_name,
             String category_name,
