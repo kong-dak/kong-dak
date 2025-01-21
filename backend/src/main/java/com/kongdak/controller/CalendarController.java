@@ -8,7 +8,6 @@ import com.kongdak.controller.dto.response.ScheduleResponse;
 import com.kongdak.domain.calendar.CalendarService;
 import com.kongdak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @RestController
@@ -40,11 +40,10 @@ public class CalendarController {
                     content = @Content(schema = @Schema(implementation = BaseResponse.class))
             )
     })
-    @GetMapping("/{calendarId}/schedules/monthly")
+    @GetMapping("/schedules/monthly")
     public BaseResponse<MonthlyScheduleResponse> getMonthlySchedules(
-            @PathVariable Long calendarId,
-            @RequestParam("datetime") @DateTimeFormat(pattern = "yyyyMM") LocalDateTime dateTime) {
-        MonthlyScheduleResponse monthlySchedules = calendarService.getMonthlySchedules(calendarId, dateTime);
+            @RequestParam("datetime") @DateTimeFormat(pattern = "yyyyMM") YearMonth dateTime) {
+        MonthlyScheduleResponse monthlySchedules = calendarService.getMonthlySchedules(dateTime);
         return BaseResponse.ok(monthlySchedules);
     }
 
@@ -59,12 +58,13 @@ public class CalendarController {
                     content = @Content(schema = @Schema(implementation = BaseResponse.class))
             )
     })
-    @GetMapping("/{calendarId}/schedules/daily")
+    @GetMapping("/schedules/daily")
     public BaseResponse<List<ScheduleResponse>> getDailySchedules(
-            @PathVariable Long calendarId,
-            @RequestParam("datetime") @DateTimeFormat(pattern = "yyyyMMdd") LocalDateTime dateTime) {
+
+            @RequestParam("datetime")
+            @DateTimeFormat(pattern = "yyyyMMdd") LocalDate dateTime) {
         return BaseResponse.ok(
-                calendarService.getDailySchedules(calendarId, dateTime)
+                calendarService.getDailySchedules(dateTime)
         );
     }
 
@@ -79,11 +79,10 @@ public class CalendarController {
                     content = @Content(schema = @Schema(implementation = BaseResponse.class))
             )
     })
-    @GetMapping("/{calendarId}/schedules/{scheduleId}")
+    @GetMapping("/schedules/{scheduleId}")
     public BaseResponse<ScheduleDetailResponse> getScheduleDetail(
-            @PathVariable Long calendarId,
-            @PathVariable Long scheduleId) {
-        ScheduleDetailResponse scheduleDetail = calendarService.getScheduleDetail(calendarId, scheduleId);
+            @PathVariable("scheduleId") Long scheduleId) {
+        ScheduleDetailResponse scheduleDetail = calendarService.getScheduleDetail(scheduleId);
         return BaseResponse.ok(scheduleDetail);
     }
 
@@ -99,13 +98,10 @@ public class CalendarController {
                     content = @Content(schema = @Schema(implementation = BaseResponse.class))
             )
     })
-    @PostMapping("/{calendarId}/schedules")
+    @PostMapping("/schedules")
     public BaseResponse<ScheduleResponse> createSchedule(
-            @Parameter(description = "캘린더 ID", example = "1")
-            @PathVariable("calendarId") Long calendarId,
             @Valid @RequestBody ScheduleCreateRequest request) {
-        ScheduleResponse response = calendarService.createSchedule(calendarId, request);
-        return BaseResponse.created(response);
+        return BaseResponse.created(calendarService.createSchedule(request));
     }
 
 
@@ -120,12 +116,11 @@ public class CalendarController {
                     content = @Content(schema = @Schema(implementation = BaseResponse.class))
             )
     })
-    @PatchMapping("/{calendarId}/schedules/{scheduleId}")
+    @PatchMapping("/schedules/{scheduleId}")
     public BaseResponse<ScheduleResponse> updateSchedule(
-            @PathVariable Long calendarId,
-            @PathVariable Long scheduleId,
+            @PathVariable("scheduleId") Long scheduleId,
             @Valid @RequestBody ScheduleCreateRequest request) {
-        ScheduleResponse scheduleResponse = calendarService.updateSchedule(calendarId, scheduleId, request);
+        ScheduleResponse scheduleResponse = calendarService.updateSchedule(scheduleId, request);
         return BaseResponse.ok(scheduleResponse);
     }
 
@@ -140,10 +135,9 @@ public class CalendarController {
                     content = @Content(schema = @Schema(implementation = BaseResponse.class))
             )
     })
-    @DeleteMapping("/{calendarId}/schedules/{scheduleId}")
+    @DeleteMapping("/schedules/{scheduleId}")
     public BaseResponse<ScheduleDeleteResponse> deleteSchedule(
-            @PathVariable Long calendarId,
-            @PathVariable Long scheduleId) {
-        return BaseResponse.ok(calendarService.deleteSchedule(calendarId, scheduleId));
+            @PathVariable("scheduleId") Long scheduleId) {
+        return BaseResponse.ok(calendarService.deleteSchedule(scheduleId));
     }
 }

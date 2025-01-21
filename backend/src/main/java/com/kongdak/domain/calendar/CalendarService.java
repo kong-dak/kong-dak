@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +41,9 @@ public class CalendarService {
     }
 
     // 월별 일정 조회
-    public MonthlyScheduleResponse getMonthlySchedules(Long calendarId, LocalDateTime dateTime) {
+    public MonthlyScheduleResponse getMonthlySchedules(YearMonth dateTime) {
+
+        Long calendarId = getCurrentCalendar().getId();
         Calendar calendar = findCalendarById(calendarId);
 
         validateCalendarAccess(calendar);
@@ -54,12 +58,13 @@ public class CalendarService {
     }
 
     // 일정 상세 조회
-    public ScheduleDetailResponse getScheduleDetail(Long calendarId, Long scheduleId) {
-        Calendar calendar = findCalendarById(calendarId);
+    public ScheduleDetailResponse getScheduleDetail(Long scheduleId) {
+
+        Calendar calendar = getCurrentCalendar();
         Schedule schedule = findScheduleById(scheduleId);
 
         validateCalendarAccess(calendar);
-        validateScheduleForCalendar(schedule, calendarId);
+        validateScheduleForCalendar(schedule, calendar.getId());
 
         return ScheduleDetailResponse.from(schedule);
     }
@@ -76,11 +81,11 @@ public class CalendarService {
     }
 
     // 일별 일정 조회
-    public List<ScheduleResponse> getDailySchedules(Long calendarId, LocalDateTime dateTime) {
-        Calendar calendar = findCalendarById(calendarId);
+    public List<ScheduleResponse> getDailySchedules(LocalDate date) {
+        Calendar calendar = getCurrentCalendar();
         validateCalendarAccess(calendar);
 
-        return scheduleRepository.findDailySchedules(calendarId, dateTime.toLocalDate())
+        return scheduleRepository.findDailySchedules(calendar.getId(), date)
                 .stream()
                 .map(ScheduleResponse::from)
                 .collect(Collectors.toList());
@@ -88,10 +93,10 @@ public class CalendarService {
 
     // 일정 생성
     @Transactional
-    public ScheduleResponse createSchedule(Long calendarId, ScheduleCreateRequest request) {
+    public ScheduleResponse createSchedule(ScheduleCreateRequest request) {
         request.validate();
 
-        Calendar calendar = findCalendarById(calendarId);
+        Calendar calendar = getCurrentCalendar();
         Member currentMember = memberService.getCurrentMember();
 
         validateCalendarAccess(calendar);
@@ -113,15 +118,15 @@ public class CalendarService {
 
     // 일정 수정
     @Transactional
-    public ScheduleResponse updateSchedule(Long calendarId, Long scheduleId, ScheduleCreateRequest request) {
+    public ScheduleResponse updateSchedule(Long scheduleId, ScheduleCreateRequest request) {
         request.validate(); // Record의 validate 메서드 호출
 
-        Calendar calendar = findCalendarById(calendarId);
+        Calendar calendar = getCurrentCalendar();
         Schedule schedule = findScheduleById(scheduleId);
 
         validateCalendarAccess(calendar);
         validateScheduleAccess(schedule);
-        validateScheduleForCalendar(schedule, calendarId);
+        validateScheduleForCalendar(schedule, calendar.getId());
 
         schedule.update(
                 request.title(),
@@ -137,8 +142,8 @@ public class CalendarService {
 
     // 일정 삭제
     @Transactional
-    public ScheduleDeleteResponse deleteSchedule(Long calendarId, Long scheduleId) {
-        Calendar calendar = findCalendarById(calendarId);
+    public ScheduleDeleteResponse deleteSchedule(Long scheduleId) {
+        Calendar calendar = getCurrentCalendar();
         Schedule schedule = findScheduleById(scheduleId);
 
         validateCalendarAccess(calendar);
@@ -150,7 +155,7 @@ public class CalendarService {
 
         return ScheduleDeleteResponse.of(
                 scheduleId,
-                calendarId,
+                calendar.getId(),
                 scheduleTitle,
                 LocalDateTime.now()
         );
@@ -200,6 +205,13 @@ public class CalendarService {
         if (!schedule.getCalendar().getId().equals(calendarId)) {
             throw new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND);
         }
+    }
+
+    // 현재 사용자의 캘린더 조회
+    private Calendar getCurrentCalendar() {
+        Member currentMember = memberService.getCurrentMember();
+        return calendarRepository.findByCouple(currentMember.getCouple())
+                .orElseThrow(() -> new BusinessException(ErrorCode.CALENDAR_NOT_FOUND));
     }
 
 }
