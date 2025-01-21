@@ -1,3 +1,10 @@
+import {
+  CalendarType,
+  DayProps,
+  MarkedProps,
+  SchedulePeriod,
+} from "@/assets/types/calendar/calendarModels";
+import { generateMarkedDates, getSundayDates } from "@/assets/utils/calendar";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -15,33 +22,40 @@ import {
   Modal,
 } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
+import dummydata from "../../../assets/dummydata/calandarmonthlist.json";
 
-interface CalenderType {
-  checkDate: string;
-  setCheckDate: React.Dispatch<React.SetStateAction<string>>;
-}
-interface DayProps {
-  date: {
-    day: number;
-    month: number;
-    year: number;
-    timestamp: number;
-    dateString: string;
-  };
-  marking?: {
-    marked?: boolean;
-    selected?: boolean;
-    customStyles?: {
-      container?: ViewStyle;
-      text?: TextStyle;
-    };
-  };
-  state?: "selected" | "disabled" | "today" | "";
-  onDayPress?: (date: DateData) => void; // DateData 타입으로 변경
-}
 export default function CalendarScreen() {
+  const [currentDate, setCurrentDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [checkDate, setCheckDate] = useState<string>("");
+  const [calendarData, setCalendarData] = useState<SchedulePeriod[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const calendarColor: string[] = [
+    "#F08484",
+    "#F9A686",
+    "#F9BF64",
+    "#A0D6B6",
+    "#30BA96",
+    "#FFBB77",
+  ];
+
+  useEffect(() => {
+    const data = dummydata.data;
+    const newdata: SchedulePeriod[] = [];
+    data.map((item, index) => {
+      const calendarProcess: SchedulePeriod = {
+        scheduleId: item.scheduleId,
+        title: item.title,
+        startTime: item.startTime,
+        endTime: item.endTime,
+        idx: 0,
+        color: calendarColor[index % calendarColor.length],
+      };
+      newdata.push(calendarProcess);
+    });
+    setCalendarData(newdata);
+  }, []);
   LocaleConfig.locales["ko"] = {
     monthNames: [
       "01월",
@@ -85,53 +99,28 @@ export default function CalendarScreen() {
   };
   LocaleConfig.defaultLocale = "ko";
 
-  // 기본 마커 스타일을 객체로 정의
-  const scheduleStyle = {
-    marked: true,
-    customStyles: {
-      container: {
-        flexDirection: "column",
-        alignItems: "center",
-        height: 60,
-      },
-      wrapper: {
-        backgroundColor: Colors.sublight,
-        padding: 4,
-        borderRadius: 4,
-        marginTop: 4,
-      },
-      scheduleText: {
-        fontSize: 12,
-        color: Colors.white,
-      },
-    },
-  };
+  const CalendarView = ({ checkDate, setCheckDate }: CalendarType) => {
+    // 기간 데이터를 markedDates 형식으로 변환
+    const [year, month] = currentDate.split("-");
+    const sundays = getSundayDates(year, month);
+    const markedDates = generateMarkedDates(calendarData, year, month);
 
-  const CalendarView = ({ checkDate, setCheckDate }: CalenderType) => {
-    const markedDates: Record<string, any> = {
-      "2024-12-06": { ...scheduleStyle },
-      "2024-12-07": { ...scheduleStyle },
-      "2024-12-08": { ...scheduleStyle },
-    };
-
+    // console.info(markedDates["2025-01-13"]);
+    // console.info(markedDates["2025-01-14"]);
+    for (let i = 0; i < sundays.length; i++) {
+      if (markedDates[sundays[i]]) {
+        markedDates[sundays[i]].periods.map((item: MarkedProps) => {});
+      }
+    }
+    // 선택한 날짜에 대한 스타일 설정이 있다
     const markedSelectedDates = {
       ...markedDates,
       [checkDate]: {
+        ...markedDates[checkDate], // 기존 일정 정보 유지
         selected: true,
-        marked: markedDates[checkDate]?.marked, // 기존 marked 속성 유지
-        selectedColor: "white", // 배경색을 흰색으로
-        selectedTextColor: Colors.black, // 텍스트 색상
-        customStyles: {
-          container: {
-            borderRadius: 5,
-            borderWidth: 1, // border 두께
-            borderColor: Colors.sublight, // border 색상
-            width: "100%",
-          },
-        },
       },
     };
-
+    // 날짜 커스텀을 위한 컴포넌트
     const CustomDay: React.FC<DayProps> = ({
       date,
       state,
@@ -151,18 +140,30 @@ export default function CalendarScreen() {
           }
           style={[
             {
-              height: 60,
+              height: 130,
               alignItems: "center",
               width: "100%",
-            },
-            // 선택된 날짜에 대한 스타일
-            marking?.selected && {
-              borderRadius: 5,
-              borderWidth: 1,
-              borderColor: Colors.sublight,
+              position: "relative",
             },
           ]}
         >
+          {/* 선택 요소에 대한 속성 */}
+          {marking?.selected && (
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                borderRadius: 5,
+                borderWidth: 1,
+                borderColor: Colors.sublight,
+                zIndex: 1,
+                pointerEvents: "none", // 터치 이벤트가 통과하도록
+              }}
+            />
+          )}
           <Text
             style={{
               color: state === "disabled" ? "gray" : "black",
@@ -170,31 +171,40 @@ export default function CalendarScreen() {
           >
             {date.day}
           </Text>
-          {marking?.marked && (
-            <View
-              style={{
-                backgroundColor: Colors.sublight,
-                padding: 4,
-                borderRadius: 4,
-                marginTop: 4,
-                width: "80%",
-              }}
-            >
-              <Text
+
+          {marking?.periods?.map((period, idx) => {
+            const height = 22;
+            const margin = period.idx - idx;
+            return (
+              <View
                 style={{
-                  fontSize: 12,
-                  color: "white",
-                  textAlign: "center",
+                  height: height,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: period.color,
+                  padding: 4,
+                  marginTop: 4 + (margin > 0 ? margin * (height + 4) : 0),
+                  width: "100%",
                 }}
               >
-                일정
-              </Text>
-            </View>
-          )}
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: "white",
+                    textAlign: "center",
+                  }}
+                >
+                  {period.title}
+                </Text>
+              </View>
+            );
+          })}
         </Pressable>
       );
     };
     return (
+      //기본 캘린더 설정
       <Calendar
         theme={{
           "stylesheet.calendar.header": {
@@ -232,13 +242,13 @@ export default function CalendarScreen() {
           textDayFontSize: 16, //글씨크기
 
           // 달력 헤더, 날짜 관련
-          calendarBackground: "#ffffff",
+          // calendarBackground: "#ffffff",
           textSectionTitleColor: Colors.black,
           textMonthFontSize: 18,
 
           // 선택된 날짜 스타일
           selectedDayBackgroundColor: Colors.main,
-          selectedDayTextColor: "#ffffff",
+          // selectedDayTextColor: "#ffffff",
 
           // 오늘 날짜 스타일
           todayTextColor: Colors.subbold,
@@ -247,14 +257,17 @@ export default function CalendarScreen() {
           <CustomDay
             {...props}
             onDayPress={(day: DateData) => {
-              console.log(day);
               setCheckDate(day.dateString);
               setIsModalVisible(true);
             }}
           />
         )}
+        current={currentDate}
+        onMonthChange={(date: DateData) => {
+          setCurrentDate(date.dateString);
+        }}
         markedDates={markedSelectedDates}
-        markingType="custom"
+        markingType="period"
         //달 출력 포맷
         monthFormat={"yyyy / M"}
         renderArrow={(direction: string) =>
@@ -271,7 +284,7 @@ export default function CalendarScreen() {
   return (
     <View className="items-center relative" style={styles.container}>
       <Text>Calendar화면입니다</Text>
-      <View className="w-full h-[70%] bg-slate-200">
+      <View className="w-full h-[100%] bg-slate-200">
         <CalendarView checkDate={checkDate} setCheckDate={setCheckDate} />
       </View>
       <View style={{ marginTop: 400 }}>

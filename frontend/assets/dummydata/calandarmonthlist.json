@@ -1,6 +1,51 @@
 {
   "data": [
     {
+      "scheduleId": 5,
+      "memberId": 2,
+      "category": "private",
+      "title": "새 공부",
+      "startTime": "2025-01-18",
+      "endTime": "2025-01-27",
+      "isHoliday": true
+    },
+    {
+      "scheduleId": 6,
+      "memberId": 2,
+      "category": "private",
+      "title": "자격증 공부",
+      "startTime": "2025-01-07",
+      "endTime": "2025-01-11",
+      "isHoliday": true
+    },
+    {
+      "scheduleId": 7,
+      "memberId": 2,
+      "category": "private",
+      "title": "부산여행",
+      "startTime": "2025-01-11",
+      "endTime": "2025-01-14",
+      "isHoliday": true
+    },
+    {
+      "scheduleId": 7,
+      "memberId": 2,
+      "category": "private",
+      "title": "경주여행",
+      "startTime": "2025-01-14",
+      "endTime": "2025-01-18",
+      "isHoliday": true
+    },
+    {
+      "scheduleId": 4,
+      "memberId": 2,
+      "category": "private",
+      "title": "경주여행",
+      "startTime": "2025-01-11",
+      "endTime": "2025-01-12",
+      "isHoliday": true
+    },
+    {
       "scheduleId": 1,
       "memberId": 2,
       "category": "shared",
@@ -25,15 +70,6 @@
       "title": "일본여행",
       "startTime": "2025-01-04",
       "endTime": "2025-01-05",
-      "isHoliday": true
-    },
-    {
-      "scheduleId": 4,
-      "memberId": 2,
-      "category": "private",
-      "title": "자격증 공부",
-      "startTime": "2025-01-07",
-      "endTime": "2025-01-015",
       "isHoliday": true
     }
   ]
