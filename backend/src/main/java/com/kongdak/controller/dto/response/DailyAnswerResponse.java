@@ -17,14 +17,18 @@ public record DailyAnswerResponse(
         String content,
 
         @Schema(description = "작성 시간", example = "2024-01-10T12:00:00")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        @Schema(description = "현재 사용자가 볼 수 있는지 여부", example = "true")
+        boolean isVisible
 ) {
-    public static DailyAnswerResponse from(DailyAnswer answer) {
+    public static DailyAnswerResponse from(DailyAnswer answer, boolean bothAnswered, Long currentMemberId) {
         return new DailyAnswerResponse(
                 answer.getId(),
                 answer.getMember().getId(),
                 answer.getContent(),
-                answer.getCreatedAt()
+                answer.getCreatedAt(),
+                bothAnswered || answer.getMember().getId().equals(currentMemberId)
         );
     }
 }
