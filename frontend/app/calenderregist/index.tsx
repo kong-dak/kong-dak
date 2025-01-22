@@ -6,7 +6,7 @@ import MapScreen from "@/components/ui/MapScreen";
 import MapSearchBar from "@/components/ui/MapSearchBar";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
 import { SearchResponse } from "@/assets/types/map/mapModels";
@@ -25,6 +25,9 @@ export default function CalenderregistScreen() {
     SearchResponse["data"]["documents"]
   >([]);
   const { handleSearch } = useSearch(searchResults, setSearchResults);
+  const params = useLocalSearchParams();
+  const { title, color, startingDay, endingDay, idx } = params;
+  console.log(title, color, startingDay, endingDay, idx);
 
   useEffect(() => {
     if (searchQuery) {

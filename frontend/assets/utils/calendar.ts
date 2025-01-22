@@ -1,4 +1,7 @@
-import { SchedulePeriod } from "../types/calendar/calendarModels";
+import {
+  MarkedDateProps,
+  SchedulePeriod,
+} from "../types/calendar/calendarModels";
 
 // 기간 데이터를 markedDates 형식으로 변환
 export const generateMarkedDates = (
@@ -6,9 +9,8 @@ export const generateMarkedDates = (
   year: string,
   month: string
 ) => {
-  const markedDates: Record<string, any> = {};
+  const markedDates: Record<string, MarkedDateProps> = {};
   const sundays = getSundayDates(year, month);
-  console.log(sundays);
   schedulePeriods.forEach((period, index) => {
     const start = new Date(period.startTime);
     const end = new Date(period.endTime);
@@ -31,12 +33,11 @@ export const generateMarkedDates = (
       }
       if (sundays.includes(dateStr)) {
         periodsLength = markedDates[dateStr].periods.length;
-        console.log(markedDates[dateStr], periodsLength);
       }
 
       markedDates[dateStr].periods.push({
-        startingDay: dateStr === period.startTime,
-        endingDay: dateStr === period.endTime,
+        startingDay: period.startTime,
+        endingDay: period.endTime,
         color: period.color,
         title: period.title,
         idx: periodsLength,
