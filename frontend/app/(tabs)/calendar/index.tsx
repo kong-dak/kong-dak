@@ -1,6 +1,8 @@
 import {
   CalendarType,
+  CustomDateData,
   DayProps,
+  MarkedDateProps,
   MarkedProps,
   SchedulePeriod,
 } from "@/assets/types/calendar/calendarModels";
@@ -23,12 +25,15 @@ import {
 } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import dummydata from "../../../assets/dummydata/calandarmonthlist.json";
+import { getDayOfWeek } from "@/assets/utils/getWeekday";
+import CalendarDetailList from "@/components/ui/CalendarDetailList";
 
 export default function CalendarScreen() {
   const [currentDate, setCurrentDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [checkDate, setCheckDate] = useState<string>("");
+  const [showSchedule, setShowSchedule] = useState<MarkedProps[]>([]);
   const [calendarData, setCalendarData] = useState<SchedulePeriod[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const calendarColor: string[] = [
@@ -56,6 +61,7 @@ export default function CalendarScreen() {
     });
     setCalendarData(newdata);
   }, []);
+
   LocaleConfig.locales["ko"] = {
     monthNames: [
       "01월",
@@ -102,16 +108,8 @@ export default function CalendarScreen() {
   const CalendarView = ({ checkDate, setCheckDate }: CalendarType) => {
     // 기간 데이터를 markedDates 형식으로 변환
     const [year, month] = currentDate.split("-");
-    const sundays = getSundayDates(year, month);
     const markedDates = generateMarkedDates(calendarData, year, month);
-
-    // console.info(markedDates["2025-01-13"]);
-    // console.info(markedDates["2025-01-14"]);
-    for (let i = 0; i < sundays.length; i++) {
-      if (markedDates[sundays[i]]) {
-        markedDates[sundays[i]].periods.map((item: MarkedProps) => {});
-      }
-    }
+    // setProcessDates(markedDates);
     // 선택한 날짜에 대한 스타일 설정이 있다
     const markedSelectedDates = {
       ...markedDates,
@@ -136,7 +134,8 @@ export default function CalendarScreen() {
               month: date.month,
               year: date.year,
               timestamp: date.timestamp,
-            })
+              schedule: markedDates[date.dateString],
+            } as CustomDateData)
           }
           style={[
             {
@@ -256,9 +255,14 @@ export default function CalendarScreen() {
         dayComponent={(props: DayProps) => (
           <CustomDay
             {...props}
-            onDayPress={(day: DateData) => {
+            onDayPress={(day: CustomDateData) => {
               setCheckDate(day.dateString);
               setIsModalVisible(true);
+              if (day.schedule?.periods) {
+                setShowSchedule(day.schedule?.periods);
+              } else {
+                setShowSchedule([]);
+              }
             }}
           />
         )}
@@ -295,7 +299,9 @@ export default function CalendarScreen() {
           >
             <View className="w-[80%] h-[60%] bg-white rounded-lg p-4">
               <View className="flex flex-row justify-between">
-                <AppText className="text-xl">21일 목요일</AppText>
+                <AppText className="text-xl">
+                  {Number(checkDate.split("-")[2])}일 {getDayOfWeek(checkDate)}
+                </AppText>
                 <Pressable
                   className="right-6"
                   onPress={() => {
@@ -307,7 +313,23 @@ export default function CalendarScreen() {
               </View>
               <View className="border-b py-2"></View>
               <View className="py-4">
-                <AppText>음력 11월 21일</AppText>
+                <AppText>
+                  음력 {Number(checkDate.split("-")[1])}월{" "}
+                  {checkDate.split("-")[2]}일
+                </AppText>
+              </View>
+              <View>
+                {showSchedule.map((item, index) => {
+                  return (
+                    <CalendarDetailList
+                      title={item.title}
+                      color={item.color}
+                      startingDay={item.startingDay}
+                      endingDay={item.endingDay}
+                      idx={item.idx}
+                    />
+                  );
+                })}
               </View>
               {/* 여기 일정 컴포넌트 */}
               <Pressable

@@ -20,6 +20,12 @@ export interface MarkedProps {
   title: string;
   idx: number;
 }
+export interface MarkedDateProps {
+  periods: MarkedProps[];
+}
+export interface CustomDateData extends DateData {
+  schedule?: MarkedDateProps; // 또는 더 구체적인 타입을 지정할 수 있습니다
+}
 export interface DayProps {
   date: {
     day: number;
