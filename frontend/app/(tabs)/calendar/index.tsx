@@ -7,6 +7,7 @@ import {
   SchedulePeriod,
 } from "@/assets/types/calendar/calendarModels";
 import { generateMarkedDates, getSundayDates } from "@/assets/utils/calendar";
+import { fetchLocation } from "@/assets/utils/map";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -60,6 +61,22 @@ export default function CalendarScreen() {
       newdata.push(calendarProcess);
     });
     setCalendarData(newdata);
+  }, []);
+
+  const [myLocation, setMyLocation] = useState({
+    latitude: 37.5665,
+    longitude: 126.978,
+  });
+
+  useEffect(() => {
+    const getLocation = async () => {
+      const location = await fetchLocation();
+      if (location) {
+        setMyLocation(location);
+      }
+    };
+
+    getLocation();
   }, []);
 
   LocaleConfig.locales["ko"] = {
@@ -340,7 +357,10 @@ export default function CalendarScreen() {
                 }}
                 onPress={() => {
                   setIsModalVisible(false);
-                  router.push("/calenderregist");
+                  router.push({
+                    pathname: "/calenderregist",
+                    params: myLocation,
+                  });
                 }}
               >
                 <AntDesign name="plus" size={24} color={Colors.white} />
@@ -349,10 +369,6 @@ export default function CalendarScreen() {
           </View>
         </Modal>
       </View>
-      <Button
-        title="Go to Map Screen"
-        onPress={() => router.push("/calendar/mapscreen")}
-      />
     </View>
   );
 }

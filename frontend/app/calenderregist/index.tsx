@@ -4,11 +4,19 @@ import CustomCalendarMini from "@/components/ui/CustomCalendarMini";
 import TimePicker from "@/components/ui/TimePicker";
 import MapScreen from "@/components/ui/MapScreen";
 import MapSearchBar from "@/components/ui/MapSearchBar";
+import * as Location from "expo-location";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Switch,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import { SearchResponse } from "@/assets/types/map/mapModels";
 import { useSearch } from "@/hooks/useSearch";
 
@@ -28,6 +36,11 @@ export default function CalenderregistScreen() {
   const params = useLocalSearchParams();
   const { title, color, startingDay, endingDay, idx } = params;
   console.log(title, color, startingDay, endingDay, idx);
+  const [locationLoaded, setLoactionLoaded] = useState(false);
+  const [myLocation, setMyLocation] = useState({
+    latitude: 37.5665,
+    longitude: 126.978,
+  });
 
   useEffect(() => {
     if (searchQuery) {
@@ -39,6 +52,27 @@ export default function CalenderregistScreen() {
   useEffect(() => {
     console.log("검색 결과:", searchResults);
   }, [searchResults]);
+
+  // 위치 가져오기
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High, // 높은 정확도로 설정
+        });
+
+        console.log("위치 가져오기 성공", location);
+        const { latitude, longitude } = location.coords;
+        setMyLocation({ latitude, longitude });
+        setLoactionLoaded(true);
+        console.log("현재 위치:", latitude, longitude);
+      } catch (error) {
+        console.error("위치 가져오기 오류", error);
+      }
+    };
+
+    fetchLocation();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -181,7 +215,13 @@ export default function CalenderregistScreen() {
 
         <MapSearchBar onSearch={(query) => setSearchQuery(query)} />
         {/* 지도 */}
-        <MapScreen searchResults={searchResults} />
+        <View>
+          {!locationLoaded ? (
+            <ActivityIndicator size="large" color={Colors.main} />
+          ) : (
+            <MapScreen myLocation={myLocation} searchResults={searchResults} />
+          )}
+        </View>
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
