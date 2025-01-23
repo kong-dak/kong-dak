@@ -4,7 +4,6 @@ import CustomCalendarMini from "@/components/ui/CustomCalendarMini";
 import TimePicker from "@/components/ui/TimePicker";
 import MapScreen from "@/components/ui/MapScreen";
 import MapSearchBar from "@/components/ui/MapSearchBar";
-import * as Location from "expo-location";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -34,17 +33,31 @@ export default function CalenderregistScreen() {
   >([]);
   const { handleSearch } = useSearch(searchResults, setSearchResults);
   const params = useLocalSearchParams();
-  const { title, color, startingDay, endingDay, idx } = params;
-  console.log(title, color, startingDay, endingDay, idx);
-  const [locationLoaded, setLoactionLoaded] = useState(false);
-  const [myLocation, setMyLocation] = useState({
-    latitude: 37.5665,
-    longitude: 126.978,
-  });
+  const { title, color, startingDay, endingDay, idx, myLatitude, myLongitude } =
+    params;
+  const [currentLatitude, setCurrentLatitude] = useState<number>(
+    Number(params.myLatitude)
+  );
+  const [currentLongitude, setCurrentLongitude] = useState<number>(
+    Number(params.myLongitude)
+  );
+  console.log("현재 카메라 위치", currentLatitude, currentLongitude);
+  console.log(
+    title,
+    color,
+    startingDay,
+    endingDay,
+    idx,
+    myLatitude,
+    myLongitude
+  );
 
   useEffect(() => {
     if (searchQuery) {
-      handleSearch(searchQuery);
+      handleSearch(searchQuery, {
+        x: currentLongitude + "",
+        y: currentLatitude + "",
+      });
     }
   }, [searchQuery]);
 
@@ -53,26 +66,10 @@ export default function CalenderregistScreen() {
     console.log("검색 결과:", searchResults);
   }, [searchResults]);
 
-  // 위치 가져오기
-  useEffect(() => {
-    const fetchLocation = async () => {
-      try {
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High, // 높은 정확도로 설정
-        });
-
-        console.log("위치 가져오기 성공", location);
-        const { latitude, longitude } = location.coords;
-        setMyLocation({ latitude, longitude });
-        setLoactionLoaded(true);
-        console.log("현재 위치:", latitude, longitude);
-      } catch (error) {
-        console.error("위치 가져오기 오류", error);
-      }
-    };
-
-    fetchLocation();
-  }, []);
+  const handleCameraIdle = (latitude: number, longitude: number) => {
+    setCurrentLatitude(latitude);
+    setCurrentLongitude(longitude);
+  };
 
   return (
     <View style={styles.container}>
@@ -215,13 +212,12 @@ export default function CalenderregistScreen() {
 
         <MapSearchBar onSearch={(query) => setSearchQuery(query)} />
         {/* 지도 */}
-        <View>
-          {!locationLoaded ? (
-            <ActivityIndicator size="large" color={Colors.main} />
-          ) : (
-            <MapScreen myLocation={myLocation} searchResults={searchResults} />
-          )}
-        </View>
+        <MapScreen
+          myLatitude={Number(params.myLatitude)}
+          myLongitude={Number(params.myLongitude)}
+          searchResults={searchResults}
+          onCameraIdle={handleCameraIdle}
+        />
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}

@@ -46,6 +46,9 @@ export default function CalendarScreen() {
     "#FFBB77",
   ];
 
+  const [myLatitude, setMyLatitude] = useState<number>(37.5665);
+  const [myLongitude, setMyLongitude] = useState<number>(126.978);
+
   useEffect(() => {
     const data = dummydata.data;
     const newdata: SchedulePeriod[] = [];
@@ -63,16 +66,12 @@ export default function CalendarScreen() {
     setCalendarData(newdata);
   }, []);
 
-  const [myLocation, setMyLocation] = useState({
-    latitude: 37.5665,
-    longitude: 126.978,
-  });
-
   useEffect(() => {
     const getLocation = async () => {
       const location = await fetchLocation();
       if (location) {
-        setMyLocation(location);
+        setMyLatitude(location.latitude);
+        setMyLongitude(location.longitude);
       }
     };
 
@@ -359,7 +358,10 @@ export default function CalendarScreen() {
                   setIsModalVisible(false);
                   router.push({
                     pathname: "/calenderregist",
-                    params: myLocation,
+                    params: {
+                      myLatitude,
+                      myLongitude,
+                    },
                   });
                 }}
               >
