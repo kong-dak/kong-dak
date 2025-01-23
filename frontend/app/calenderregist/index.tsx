@@ -8,7 +8,14 @@ import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Switch,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import { SearchResponse } from "@/assets/types/map/mapModels";
 import { useSearch } from "@/hooks/useSearch";
 
@@ -26,12 +33,31 @@ export default function CalenderregistScreen() {
   >([]);
   const { handleSearch } = useSearch(searchResults, setSearchResults);
   const params = useLocalSearchParams();
-  const { title, color, startingDay, endingDay, idx } = params;
-  console.log(title, color, startingDay, endingDay, idx);
+  const { title, color, startingDay, endingDay, idx, myLatitude, myLongitude } =
+    params;
+  const [currentLatitude, setCurrentLatitude] = useState<number>(
+    Number(params.myLatitude)
+  );
+  const [currentLongitude, setCurrentLongitude] = useState<number>(
+    Number(params.myLongitude)
+  );
+  console.log("현재 카메라 위치", currentLatitude, currentLongitude);
+  console.log(
+    title,
+    color,
+    startingDay,
+    endingDay,
+    idx,
+    myLatitude,
+    myLongitude
+  );
 
   useEffect(() => {
     if (searchQuery) {
-      handleSearch(searchQuery);
+      handleSearch(searchQuery, {
+        x: currentLongitude + "",
+        y: currentLatitude + "",
+      });
     }
   }, [searchQuery]);
 
@@ -39,6 +65,11 @@ export default function CalenderregistScreen() {
   useEffect(() => {
     console.log("검색 결과:", searchResults);
   }, [searchResults]);
+
+  const handleCameraIdle = (latitude: number, longitude: number) => {
+    setCurrentLatitude(latitude);
+    setCurrentLongitude(longitude);
+  };
 
   return (
     <View style={styles.container}>
@@ -181,7 +212,12 @@ export default function CalenderregistScreen() {
 
         <MapSearchBar onSearch={(query) => setSearchQuery(query)} />
         {/* 지도 */}
-        <MapScreen searchResults={searchResults} />
+        <MapScreen
+          myLatitude={Number(params.myLatitude)}
+          myLongitude={Number(params.myLongitude)}
+          searchResults={searchResults}
+          onCameraIdle={handleCameraIdle}
+        />
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}
