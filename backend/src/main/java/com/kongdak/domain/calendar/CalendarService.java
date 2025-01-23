@@ -3,6 +3,7 @@ package com.kongdak.domain.calendar;
 import com.kongdak.controller.dto.request.ScheduleCreateRequest;
 import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.couple.Couple;
+import com.kongdak.domain.couple.CoupleService;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
 import com.kongdak.global.exception.BusinessException;
@@ -25,6 +26,7 @@ public class CalendarService {
     private final ScheduleRepository scheduleRepository;
     private final HolidayRepository holidayRepository;
     private final MemberService memberService;
+    private final CoupleService coupleService;  // 추가
 
     // 캘린더 생성 (커플 연결 시 자동 생성)
     @Transactional
@@ -195,6 +197,16 @@ public class CalendarService {
 
     private void validateScheduleAccess(Schedule schedule) {
         Member currentMember = memberService.getCurrentMember();
+
+        // SHARED 카테고리인 경우 커플 중 누구나 수정 가능
+        if (schedule.getCategory() == ScheduleCategory.SHARED) {
+
+            if (coupleService.isCoupleMember(currentMember, schedule.getCalendar().getCouple().getId())) {
+                return;
+            }
+            throw new BusinessException(ErrorCode.SCHEDULE_ACCESS_DENIED);
+        }
+
 
         if (!schedule.getCreator().equals(currentMember)) {
             throw new BusinessException(ErrorCode.SCHEDULE_ACCESS_DENIED);

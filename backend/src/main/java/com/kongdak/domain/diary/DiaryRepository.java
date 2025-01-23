@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -46,4 +47,14 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
     // 특정 날짜의 일기 조회
     Optional<Diary> findByCoupleIdAndDiaryDate(Long coupleId, LocalDate diaryDate);
+
+    @Query("SELECT d FROM Diary d WHERE d.couple.id = :coupleId " +
+            "AND FUNCTION('YEAR', d.diaryDate) = :year " +
+            "AND FUNCTION('MONTH', d.diaryDate) = :month " +
+            "ORDER BY d.diaryDate ASC")
+    List<Diary> findMonthlyDiaries(
+            @Param("coupleId") Long coupleId,
+            @Param("year") int year,
+            @Param("month")int month)
+            ;
 }
