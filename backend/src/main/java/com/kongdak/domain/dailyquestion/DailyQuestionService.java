@@ -107,7 +107,7 @@ public class DailyQuestionService {
         DailyQuestion question = dailyQuestionRepository.findById(questionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
         List<DailyAnswer> answers = dailyAnswerRepository.findByQuestionId(questionId);
-
+        int replyCounts = answerReplyRepository.countByQuestionId(questionId);
         boolean bothAnswered = answers.size() == 2;
 
         return DailyQuestionWithAnswersResponse.builder()
@@ -117,6 +117,7 @@ public class DailyQuestionService {
                         .map(answer -> DailyAnswerResponse.from(answer, bothAnswered, memberId))
                         .collect(Collectors.toList()))
                 .bothAnswered(bothAnswered)
+                .replyCounts(replyCounts)
                 .build();
     }
 
@@ -214,8 +215,8 @@ public class DailyQuestionService {
 
         // 질문에 대한 답변들 조회
         List<DailyAnswer> answers = dailyAnswerRepository.findByQuestionId(question.getId());
-
-        return DailyQuestionWithAnswersResponse.of(question, answers, memberId);
+        int replyCounts = answerReplyRepository.countByQuestionId(question.getId());
+        return DailyQuestionWithAnswersResponse.of(question, answers, memberId, replyCounts);
     }
 
     public List<DailyQuestionListResponse> getAllQuestions(Long memberId) {
@@ -229,4 +230,12 @@ public class DailyQuestionService {
     }
 
 
+    public List<AnswerReplyResponse> getReplies(Long questionId) {
+
+        List<AnswerReply> replies = answerReplyRepository.findByQuestionIdOrderByCreatedAtDesc(questionId);
+
+        return replies.stream()
+                .map(AnswerReplyResponse::from)
+                .collect(Collectors.toList());
+    }
 }

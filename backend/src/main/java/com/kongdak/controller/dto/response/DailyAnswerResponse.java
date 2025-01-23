@@ -1,11 +1,15 @@
 package com.kongdak.controller.dto.response;
 
+import com.kongdak.domain.dailyquestion.AnswerEmoji;
 import com.kongdak.domain.dailyquestion.DailyAnswer;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "데일리 답변 응답")
+
+
 public record DailyAnswerResponse(
         @Schema(description = "답변 ID", example = "1")
         Long answerId,
@@ -20,7 +24,10 @@ public record DailyAnswerResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "현재 사용자가 볼 수 있는지 여부", example = "true")
-        boolean isVisible
+        boolean isVisible,
+
+        @Schema(description = "이모지", example = "true")
+        List<String> emoji
 ) {
     public static DailyAnswerResponse from(DailyAnswer answer, boolean bothAnswered, Long currentMemberId) {
         return new DailyAnswerResponse(
@@ -28,7 +35,11 @@ public record DailyAnswerResponse(
                 answer.getMember().getId(),
                 answer.getContent(),
                 answer.getCreatedAt(),
-                bothAnswered || answer.getMember().getId().equals(currentMemberId)
+                bothAnswered || answer.getMember().getId().equals(currentMemberId),
+                answer.getEmojis().stream().map(
+                        AnswerEmoji::getEmoji
+                ).toList()
         );
     }
+
 }

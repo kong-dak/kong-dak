@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,9 +171,11 @@ public class DiaryService {
         return DiaryDetailResponse.from(diary);
     }
 
-    public SearchDiaryResponse searchDiaries(Long memberId, Pageable pageable) {
+    public SearchDiaryResponse searchDiaries(Long memberId, YearMonth dateTime) {
         Couple couple = getCoupleByMemberId(memberId);
-        Page<Diary> diaries = diaryRepository.findAllByCoupleIdOrderByDiaryDateDesc(couple.getId(), pageable);
+        int year = dateTime.getYear();
+        int month = dateTime.getMonthValue();
+        List<Diary> diaries = diaryRepository.findMonthlyDiaries(couple.getId(), year, month);
         return SearchDiaryResponse.from(diaries);
     }
 
