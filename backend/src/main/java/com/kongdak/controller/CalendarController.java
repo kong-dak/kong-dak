@@ -1,6 +1,7 @@
 package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.ScheduleCreateRequest;
+import com.kongdak.controller.dto.request.ScheduleUpdateRequest;
 import com.kongdak.controller.dto.response.MonthlyScheduleResponse;
 import com.kongdak.controller.dto.response.ScheduleDeleteResponse;
 import com.kongdak.controller.dto.response.ScheduleDetailResponse;
@@ -119,7 +120,7 @@ public class CalendarController {
     @PatchMapping("/schedules/{scheduleId}")
     public BaseResponse<ScheduleResponse> updateSchedule(
             @PathVariable("scheduleId") Long scheduleId,
-            @Valid @RequestBody ScheduleCreateRequest request) {
+            @Valid @RequestBody ScheduleUpdateRequest request) {
         ScheduleResponse scheduleResponse = calendarService.updateSchedule(scheduleId, request);
         return BaseResponse.ok(scheduleResponse);
     }

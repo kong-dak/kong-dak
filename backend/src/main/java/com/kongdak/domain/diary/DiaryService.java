@@ -2,7 +2,7 @@ package com.kongdak.domain.diary;
 
 import com.kongdak.controller.dto.request.CreateDiaryRequest;
 import com.kongdak.controller.dto.request.DecorationUpdateRequest;
-import com.kongdak.controller.dto.request.UpdateDiaryRequest;
+import com.kongdak.controller.dto.request.DiaryUpdateRequest;
 import com.kongdak.controller.dto.response.DiaryDeleteResponse;
 import com.kongdak.controller.dto.response.DiaryDetailResponse;
 import com.kongdak.controller.dto.response.DiaryUpdateResponse;
@@ -14,8 +14,6 @@ import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.redis.RedisLockRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,7 +88,7 @@ public class DiaryService {
     }
 
     @Transactional
-    public DiaryUpdateResponse updateDiary(Long memberId, Long diaryId, UpdateDiaryRequest request) {
+    public DiaryUpdateResponse updateDiary(Long memberId, Long diaryId, DiaryUpdateRequest request) {
         Diary diary = getDiaryByIdAndMemberId(diaryId, memberId);
         validateDiaryEditable(diary, memberId);
 
