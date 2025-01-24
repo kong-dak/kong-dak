@@ -1,7 +1,7 @@
 package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.CreateDiaryRequest;
-import com.kongdak.controller.dto.request.UpdateDiaryRequest;
+import com.kongdak.controller.dto.request.DiaryUpdateRequest;
 import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.diary.DiaryService;
 import com.kongdak.global.response.BaseResponse;
@@ -79,7 +79,7 @@ public class DiaryController {
             @Parameter(description = "다이어리 ID", required = true)
             @PathVariable("diaryId") Long diaryId,
             @Parameter(description = "다이어리 수정 정보")
-            @RequestBody @Valid UpdateDiaryRequest request
+            @RequestBody @Valid DiaryUpdateRequest request
     ) {
 
         return BaseResponse.ok(diaryService.updateDiary(userDetails.getId(), diaryId, request));

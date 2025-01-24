@@ -1,6 +1,7 @@
 package com.kongdak.domain.calendar;
 
 import com.kongdak.controller.dto.request.ScheduleCreateRequest;
+import com.kongdak.controller.dto.request.ScheduleUpdateRequest;
 import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.couple.Couple;
 import com.kongdak.domain.couple.CoupleService;
@@ -45,15 +46,14 @@ public class CalendarService {
     // 월별 일정 조회
     public MonthlyScheduleResponse getMonthlySchedules(YearMonth dateTime) {
 
-        Long calendarId = getCurrentCalendar().getId();
-        Calendar calendar = findCalendarById(calendarId);
+        Calendar calendar = getCurrentCalendar();
 
         validateCalendarAccess(calendar);
 
         int year = dateTime.getYear();
         int month = dateTime.getMonthValue();
 
-        List<Schedule> schedules = scheduleRepository.findMonthlySchedules(calendarId, year, month);
+        List<Schedule> schedules = scheduleRepository.findMonthlySchedules(calendar.getId(), year, month);
         List<Holiday> holidays = holidayRepository.findByYearAndMonth(year, month);
 
         return MonthlyScheduleResponse.of(schedules, holidays);
@@ -120,7 +120,7 @@ public class CalendarService {
 
     // 일정 수정
     @Transactional
-    public ScheduleResponse updateSchedule(Long scheduleId, ScheduleCreateRequest request) {
+    public ScheduleResponse updateSchedule(Long scheduleId, ScheduleUpdateRequest request) {
         request.validate(); // Record의 validate 메서드 호출
 
         Calendar calendar = getCurrentCalendar();
@@ -189,6 +189,10 @@ public class CalendarService {
     private void validateCalendarAccess(Calendar calendar) {
         Member currentMember = memberService.getCurrentMember();
         Couple couple = calendar.getCouple();
+
+        if (!couple.isConnected()) {  // 추가
+            throw new BusinessException(ErrorCode.COUPLE_ALREADY_DISCONNECTED);
+        }
 
         if (!currentMember.getCouple().equals(couple)) {
             throw new BusinessException(ErrorCode.CALENDAR_ACCESS_DENIED);
