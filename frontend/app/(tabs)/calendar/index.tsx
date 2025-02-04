@@ -349,10 +349,6 @@ export default function CalendarScreen() {
           </View>
         </Modal>
       </View>
-      <Button
-        title="Go to Map Screen"
-        onPress={() => router.push("/calendar/mapscreen")}
-      />
     </View>
   );
 }

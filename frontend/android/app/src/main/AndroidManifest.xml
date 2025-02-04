@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jungeunsoo.kongdak">
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
@@ -30,8 +30,21 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="kongdak"/>
+        <!-- <data android:scheme="kongdak"/> -->
         <data android:scheme="com.jungeunsoo.kongdak"/>
+      </intent-filter>
+    </activity>
+    <activity
+     android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+     android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <!-- Redirect URI: "kakao{NATIVE_APP_KEY}://oauth“ -->
+        <data android:host="oauth"
+            android:scheme="@string/kakao_scheme" />
       </intent-filter>
     </activity>
   </application>

@@ -23,6 +23,9 @@ if (localPropertiesFile.exists()) {
     localProperties.load(new FileInputStream(localPropertiesFile))
 }
 def naverMapClientId = localProperties.getProperty("NAVER_MAP_CLIENT_ID") ?: ""
+def kakaoAppKey = localProperties.getProperty("KAKAO_NATIVE_APP_KEY") ?: ""
+def kakaoAppKeyWithKakao = localProperties.getProperty("KAKAO_NATIVE_APP_KEY_WITH_KAKAO") ?: ""
+
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -39,6 +42,8 @@ android {
 
         // gradle.properties에서 NAVER_MAP_CLIENT_ID 가져오기
         resValue "string", "NAVER_MAP_CLIENT_ID", naverMapClientId
+        resValue "string", "kakao_app_key", kakaoAppKey
+        resValue "string", "kakao_scheme", kakaoAppKeyWithKakao
     }
     signingConfigs {
         debug {
