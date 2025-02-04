@@ -14,6 +14,7 @@ export default function RootLayout() {
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="kakao" />
+      <Stack.Screen name="kakaoredirect" />
       <Stack.Screen name="setnick" />
       <Stack.Screen
         name="(tabs)"
