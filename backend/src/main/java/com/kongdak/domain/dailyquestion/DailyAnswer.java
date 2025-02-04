@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.ArrayList;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,6 +31,9 @@ public class DailyAnswer extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String content;
+
+    @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnswerEmoji> emojis = new ArrayList<>();
 
     @Builder
     public DailyAnswer(DailyQuestion question, Member member, String content) {

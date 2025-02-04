@@ -207,4 +207,10 @@ public class CoupleService {
             throw new BusinessException(ErrorCode.NOT_COUPLE_MEMBER);
         }
     }
+
+    public boolean isCoupleMember(Member currentMember, Long coupleId) {
+        return coupleRepository.findByMemberId(currentMember.getId()).orElseThrow(
+                () -> new BusinessException(ErrorCode.COUPLE_NOT_FOUND)
+        ).getId().equals(coupleId);
+    }
 }

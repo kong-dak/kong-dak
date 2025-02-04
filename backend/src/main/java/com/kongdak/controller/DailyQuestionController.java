@@ -66,6 +66,19 @@ public class DailyQuestionController {
         return BaseResponse.created(dailyQuestionService.createAnswer(userDetails.getId(), questionId, request));
     }
 
+    @Operation(summary = "댓글 조회", description = "데일리 질문의 댓글을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    @GetMapping("/{questionId}/replies")
+    public BaseResponse<List<AnswerReplyResponse>> getReplies(
+            @Parameter(description = "인증된 사용자 ID", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(description = "질문 ID", required = true)
+            @PathVariable("questionId") Long questionId) {
+
+        return BaseResponse.ok(dailyQuestionService.getReplies(questionId));
+    }
+
     @Operation(summary = "질문 히스토리 조회", description = "첫 번째 질문부터 현재 진행 중인 질문까지의 모든 질문 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))

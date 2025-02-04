@@ -1,7 +1,7 @@
 package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.CreateDiaryRequest;
-import com.kongdak.controller.dto.request.UpdateDiaryRequest;
+import com.kongdak.controller.dto.request.DiaryUpdateRequest;
 import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.diary.DiaryService;
 import com.kongdak.global.response.BaseResponse;
@@ -14,10 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.YearMonth;
 
 @RestController
 @RequestMapping("/diaries")
@@ -62,11 +63,10 @@ public class DiaryController {
     public BaseResponse<SearchDiaryResponse> searchDiaries(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Parameter(description = "페이징 정보")
-            @PageableDefault Pageable pageable
+            @Parameter(description = "조회할 년월", example = "2024-01")
+            @RequestParam("datetime") @DateTimeFormat(pattern = "yyyy-MM") YearMonth dateTime
     ) {
-        SearchDiaryResponse response = diaryService.searchDiaries(userDetails.getId(), pageable);
-        return BaseResponse.ok(response);
+        return BaseResponse.ok(diaryService.searchDiaries(userDetails.getId(), dateTime));
     }
 
     @Operation(summary = "다이어리 수정", description = "작성된 다이어리를 수정합니다.")
@@ -79,7 +79,7 @@ public class DiaryController {
             @Parameter(description = "다이어리 ID", required = true)
             @PathVariable("diaryId") Long diaryId,
             @Parameter(description = "다이어리 수정 정보")
-            @RequestBody @Valid UpdateDiaryRequest request
+            @RequestBody @Valid DiaryUpdateRequest request
     ) {
 
         return BaseResponse.ok(diaryService.updateDiary(userDetails.getId(), diaryId, request));

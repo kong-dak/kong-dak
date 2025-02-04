@@ -16,7 +16,8 @@ public interface DailyQuestionRepository extends JpaRepository<DailyQuestion, Lo
     // 특정 ID 이후의 다음 질문 조회
     @Query("SELECT dq FROM DailyQuestion dq " +
             "WHERE dq.id > :questionId " +
-            "ORDER BY dq.id ASC")
+            "ORDER BY dq.id ASC " +
+            "limit 1 ")
     Optional<DailyQuestion> findNextQuestion(@Param("questionId") Long questionId);
 
 
