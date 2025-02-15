@@ -45,6 +45,8 @@ export default function MapScreen({
             latitude={parseFloat(item.y)}
             longitude={parseFloat(item.x)}
             caption={{ text: item.place_name }}
+            width={30}
+            height={40}
           />
         ))}
         {/* 내 위치 마커 */}
@@ -53,6 +55,9 @@ export default function MapScreen({
           latitude={myLatitude}
           longitude={myLongitude}
           caption={{ text: "내 위치" }}
+          image={require("../../assets/images/blue-marker.png")}
+          width={30}
+          height={30}
         />
       </NaverMapView>
     </View>
