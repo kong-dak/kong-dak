@@ -44,9 +44,15 @@ export default function MapScreen({
             key={item.id}
             latitude={parseFloat(item.y)}
             longitude={parseFloat(item.x)}
-            caption={{ text: item.place_name }}
+            caption={{
+              text: item.place_name,
+              haloColor: "white",
+              requestedWidth: 5,
+              minZoom: 14,
+            }}
             width={30}
             height={40}
+            isHideCollidedCaptions={true}
           />
         ))}
         {/* 내 위치 마커 */}
@@ -54,7 +60,6 @@ export default function MapScreen({
           key="my-location"
           latitude={myLatitude}
           longitude={myLongitude}
-          caption={{ text: "내 위치" }}
           image={require("../../assets/images/blue-marker.png")}
           width={30}
           height={30}
