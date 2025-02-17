@@ -1,10 +1,11 @@
+import { setNickname } from "@/assets/apis/members";
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
-import { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { ChangeEvent, useState } from "react";
+import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import {
   GestureHandlerRootView,
   TextInput,
@@ -14,6 +15,18 @@ export default function SetNicknameScreen() {
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [isChecked2, setIsChecked2] = useState<boolean>(false);
   const [nickText, setNickText] = useState<string>("");
+
+  const changeNickName = async () => {
+    if (!nickText || nickText.trim() === "") {
+      Alert.alert("알림", "닉네임을 입력해주세요.", [{ text: "확인" }]);
+      return; // 함수 실행 중단
+    }
+    await setNickname(nickText).then((res) => {
+      if (res.data.status === 200) {
+        router.push("/(tabs)");
+      }
+    });
+  };
   return (
     <View className="section" style={styles.container}>
       <View className="h-[35%]"></View>
@@ -33,6 +46,10 @@ export default function SetNicknameScreen() {
                 style={[styles.TextInput, { outline: "none" }]}
                 placeholder="사용할 별명을 입력해주세요"
                 placeholderTextColor={Colors.gray}
+                value={nickText}
+                onChangeText={(text) => {
+                  setNickText(text);
+                }}
               />
             </GestureHandlerRootView>
           </View>
@@ -63,7 +80,9 @@ export default function SetNicknameScreen() {
           <AppButton
             text="시작하기"
             type="main"
-            onPress={() => router.push("/(tabs)")}
+            onPress={() => {
+              changeNickName();
+            }}
             style={{ width: "100%" }}
             size="big"
           />
@@ -71,10 +90,6 @@ export default function SetNicknameScreen() {
       </View>
     </View>
   );
-
-  function onChangeNickText(text: string) {
-    setNickText(text);
-  }
 }
 
 const styles = StyleSheet.create({

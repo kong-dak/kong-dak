@@ -1,10 +1,39 @@
+import { acceptReq, matchReq } from "@/assets/apis/couples";
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import { router } from "expo-router";
-import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from "react-native";
 
 export default function InputCodeScreen() {
+  const [code, setCode] = useState<string>("");
+
+  const requestCode = async () => {
+    if (!code || code.trim() === "") {
+      Alert.alert("알림", "코드를 입력해주세요.", [{ text: "확인" }]);
+      return; // 함수 실행 중단
+    }
+
+    await matchReq(code)
+      .then((res) => {
+        if (res.data.status === 200) {
+          console.log(res.data);
+          router.push("/(tabs)");
+        } else {
+          console.error(res.data);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   return (
     <View className="" style={styles.container}>
       <View className="h-[35%]"></View>
@@ -25,6 +54,10 @@ export default function InputCodeScreen() {
               ]}
               placeholder="코드"
               placeholderTextColor={Colors.gray}
+              value={code}
+              onChangeText={(text) => {
+                setCode(text);
+              }}
             />
             <View style={styles.underline} />
           </View>
@@ -36,7 +69,7 @@ export default function InputCodeScreen() {
           <AppButton
             text="연결하기"
             type="main"
-            onPress={() => router.push("/(tabs)")}
+            onPress={() => requestCode()}
           />
         </View>
       </View>

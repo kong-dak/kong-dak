@@ -5,13 +5,25 @@ import { AppText } from "@/components/common/AppText";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import HeaderIcons from "@/components/common/HeaderIcons";
+import { useEffect, useState } from "react";
+import { memberInfo } from "@/assets/apis/members";
 
 export default function HomeScreen() {
+  const [userNick, setUserNick] = useState<string>("멀쩡한 바지");
+  useEffect(() => {
+    const member = async () => {
+      await memberInfo().then((res) => {
+        setUserNick(res.data.data.nickname);
+      });
+    };
+    member();
+  }, []);
+
   return (
     <View className=" items-center" style={styles.container}>
       <HeaderIcons />
       <View className="w-full flex flex-row-reverse my-2">
-        <AppText className="text-2xl mx-2">멀쩡한 바지</AppText>
+        <AppText className="text-2xl mx-2">{userNick}</AppText>
       </View>
       <View className="w-full flex flex-row-reverse">
         <TouchableOpacity

@@ -1,10 +1,22 @@
+import { getCode } from "@/assets/apis/couples";
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { View, Text, Button, TouchableOpacity, StyleSheet } from "react-native";
 
 export default function CodeScreen() {
+  const [code, setCode] = useState<string>("");
+  useEffect(() => {
+    const loadCode = async () => {
+      await getCode().then((res) => {
+        console.log(res.data);
+        setCode(res.data.data.code);
+      });
+    };
+    loadCode();
+  }, []);
   return (
     <View className="" style={styles.container}>
       <View className="h-[35%]"></View>
@@ -13,7 +25,7 @@ export default function CodeScreen() {
           <View className="flex items-center ">
             <AppText className="text-xl">나의 공유코드</AppText>
             <AppText className="text-xl my-4" style={{ color: Colors.main }}>
-              123465
+              {code}
             </AppText>
           </View>
         </View>
