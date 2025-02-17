@@ -12,6 +12,7 @@ interface mapProps {
   myLongitude: number;
   searchResults: SearchResponse["data"]["documents"];
   onCameraIdle: (currentLatitude: number, currentLongitude: number) => void;
+  selectedMarker: (marker: SearchResponse["data"]["documents"][0]) => void;
 }
 
 export default function MapScreen({
@@ -19,6 +20,7 @@ export default function MapScreen({
   myLongitude,
   searchResults,
   onCameraIdle,
+  selectedMarker,
 }: mapProps) {
   // NaverMapView의 참조를 생성
   const ref = useRef<NaverMapViewRef>(null);
@@ -53,6 +55,9 @@ export default function MapScreen({
             width={30}
             height={40}
             isHideCollidedCaptions={true}
+            onTap={() => {
+              selectedMarker(item);
+            }}
           />
         ))}
         {/* 내 위치 마커 */}
