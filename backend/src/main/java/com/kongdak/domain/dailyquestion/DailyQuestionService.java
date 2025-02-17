@@ -49,7 +49,7 @@ public class DailyQuestionService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
         } else {
             // 마지막 답변의 다음 질문 조회
-            nextQuestion = dailyQuestionRepository.findNextQuestion(lastAnswer.get().getQuestion().getId())
+            nextQuestion = dailyQuestionRepository.findFirstByIdGreaterThanOrderByIdAsc(lastAnswer.get().getQuestion().getId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
         }
 
