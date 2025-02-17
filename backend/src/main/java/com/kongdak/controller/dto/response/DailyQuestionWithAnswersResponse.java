@@ -12,12 +12,14 @@ public record DailyQuestionWithAnswersResponse(
         Long questionId,
         String title,
         List<DailyAnswerResponse> answers,
+        int replyCounts,
         boolean bothAnswered
 ) {
     public static DailyQuestionWithAnswersResponse of(
             DailyQuestion question,
             List<DailyAnswer> answers,
-            Long currentMemberId
+            Long currentMemberId,
+            int replyCounts
     ) {
         return new DailyQuestionWithAnswersResponse(
                 question.getId(),
@@ -25,6 +27,7 @@ public record DailyQuestionWithAnswersResponse(
                 answers.stream()
                         .map(answer -> DailyAnswerResponse.from(answer, answers.size() == 2, currentMemberId))
                         .collect(Collectors.toList()),
+                replyCounts,
                 answers.size() == 2
         );
     }

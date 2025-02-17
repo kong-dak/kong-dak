@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Schema(description = "다이어리 수정 요청")
-public record UpdateDiaryRequest(
+public record DiaryUpdateRequest(
         @Schema(description = "다이어리 내용", example = "수정된 내용...", required = true)
         @NotNull
         String content,

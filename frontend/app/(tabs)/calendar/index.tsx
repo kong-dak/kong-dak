@@ -7,6 +7,7 @@ import {
   SchedulePeriod,
 } from "@/assets/types/calendar/calendarModels";
 import { generateMarkedDates, getSundayDates } from "@/assets/utils/calendar";
+import { fetchLocation } from "@/assets/utils/map";
 import { AppText } from "@/components/common/AppText";
 import { Colors } from "@/constants/Colors";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -45,6 +46,9 @@ export default function CalendarScreen() {
     "#FFBB77",
   ];
 
+  const [myLatitude, setMyLatitude] = useState<number>(37.5665);
+  const [myLongitude, setMyLongitude] = useState<number>(126.978);
+
   useEffect(() => {
     const data = dummydata.data;
     const newdata: SchedulePeriod[] = [];
@@ -60,6 +64,18 @@ export default function CalendarScreen() {
       newdata.push(calendarProcess);
     });
     setCalendarData(newdata);
+  }, []);
+
+  useEffect(() => {
+    const getLocation = async () => {
+      const location = await fetchLocation();
+      if (location) {
+        setMyLatitude(location.latitude);
+        setMyLongitude(location.longitude);
+      }
+    };
+
+    getLocation();
   }, []);
 
   LocaleConfig.locales["ko"] = {
@@ -340,7 +356,13 @@ export default function CalendarScreen() {
                 }}
                 onPress={() => {
                   setIsModalVisible(false);
-                  router.push("/calenderregist");
+                  router.push({
+                    pathname: "/calenderregist",
+                    params: {
+                      myLatitude,
+                      myLongitude,
+                    },
+                  });
                 }}
               >
                 <AntDesign name="plus" size={24} color={Colors.white} />

@@ -19,8 +19,15 @@ public interface DailyAnswerRepository extends JpaRepository<DailyAnswer, Long> 
     Optional<DailyAnswer> findFirstByMemberIdOrderByQuestionIdDesc(Long memberId);
 
 
+    // 답변 수 세기
     @Query("SELECT COUNT(da) FROM DailyAnswer da " +
             "WHERE da.question.id = :questionId " +
             "AND da.member.couple.id = :coupleId")
-    long countByQuestionIdAndCoupleId(@Param("questionId")Long questionId, @Param("coupleId")Long coupleId);
+    long countByQuestionIdAndCoupleId(@Param("questionId") Long questionId, @Param("coupleId") Long coupleId);
+
+    // 이모지 Fetch Join 하여 가져오기
+    @Query("SELECT DISTINCT a FROM DailyAnswer a " +
+            "LEFT JOIN FETCH a.emojis " +
+            "WHERE a.question.id = :questionId")
+    List<DailyAnswer> findByQuestionIdWithEmojis(@Param("questionId") Long questionId);
 }

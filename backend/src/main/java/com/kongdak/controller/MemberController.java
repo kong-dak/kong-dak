@@ -1,6 +1,6 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.UpdateNicknameRequest;
+import com.kongdak.controller.dto.request.NicknameUpdateRequest;
 import com.kongdak.controller.dto.response.DeactivateResponse;
 import com.kongdak.controller.dto.response.MemberResponse;
 import com.kongdak.domain.member.MemberService;
@@ -43,7 +43,7 @@ public class MemberController {
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "변경할 닉네임 정보")
-            @RequestBody @Valid UpdateNicknameRequest request) {
+            @RequestBody @Valid NicknameUpdateRequest request) {
         return BaseResponse.ok(memberService.updateNickname(
                 userDetails.getUsername(),
                 request.nickname()

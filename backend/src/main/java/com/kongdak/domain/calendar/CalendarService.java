@@ -1,8 +1,10 @@
 package com.kongdak.domain.calendar;
 
 import com.kongdak.controller.dto.request.ScheduleCreateRequest;
+import com.kongdak.controller.dto.request.ScheduleUpdateRequest;
 import com.kongdak.controller.dto.response.*;
 import com.kongdak.domain.couple.Couple;
+import com.kongdak.domain.couple.CoupleService;
 import com.kongdak.domain.member.Member;
 import com.kongdak.domain.member.MemberService;
 import com.kongdak.global.exception.BusinessException;
@@ -25,6 +27,7 @@ public class CalendarService {
     private final ScheduleRepository scheduleRepository;
     private final HolidayRepository holidayRepository;
     private final MemberService memberService;
+    private final CoupleService coupleService;  // 추가
 
     // 캘린더 생성 (커플 연결 시 자동 생성)
     @Transactional
@@ -43,15 +46,14 @@ public class CalendarService {
     // 월별 일정 조회
     public MonthlyScheduleResponse getMonthlySchedules(YearMonth dateTime) {
 
-        Long calendarId = getCurrentCalendar().getId();
-        Calendar calendar = findCalendarById(calendarId);
+        Calendar calendar = getCurrentCalendar();
 
         validateCalendarAccess(calendar);
 
         int year = dateTime.getYear();
         int month = dateTime.getMonthValue();
 
-        List<Schedule> schedules = scheduleRepository.findMonthlySchedules(calendarId, year, month);
+        List<Schedule> schedules = scheduleRepository.findMonthlySchedules(calendar.getId(), year, month);
         List<Holiday> holidays = holidayRepository.findByYearAndMonth(year, month);
 
         return MonthlyScheduleResponse.of(schedules, holidays);
@@ -118,7 +120,7 @@ public class CalendarService {
 
     // 일정 수정
     @Transactional
-    public ScheduleResponse updateSchedule(Long scheduleId, ScheduleCreateRequest request) {
+    public ScheduleResponse updateSchedule(Long scheduleId, ScheduleUpdateRequest request) {
         request.validate(); // Record의 validate 메서드 호출
 
         Calendar calendar = getCurrentCalendar();
@@ -188,6 +190,10 @@ public class CalendarService {
         Member currentMember = memberService.getCurrentMember();
         Couple couple = calendar.getCouple();
 
+        if (!couple.isConnected()) {  // 추가
+            throw new BusinessException(ErrorCode.COUPLE_ALREADY_DISCONNECTED);
+        }
+
         if (!currentMember.getCouple().equals(couple)) {
             throw new BusinessException(ErrorCode.CALENDAR_ACCESS_DENIED);
         }
@@ -195,6 +201,16 @@ public class CalendarService {
 
     private void validateScheduleAccess(Schedule schedule) {
         Member currentMember = memberService.getCurrentMember();
+
+        // SHARED 카테고리인 경우 커플 중 누구나 수정 가능
+        if (schedule.getCategory() == ScheduleCategory.SHARED) {
+
+            if (coupleService.isCoupleMember(currentMember, schedule.getCalendar().getCouple().getId())) {
+                return;
+            }
+            throw new BusinessException(ErrorCode.SCHEDULE_ACCESS_DENIED);
+        }
+
 
         if (!schedule.getCreator().equals(currentMember)) {
             throw new BusinessException(ErrorCode.SCHEDULE_ACCESS_DENIED);

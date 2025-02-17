@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HolidayRepository extends JpaRepository<Holiday, Long> {
@@ -44,4 +45,6 @@ public interface HolidayRepository extends JpaRepository<Holiday, Long> {
 
     // 이름으로 공휴일 검색
     List<Holiday> findByNameContainingOrderByDateAsc(String name);
+
+    Optional<Holiday> findByDate(LocalDate date);
 }
