@@ -10,7 +10,8 @@ import java.util.List;
 @Schema(description = "데일리 답변 응답")
 
 
-public record DailyAnswerResponse(
+public record DailyAnswerCreateResponse(
+
         @Schema(description = "답변 ID", example = "1")
         Long answerId,
 
@@ -29,8 +30,8 @@ public record DailyAnswerResponse(
         @Schema(description = "이모지", example = "true")
         List<String> emoji
 ) {
-    public static DailyAnswerResponse from(DailyAnswer answer, boolean bothAnswered, Long currentMemberId) {
-        return new DailyAnswerResponse(
+    public static DailyAnswerCreateResponse from(DailyAnswer answer, boolean bothAnswered, Long currentMemberId) {
+        return new DailyAnswerCreateResponse(
                 answer.getId(),
                 answer.getMember().getId(),
                 answer.getContent(),

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public record DailyQuestionWithAnswersResponse(
         Long questionId,
         String title,
-        List<DailyAnswerResponse> answers,
+        List<DailyAnswerCreateResponse> answers,
         int replyCounts,
         boolean bothAnswered
 ) {
@@ -25,7 +25,7 @@ public record DailyQuestionWithAnswersResponse(
                 question.getId(),
                 question.getTitle(),
                 answers.stream()
-                        .map(answer -> DailyAnswerResponse.from(answer, answers.size() == 2, currentMemberId))
+                        .map(answer -> DailyAnswerCreateResponse.from(answer, answers.size() == 2, currentMemberId))
                         .collect(Collectors.toList()),
                 replyCounts,
                 answers.size() == 2

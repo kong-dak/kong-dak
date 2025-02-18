@@ -1,6 +1,7 @@
 package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.DailyAnswerRequest;
+import com.kongdak.controller.dto.request.DailyAnswerUpdateRequest;
 import com.kongdak.controller.dto.request.EmojiRequest;
 import com.kongdak.controller.dto.request.ReplyRequest;
 import com.kongdak.controller.dto.response.*;
@@ -56,7 +57,7 @@ public class DailyQuestionController {
     @ApiResponse(responseCode = "200", description = "작성 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @PostMapping("/{questionId}/answers")
-    public BaseResponse<DailyAnswerResponse> createAnswer(
+    public BaseResponse<DailyAnswerCreateResponse> createAnswer(
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "질문 ID", required = true)
@@ -64,6 +65,22 @@ public class DailyQuestionController {
             @Parameter(description = "답변 내용")
             @RequestBody @Valid DailyAnswerRequest request) {
         return BaseResponse.created(dailyQuestionService.createAnswer(userDetails.getId(), questionId, request));
+    }
+
+    @Operation(summary = "답변 수정", description = "데일리 질문에 대한 답변을 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공",
+            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    @PatchMapping("/{questionId}/answers/{answerId}")
+    public BaseResponse<DailyAnswerUpdateResponse> updateAnswer(
+            @Parameter(description = "인증된 사용자 ID", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(description = "질문 ID", required = true)
+            @PathVariable("questionId") Long questionId,
+            @Parameter(description = "답변 ID", required = true)
+            @PathVariable("answerId") Long answerId,
+            @Parameter(description = "답변 내용")
+            @RequestBody @Valid DailyAnswerUpdateRequest request) {
+        return BaseResponse.ok(dailyQuestionService.updateAnswer(userDetails.getId(), questionId, answerId, request));
     }
 
     @Operation(summary = "댓글 조회", description = "데일리 질문의 댓글을 조회합니다.")
