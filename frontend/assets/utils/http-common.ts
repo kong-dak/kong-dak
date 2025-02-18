@@ -27,6 +27,8 @@ export default function localAxios() {
       // 토큰이 있으면 헤더에 추가
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.log("토큰이 없습니다.");
       }
 
       return config;
