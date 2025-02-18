@@ -7,16 +7,28 @@ import { Colors } from "@/constants/Colors";
 import HeaderIcons from "@/components/common/HeaderIcons";
 import { useEffect, useState } from "react";
 import { memberInfo } from "@/assets/apis/members";
+import { getDailyQuestion } from "@/assets/apis/daily-questions";
+import { DailyQuestion } from "@/assets/types/question/questionModels";
 
 export default function HomeScreen() {
   const [userNick, setUserNick] = useState<string>("멀쩡한 바지");
+  const [dailyQuestion, setDailyQuestion] = useState<DailyQuestion>();
   useEffect(() => {
     const member = async () => {
       await memberInfo().then((res) => {
         setUserNick(res.data.data.nickname);
       });
     };
+    const question = async () => {
+      await getDailyQuestion().then((res) => {
+        if (res.data.status === 200) {
+          console.log(res.data);
+          setDailyQuestion(res.data.data);
+        }
+      });
+    };
     member();
+    question();
   }, []);
 
   return (
@@ -42,10 +54,8 @@ export default function HomeScreen() {
 
       <TouchableOpacity className="" onPress={() => router.push("/question")}>
         <View className="w-[95%] my-6 bg-gray-100 rounded py-3 px-6 flex flex-col items-center justify-center">
-          <AppText className="text-xl">Day 1</AppText>
-          <AppText className="text-xl my-2">
-            상대와 하고싶은 데이트는 무엇인가요?
-          </AppText>
+          <AppText className="text-xl">Day {dailyQuestion?.questionId}</AppText>
+          <AppText className="text-xl my-2">{dailyQuestion?.title}</AppText>
         </View>
       </TouchableOpacity>
     </View>

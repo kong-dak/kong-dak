@@ -3,7 +3,6 @@ import { StyleSheet, Dimensions, Alert } from "react-native";
 import "../global.css";
 import "../constants/variables.css";
 import "../constants/common.css";
-import { useState } from "react";
 import { memberInfo } from "@/assets/apis/members";
 import { useEffect, useState } from "react";
 import { requestLocationPermission } from "@/assets/utils/map";
