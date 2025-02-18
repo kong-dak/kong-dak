@@ -1,6 +1,7 @@
 package com.kongdak.domain.dailyquestion;
 
 import com.kongdak.controller.dto.request.DailyAnswerRequest;
+import com.kongdak.controller.dto.request.DailyAnswerUpdateRequest;
 import com.kongdak.controller.dto.request.EmojiRequest;
 import com.kongdak.controller.dto.request.ReplyRequest;
 import com.kongdak.controller.dto.response.*;
@@ -62,7 +63,7 @@ public class DailyQuestionService {
 
     // 답변 작성
     @Transactional
-    public DailyAnswerResponse createAnswer(Long memberId, Long questionId, DailyAnswerRequest request) {
+    public DailyAnswerCreateResponse createAnswer(Long memberId, Long questionId, DailyAnswerRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -86,7 +87,7 @@ public class DailyQuestionService {
         List<DailyAnswer> answers = dailyAnswerRepository.findByQuestionId(questionId);
         boolean bothAnswered = answers.size() == 2;
 
-        return DailyAnswerResponse.from(savedAnswer, bothAnswered, memberId);
+        return DailyAnswerCreateResponse.from(savedAnswer, bothAnswered, memberId);
     }
 
     // 답변 조회 (커플 둘 다 답변했을 때만 상대방 답변 보이도록)
@@ -114,7 +115,7 @@ public class DailyQuestionService {
                 .questionId(question.getId())
                 .title(question.getTitle())
                 .answers(answers.stream()
-                        .map(answer -> DailyAnswerResponse.from(answer, bothAnswered, memberId))
+                        .map(answer -> DailyAnswerCreateResponse.from(answer, bothAnswered, memberId))
                         .collect(Collectors.toList()))
                 .bothAnswered(bothAnswered)
                 .replyCounts(replyCounts)
@@ -237,5 +238,35 @@ public class DailyQuestionService {
         return replies.stream()
                 .map(AnswerReplyResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public DailyAnswerUpdateResponse updateAnswer(Long memberId, Long questionId, Long answerId, DailyAnswerUpdateRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
+        DailyQuestion question = dailyQuestionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        DailyAnswer answer = dailyAnswerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+
+        // 답변 작성자와 수정 요청자가 같은지 확인
+        if (!answer.getMember().getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.NOT_YOUR_ANSWER);
+        }
+
+        // 답변이 해당 질문에 대한 것인지 확인
+        if (!answer.getQuestion().getId().equals(questionId)) {
+            throw new BusinessException(ErrorCode.ANSWER_QUESTION_NOT_MATCH);
+        }
+
+        answer.updateContent(request.content());
+
+        // 현재 질문에 대한 전체 답변 수 확인
+        List<DailyAnswer> answers = dailyAnswerRepository.findByQuestionId(questionId);
+        boolean bothAnswered = answers.size() == 2;
+
+        return DailyAnswerUpdateResponse.from(answer, bothAnswered, memberId);
     }
 }
