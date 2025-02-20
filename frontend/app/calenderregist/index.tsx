@@ -36,7 +36,7 @@ export default function CalenderregistScreen() {
     Number(params.myLongitude)
   );
 
-  const [selectedMarker, setSelectedMarker] = useState<
+  const [selectedPlace, setSelectedPlace] = useState<
     SearchResponse["data"]["documents"][0] | null
   >(null);
 
@@ -205,11 +205,18 @@ export default function CalenderregistScreen() {
           myLongitude={Number(params.myLongitude)}
           searchResults={searchResults}
           onCameraIdle={handleCameraIdle}
-          selectedMarker={setSelectedMarker}
+          selectedPlace={selectedPlace}
+          setSelectedPlace={setSelectedPlace}
         />
 
         {/* 장소 정보 표시 */}
-        <PlaceInfo selectedMarker={selectedMarker} />
+        <View className="h-[24%]">
+          <PlaceInfo
+            searchResults={searchResults}
+            selectedPlace={selectedPlace}
+            setSelectedPlace={setSelectedPlace}
+          />
+        </View>
 
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
