@@ -8,16 +8,10 @@ import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  Switch,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
 import { SearchResponse } from "@/assets/types/map/mapModels";
 import { useSearch } from "@/hooks/useSearch";
+import PlaceInfo from "@/components/ui/PlaceInfo";
 
 export default function CalenderregistScreen() {
   const url = require("../../assets/images/diary-write-sample.png");
@@ -41,16 +35,10 @@ export default function CalenderregistScreen() {
   const [currentLongitude, setCurrentLongitude] = useState<number>(
     Number(params.myLongitude)
   );
-  console.log("현재 카메라 위치", currentLatitude, currentLongitude);
-  console.log(
-    title,
-    color,
-    startingDay,
-    endingDay,
-    idx,
-    myLatitude,
-    myLongitude
-  );
+
+  const [selectedPlace, setSelectedPlace] = useState<
+    SearchResponse["data"]["documents"][0] | null
+  >(null);
 
   useEffect(() => {
     if (searchQuery) {
@@ -209,15 +197,27 @@ export default function CalenderregistScreen() {
         ) : null}
 
         {/* 지도 검색 */}
-
         <MapSearchBar onSearch={(query) => setSearchQuery(query)} />
+
         {/* 지도 */}
         <MapScreen
           myLatitude={Number(params.myLatitude)}
           myLongitude={Number(params.myLongitude)}
           searchResults={searchResults}
           onCameraIdle={handleCameraIdle}
+          selectedPlace={selectedPlace}
+          setSelectedPlace={setSelectedPlace}
         />
+
+        {/* 장소 정보 표시 */}
+        <View className="h-[24%]">
+          <PlaceInfo
+            searchResults={searchResults}
+            selectedPlace={selectedPlace}
+            setSelectedPlace={setSelectedPlace}
+          />
+        </View>
+
         <View
           className="w-full flex flex-row items-center mt-4 border-2 rounded-md justify-between"
           style={{ borderColor: Colors.main }}

@@ -1,10 +1,10 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import {
   NaverMapView,
   NaverMapMarkerOverlay,
   NaverMapViewRef,
 } from "@mj-studio/react-native-naver-map";
-import { View, StyleSheet, Text, Alert } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { SearchResponse } from "@/assets/types/map/mapModels";
 
 interface mapProps {
@@ -12,6 +12,8 @@ interface mapProps {
   myLongitude: number;
   searchResults: SearchResponse["data"]["documents"];
   onCameraIdle: (currentLatitude: number, currentLongitude: number) => void;
+  selectedPlace: SearchResponse["data"]["documents"][0] | null;
+  setSelectedPlace: (place: SearchResponse["data"]["documents"][0]) => void;
 }
 
 export default function MapScreen({
@@ -19,9 +21,21 @@ export default function MapScreen({
   myLongitude,
   searchResults,
   onCameraIdle,
+  selectedPlace,
+  setSelectedPlace,
 }: mapProps) {
   // NaverMapView의 참조를 생성
   const ref = useRef<NaverMapViewRef>(null);
+
+  useEffect(() => {
+    if (selectedPlace) {
+      ref.current?.animateCameraTo({
+        latitude: parseFloat(selectedPlace.y),
+        longitude: parseFloat(selectedPlace.x),
+        zoom: 16,
+      });
+    }
+  }, [selectedPlace]);
 
   return (
     <View style={styles.container}>
@@ -39,12 +53,26 @@ export default function MapScreen({
         }}
       >
         {/* 검색된 장소 마커 */}
-        {searchResults?.map((item) => (
+        {searchResults?.map((item, index) => (
           <NaverMapMarkerOverlay
             key={item.id}
             latitude={parseFloat(item.y)}
             longitude={parseFloat(item.x)}
-            caption={{ text: item.place_name }}
+            caption={{
+              text: item.place_name,
+              haloColor: "white",
+              requestedWidth: 5,
+              minZoom: 13,
+            }}
+            image={
+              selectedPlace?.id === item.id
+                ? require("../../assets/images/red-marker.png")
+                : require("../../assets/images/green-marker.png")
+            }
+            isHideCollidedCaptions={true}
+            onTap={() => setSelectedPlace(item)}
+            width={30}
+            height={30}
           />
         ))}
         {/* 내 위치 마커 */}
@@ -52,7 +80,9 @@ export default function MapScreen({
           key="my-location"
           latitude={myLatitude}
           longitude={myLongitude}
-          caption={{ text: "내 위치" }}
+          image={require("../../assets/images/blue-circle.png")}
+          width={17}
+          height={17}
         />
       </NaverMapView>
     </View>
