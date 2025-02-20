@@ -45,7 +45,6 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/auth/**", "/api/oauth2/**", "/oauth2/**").permitAll()
                         .requestMatchers("/auth/**", "/api/**", "/oauth2/**").permitAll()
                         // Swagger UI 관련 경로 허용
                         .requestMatchers(
@@ -56,7 +55,6 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 );
-
         return http.build();
     }
 

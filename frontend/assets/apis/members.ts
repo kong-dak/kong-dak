@@ -1,4 +1,4 @@
-import localAxios from '../utils/http-common';
+import localAxios from "../utils/http-common";
 
 const local = localAxios();
 
@@ -14,15 +14,15 @@ const local = localAxios();
 
 /**회원 조회 */
 export async function memberInfo() {
-    return await local.get(`/api/members`);
+  return await local.get(`/api/members`);
 }
 
 /**닉네임 설정 */
-export async function setNickname() {
-    return await local.patch(`/api/members/nickname`);
+export async function setNickname(nickname: string) {
+  return await local.patch(`/api/members/nickname`, { nickname });
 }
 
 /**회원 탈퇴 */
 export async function deactivateMember() {
-    return await local.delete(`/api/members`);
+  return await local.delete(`/api/members`);
 }

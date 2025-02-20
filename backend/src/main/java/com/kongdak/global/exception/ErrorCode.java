@@ -49,6 +49,8 @@ public enum ErrorCode {
     BOTH_ANSWERS_REQUIRED(400, "Q005", "댓글을 작성하기 전에 두 파트너 모두 답변해야 합니다"),
     REPLY_NOT_FOUND(404, "Q006", "댓글을 찾을 수 없습니다"),
     NOT_YOUR_REPLY(403, "Q007", "다른 사람의 댓글은 삭제할 수 없습니다"),
+    NOT_YOUR_ANSWER(403, "Q008", "다른 사람의 답변은 삭제할 수 없습니다"),
+    ANSWER_QUESTION_NOT_MATCH(404, "Q009", "질문과의 답변의 관계가 맞지 않습니다"),
 
     // Diary 관련 예외
     DIARY_NOT_FOUND(404, "D001", "다이어리를 찾을 수 없습니다."),
