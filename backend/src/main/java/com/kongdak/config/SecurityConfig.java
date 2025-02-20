@@ -37,12 +37,12 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2SuccessHandler)
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .successHandler(oAuth2SuccessHandler)
+//                        .userInfoEndpoint(userInfo -> userInfo
+//                                .userService(customOAuth2UserService)
+//                        )
+//                ) // SDK 연결로 인해 customOAuth2UserSerivce 를 사용하지 않도록 한다.
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/api/**", "/oauth2/**").permitAll()

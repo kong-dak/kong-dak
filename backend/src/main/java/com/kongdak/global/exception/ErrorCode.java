@@ -13,6 +13,7 @@ public enum ErrorCode {
 
     // OAUTH2.0 관련 예외
     INVALID_PROVIDER(400, "O001", "옳지 않은 PROVIDER 입니다."),
+    INVALID_SOCIAL_TOKEN(400, "O002", "옳지않은 소셜 토큰입니다."),
 
     // Couple 관련 예외
     COUPLE_NOT_FOUND(404, "C001", "커플을 찾을 수 없습니다"),
