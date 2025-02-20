@@ -1,6 +1,7 @@
 package com.kongdak.global.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kongdak.global.response.BaseResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +36,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         refreshTokenRepository.save(email, refreshToken,
                 jwtTokenProvider.getRefreshTokenValidityInMilliseconds());
+
+        // BaseResponse 형식으로 응답 생성
+        BaseResponse<TokenResponse> baseResponse = BaseResponse.ok(
+                TokenResponse.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .provider(provider)
+                        .build()
+        );
         // Response 설정
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
@@ -45,7 +55,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .refreshToken(refreshToken)
                 .provider(provider)
                 .build();
-        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(baseResponse));
 
         log.info("OAuth2 Login Success: {}", String.valueOf(email));
     }
