@@ -51,11 +51,10 @@ public class MapController {
             @Parameter(description = "검색 키워드", required = true) @RequestParam String query,
             @Parameter(description = "중심 좌표 X (경도)") @RequestParam(required = false) String x,
             @Parameter(description = "중심 좌표 Y (위도)") @RequestParam(required = false) String y,
-            @Parameter(description = "검색 반경 (미터 단위)") @RequestParam(defaultValue = "500") String radius,
             @Parameter(description = "결과 개수") @RequestParam(defaultValue = "15") String size,
             @Parameter(description = "정렬 기준 (accuracy/distance)") @RequestParam(required = false) String sort
     ) {
-        KakaoLocalSearchResponse response = mapService.search(query, x, y, radius, size, sort);
+        KakaoLocalSearchResponse response = mapService.search(query, x, y, size, sort);
         return BaseResponse.ok(response);
     }
 }

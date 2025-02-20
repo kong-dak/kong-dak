@@ -22,14 +22,13 @@ public class MapService {
             .baseUrl("https://dapi.kakao.com")
             .build();
 
-    public KakaoLocalSearchResponse search(String query, String x, String y, String radius, String size, String sort) {
+    public KakaoLocalSearchResponse search(String query, String x, String y, String size, String sort) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v2/local/search/keyword.json")
                         .queryParam("query", query)
                         .queryParamIfPresent("x", Optional.ofNullable(x))
                         .queryParamIfPresent("y", Optional.ofNullable(y))
-                        .queryParamIfPresent("radius", Optional.ofNullable(radius))
                         .queryParamIfPresent("size", Optional.ofNullable(size))
                         .queryParamIfPresent("sort", Optional.ofNullable(sort))
                         .build())
