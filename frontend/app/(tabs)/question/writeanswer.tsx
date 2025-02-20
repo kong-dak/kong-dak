@@ -16,6 +16,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -46,27 +47,29 @@ export default function AnswerWriteScreen() {
   const submitAnswer = async () => {
     console.log(questionId, answerText);
     if (AnswerState === "POST")
-      await createAnswers(Number(questionId), answerText).then((res) => {
-        console.log("POST 요청을 보냅니다. " + res);
-        if (res.data.status === 201) {
+      await createAnswers(Number(questionId), answerText)
+        .then((res) => {
+          console.log("POST 요청을 보냅니다. " + res);
           router.push({
             pathname: "/question/viewanswer",
             params: { questionId },
           });
-        }
-      });
-    else {
-      await modifyAnswers(
-        Number(questionId),
-        Number(answerId),
-        answerText
-      ).then((res) => {
-        console.log("PATCH 요청을 보냅니다. " + res.data);
-        router.push({
-          pathname: "/question/viewanswer",
-          params: { questionId },
+        })
+        .catch((error) => {
+          console.error("에러 발생:", error.response?.data);
         });
-      });
+    else {
+      await modifyAnswers(Number(questionId), Number(answerId), answerText)
+        .then((res) => {
+          console.log("PATCH 요청을 보냅니다. " + res.data);
+          router.push({
+            pathname: "/question/viewanswer",
+            params: { questionId },
+          });
+        })
+        .catch((error) => {
+          console.error("에러 발생:", error.response?.data);
+        });
     }
   };
   return (
