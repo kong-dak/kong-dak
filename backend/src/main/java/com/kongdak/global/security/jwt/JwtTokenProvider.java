@@ -1,7 +1,10 @@
 package com.kongdak.global.security.jwt;
 
+import com.kongdak.global.exception.BusinessException;
+import com.kongdak.global.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -152,16 +155,19 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
+        } catch (SecurityException | MalformedJwtException | SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         } catch (ExpiredJwtException e) {
             log.error("JWT token is expired: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException e) {
             log.error("JWT token is unsupported: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         } catch (IllegalArgumentException e) {
             log.error("JWT claims string is empty: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
-        return false;
     }
 
     // Access Token과 Refresh Token을 함께 재발급
