@@ -79,12 +79,12 @@ public class SocialLoginService {
             );
 
             KakaoUserInfo userInfo = response.getBody();
-            if (userInfo == null || userInfo.getKakaoAccount() == null || userInfo.getKakaoAccount().getEmail() == null) {
+            if (userInfo == null || userInfo.kakaoAccount() == null || userInfo.kakaoAccount().email() == null) {
                 log.error("Failed to get valid user info from Kakao. UserInfo: {}", userInfo);
                 throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
             }
 
-            return userInfo.getKakaoAccount().getEmail();
+            return userInfo.kakaoAccount().email();
         } catch (RestClientException e) {
             log.error("Failed to get Kakao user info", e);
             throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
@@ -93,17 +93,5 @@ public class SocialLoginService {
 
     private String generateTempNickname() {
         return "User" + UUID.randomUUID().toString().substring(0, 8);
-    }
-
-    @Getter
-    @NoArgsConstructor
-    private class KakaoUserInfo {
-        private KakaoAccount kakaoAccount;
-
-        @Getter
-        @NoArgsConstructor
-        static class KakaoAccount {
-            private String email;
-        }
     }
 }
