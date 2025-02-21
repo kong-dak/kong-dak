@@ -36,7 +36,7 @@ public class AuthController {
     @Operation(summary = "소셜 로그인", description = "소셜 액세스 토큰으로 로그인합니다.")
     @PostMapping("/login/{provider}")
     public BaseResponse<TokenRefreshResponse> socialLogin(
-            @PathVariable String provider,
+            @PathVariable("provider") String provider,
             @RequestBody SocialLoginRequest request) {
         TokenPairResponse tokenPair = socialLoginService.socialLogin(request.accessToken(), provider);
 
