@@ -1,6 +1,8 @@
 package com.kongdak.domain.notification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kongdak.global.exception.BusinessException;
+import com.kongdak.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -28,22 +30,18 @@ public class SseEmitterService {
         sendDummyEvent(emitter);
 
         emitter.onCompletion(() -> {
-            log.info("SSE Connection completed: {}", emitterId);
             removeEmitter(emitterId);
         });
         emitter.onTimeout(() -> {
-            log.info("SSE Connection timeout: {}", emitterId);
             emitter.complete();
             removeEmitter(emitterId);
         });
         emitter.onError(ex -> {
-            log.error("SSE Connection error: {}", emitterId, ex);
             emitter.complete();
             removeEmitter(emitterId);
         });
 
         emitters.put(emitterId, emitter);
-        log.info("SSE Connection created: {}", emitterId);
 
         return emitter;
     }
@@ -58,9 +56,7 @@ public class SseEmitterService {
                         .id(message.getRequestId())
                         .name(message.getType().name())
                         .data(message, MediaType.APPLICATION_JSON));
-                log.info("Notification sent to {}: {}", memberId, message.getType());
             } catch (IOException e) {
-                log.error("Failed to send notification to {}", memberId, e);
                 removeEmitter(emitterId);
             }
         }
@@ -73,7 +69,8 @@ public class SseEmitterService {
                     .name("connect")
                     .data("connected"));
         } catch (IOException e) {
-            log.error("Failed to send dummy event", e);
+            throw new BusinessException(ErrorCode.CANNOT_SEND_DUMMY_EVENT);
+
         }
     }
 
@@ -81,7 +78,7 @@ public class SseEmitterService {
         return EMITTER_PREFIX + memberId;
     }
 
-    private void removeEmitter(String emitterId) {
+    protected void removeEmitter(String emitterId) {
         emitters.remove(emitterId);
     }
 
@@ -89,9 +86,8 @@ public class SseEmitterService {
         emitters.forEach((key, emitter) -> {
             try {
                 emitter.complete();
-                log.info("SSE Connection closed: {}", key);
             } catch (Exception e) {
-                log.error("Failed to close SSE connection: {}", key, e);
+                throw new BusinessException(ErrorCode.CANNOT_CLOSE_EMITTER);
             }
         });
         emitters.clear();

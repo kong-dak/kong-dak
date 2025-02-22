@@ -65,17 +65,14 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public BaseResponse<TokenRefreshResponse> refreshToken(@RequestBody TokenRefreshRequest request) {
-        log.info("Received refresh token: {}", request.refreshToken());
         // RefreshToken 검증
         if (!simpleJwtTokenProvider.validateToken(request.refreshToken())) {
-            log.error("Token validation failed");
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // 토큰에서 이메일 추출
         Claims claims = simpleJwtTokenProvider.parseClaims(request.refreshToken());
         String email = claims.getSubject();
-        log.info("Email from token: {}", email);
 
         // Redis에 저장된 RefreshToken 확인
         String savedToken = refreshTokenRepository.findByEmail(email)

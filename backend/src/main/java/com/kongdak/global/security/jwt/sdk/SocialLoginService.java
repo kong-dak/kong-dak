@@ -9,8 +9,6 @@ import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.security.jwt.RefreshTokenRepository;
 import com.kongdak.global.security.jwt.TokenPairResponse;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -20,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
 
 import java.util.UUID;
 
@@ -80,13 +77,11 @@ public class SocialLoginService {
 
             KakaoUserInfo userInfo = response.getBody();
             if (userInfo == null || userInfo.kakaoAccount() == null || userInfo.kakaoAccount().email() == null) {
-                log.error("Failed to get valid user info from Kakao. UserInfo: {}", userInfo);
                 throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
             }
 
             return userInfo.kakaoAccount().email();
         } catch (RestClientException e) {
-            log.error("Failed to get Kakao user info", e);
             throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
         }
     }
