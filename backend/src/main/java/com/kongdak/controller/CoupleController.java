@@ -65,7 +65,6 @@ public class CoupleController {
             @PathVariable("requestId") String requestId,
             @Parameter(description = "인증된 사용자 ID", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        log.info("Received requestId: {}", requestId);  // 로그 추가
 
         return BaseResponse.ok(coupleService.rejectMatch(requestId, userDetails.getId()));
     }

@@ -95,11 +95,8 @@ public class DailyQuestionService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
-        log.info("[DailyQuestionService - getAnswers]- memberId : {}", memberId);
         // 커플 관계 확인
         Long coupleId = member.getCoupleId();
-        log.info("[DailyQuestionService - getAnswers]- Couple 엔티티: {}", member.getCouple());
-        log.info("[DailyQuestionService - getAnswers]- coupleId : {}", coupleId);
         if (coupleId == null) {
             throw new BusinessException(ErrorCode.COUPLE_NOT_FOUND);
         }
