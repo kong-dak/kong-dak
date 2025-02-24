@@ -71,16 +71,12 @@ public class CoupleService {
     // 매칭 수락
     @Transactional
     public MatchAcceptResponse acceptMatch(String requestId, Long memberId) {
-        log.info("[CoupleService - acceptMatch] - requestId : {} , memberId : {}", requestId, memberId);
         CoupleMatchRequest request = coupleMatchRedisRepository.findCoupleMatchRequest(requestId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COUPLE_MATCH_REQUEST_NOT_FOUND));
 
         if (!request.targetId().equals(memberId)) {
             throw new BusinessException(ErrorCode.CANNOT_MATCH_TO_OWN);
         }
-
-        log.info("[CoupleService - acceptMatch] - request.requesterId : {} , memberId : {}", request.requesterId(), memberId);
-
         LocalDateTime matchedAt = LocalDateTime.now();
         // 커플 연결 처리
         connect(request.requesterId(), memberId, matchedAt);
