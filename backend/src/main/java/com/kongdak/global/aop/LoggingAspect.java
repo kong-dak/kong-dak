@@ -25,7 +25,7 @@ public class LoggingAspect {
             .registerModule(new JavaTimeModule());
 
     // Controller 레벨 로깅
-    @Around("execution(* com.kongdak..controller..*.*(..))")
+    @Around("execution(* com.kongdak.*.controller..*.*(..))")
     public Object loggingController(ProceedingJoinPoint joinPoint) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String httpMethod = request.getMethod();
@@ -50,7 +50,7 @@ public class LoggingAspect {
     }
 
     // Security 레벨 로깅
-    @Around("execution(* com.kongdak..security..*.*(..))")
+    @Around("execution(* com.kongdak.*.security.*.*(..))")
     public Object loggingSecurity(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
@@ -71,7 +71,7 @@ public class LoggingAspect {
     }
 
     // Service 레벨 로깅
-    @Around("execution(* com.kongdak..service..*.*(..))")
+    @Around("execution(* com.kongdak.*.service.*.*(..))")
     public Object loggingService(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
@@ -96,7 +96,7 @@ public class LoggingAspect {
     }
 
     // Repository 레벨 로깅
-    @Around("execution(* com.kongdak..repository..*.*(..))")
+    @Around("execution(* com.kongdak.*.repository.*.*(..))")
     public Object loggingRepository(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
@@ -127,7 +127,7 @@ public class LoggingAspect {
     }
 
     // SSE/알림 레벨 로깅
-    @Around("execution(* com.kongdak..notification..*.*(..))")
+    @Around("execution(* com.kongdak.*.notification.*.*(..))")
     public Object loggingNotification(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
