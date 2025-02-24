@@ -22,8 +22,11 @@ public class MapService {
             .baseUrl("https://dapi.kakao.com")
             .build();
 
+    private final MapRepository mapRepository;
+
+    @Transactional
     public KakaoLocalSearchResponse search(String query, String x, String y, String size, String sort) {
-        return webClient.get()
+        KakaoLocalSearchResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v2/local/search/keyword.json")
                         .queryParam("query", query)
@@ -36,5 +39,24 @@ public class MapService {
                 .retrieve()
                 .bodyToMono(KakaoLocalSearchResponse.class)
                 .block();
+
+        List<Place> placesToSave = response.documents().stream()
+                .filter(document -> !mapRepository.existsByPlaceId(document.id()))
+                .map(document -> Place.builder()
+                        .placeId(document.id())
+                        .placeName(document.place_name())
+                        .categoryName(document.category_name())
+                        .addressName(document.address_name())
+                        .roadAddressName(document.road_address_name())
+                        .phone(document.phone())
+                        .longitude(document.x())
+                        .latitude(document.y())
+                        .build())
+                .toList();
+
+        mapRepository.saveAll(placesToSave);
+
+        return response;
+
     }
 }
