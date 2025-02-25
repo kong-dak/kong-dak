@@ -22,6 +22,7 @@ export default function CalendarDetailList({
             startingDay,
             endingDay,
             idx,
+            type: "EDIT",
           },
         });
       }}

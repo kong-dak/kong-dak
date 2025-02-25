@@ -1,19 +1,126 @@
+import { editDiary, getDiaryDetail, postDiary } from "@/assets/apis/diary";
+import { DiaryType } from "@/assets/types/diary/diaryModels";
+import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
+import CustomCalendarDiary from "@/components/ui/CustomCalendarDiary";
+import { ImagePicker } from "@/components/ui/DropDownPicker";
 import { Colors } from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
   TextInput,
   Image,
-  TouchableOpacity,
+  Modal,
+  Pressable,
 } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
+import { launchImageLibrary } from "react-native-image-picker";
 
 export default function DiaryWriteScreen() {
-  const url = require("../../assets/images/diary-write-sample.png");
-  const [imageUri, setImageUri] = useState(url); // 다이어리 이미지 url
+  const props = useLocalSearchParams();
+  const diaryAPIType = props.type;
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const day = today.getDay() + 1;
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [imageFile, setImageFile] = useState<string>(""); //갤러리 이미지
+  const [selectedDay, setSelectedDay] = useState<string>(
+    year + "-" + month + "-" + day
+  );
+  const [selectedDayText, setSelectedDayText] = useState<string>(
+    year +
+      "년 " +
+      month.toString().padStart(2, "0") +
+      "월 " +
+      day.toString().padStart(2, "0") +
+      "일"
+  );
+  const [diaryDetail, setDiaryDetail] = useState<DiaryType>({
+    content: "",
+    emotion: "HAPPY",
+    weather: "SUNNY",
+    diaryDate: selectedDay,
+    photoUrls: [imageFile],
+    decorations: null,
+  });
+
+  const writeDiary = async () => {
+    console.log(diaryDetail);
+    if (props.type === "POST") {
+      await postDiary(diaryDetail).then((res) => {
+        console.log("보냈습니다", res);
+        const response = res.data.data;
+      });
+    } else if (props.type === "EDIT") {
+      await editDiary(Number(props.diaryId), diaryDetail).then((res) => {
+        const response = res.data.data;
+      });
+    }
+  };
+
+  const onChangeText = (e: string) => {
+    setDiaryDetail((prev) => ({ ...prev, content: e }));
+  };
+
+  const onChangeModalBoolean = () => {
+    setIsModalVisible((prev) => !prev);
+  };
+
+  const settingDate = () => {
+    const dateString = selectedDay.split("-");
+    const dayText =
+      dateString[0] +
+      "년 " +
+      dateString[1].toString().padStart(2, "0") +
+      "월 " +
+      dateString[2].toString().padStart(2, "0") +
+      "일";
+    setSelectedDayText(dayText);
+    setIsModalVisible(false);
+  };
+
+  const onSelectImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: "photo",
+        maxWidth: 1024,
+        maxHeight: 512,
+        includeBase64: true,
+        selectionLimit: 1,
+      },
+      (res) => {
+        // console.log(res);
+        // console.log(response.assets[0].base64)
+        if (res.didCancel) {
+          return;
+        } else if (res.errorCode) {
+          console.log("Image Error : " + res.errorCode);
+        }
+        // base64가 존재하는지 확인
+        const base64 = res.assets?.[0]?.base64;
+        if (base64) {
+          setImageFile(base64);
+        }
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (diaryAPIType === "EDIT") {
+      const initialDiaryProps = async () => {
+        await getDiaryDetail(Number(props.diaryId)).then((res) => {
+          console.log(res.data.data);
+          setDiaryDetail(res.data.data);
+        });
+      };
+      initialDiaryProps();
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* 일기 메인 */}
@@ -21,81 +128,140 @@ export default function DiaryWriteScreen() {
         className="h-[5%] flex flex-row justify-between items-center border-b p-2"
         style={{ borderColor: Colors.gray }}
       >
-        <TouchableOpacity onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()}>
           <AppText className="text-base">취소</AppText>
-        </TouchableOpacity>
+        </Pressable>
         <AppText className="text-xl">일기</AppText>
-        <TouchableOpacity onPress={() => router.push("/(tabs)/diary")}>
+        <Pressable
+          onPress={() => {
+            writeDiary();
+            router.push("/(tabs)/diary");
+          }}
+        >
           <AppText className="text-base">작성</AppText>
-        </TouchableOpacity>
+        </Pressable>
       </View>
       {/* 날씨 기분 날짜 */}
       <View className="h-[5%] flex flex-row justify-between items-center px-2">
         <View className="flex flex-row items-center my-2">
           <View className="flex flex-row items-center me-4">
             <AppText className="text-base me-2">날씨:</AppText>
-            <AntDesign
+            {/* <AntDesign
               className="me-1"
               name="cloudo"
               size={16}
               color={Colors.black}
             />
-            <AntDesign name="down" size={16} color={Colors.black} />
+            <AntDesign name="down" size={16} color={Colors.black} /> */}
+            <View className="w-24">
+              <ImagePicker type="WEATHER" setState={setDiaryDetail} />
+            </View>
           </View>
+
           <View className="flex flex-row items-center">
             <AppText className="text-base me-2">기분:</AppText>
-            <AntDesign
+            {/* <AntDesign
               className="me-1"
               name="smileo"
               size={16}
               color={Colors.black}
             />
-            <AntDesign name="down" size={16} color={Colors.black} />
+            <AntDesign name="down" size={16} color={Colors.black} /> */}
+            <View className="w-24">
+              <ImagePicker type="EMOTION" setState={setDiaryDetail} />
+            </View>
           </View>
         </View>
-        <View
+        <Pressable
           className="flex items-center border-b"
           style={{ borderColor: Colors.gray }}
+          onPress={() => {
+            onChangeModalBoolean();
+          }}
         >
-          <AppText className="text-base">2024년 11월 21일</AppText>
-        </View>
+          <AppText className="text-base">{selectedDayText}</AppText>
+        </Pressable>
       </View>
       <View className="h-[85%]">
         {/* 일기 작성 */}
         <View
-          className={`${imageUri ? "h-[70%]" : "h-full"} flex justify-between`}
+          className={`${imageFile ? "h-[70%]" : "h-full"} flex justify-between`}
         >
           <TextInput
             className="text-start"
             style={[styles.TextInput, { color: Colors.main, outline: "none" }]}
             placeholder="일기를 작성해주세요."
             placeholderTextColor={Colors.gray}
+            value={diaryDetail.content}
+            onChangeText={(e) => {
+              onChangeText(e);
+            }}
           />
           <View className=" flex justify-end items-end">
             <AppText
               className=" text-center my-2"
               style={{ color: Colors.gray }}
             >
-              0 / 1000자
+              {diaryDetail.content.length} / 1000자
             </AppText>
           </View>
         </View>
 
         {/* 이미지 */}
-        <View className={`w-full ${imageUri ? "h-[30%]" : "h-0"} p-4`}>
-          {imageUri && (
-            <Image source={url} className="w-full h-full" resizeMode="cover" />
+        <View className={`w-full ${imageFile ? "h-[30%]" : "h-0"} p-4`}>
+          {imageFile && (
+            // base64 기준으로 표시, 로컬에서 불러올 경우 uri를 require("경로");로 하고 그냥 붙여넣으면 됨.
+            <Image
+              source={{ uri: `data:image/jpeg;base64,${imageFile}` }}
+              className="w-full h-full"
+              resizeMode="contain"
+            />
           )}
         </View>
       </View>
 
       {/* 사진탭 */}
-      <View
+      <Pressable
+        onPress={() => onSelectImage()}
         className="h-[5%] flex items-start justify-center ps-2 border-t"
         style={{ borderColor: Colors.black }}
       >
         <AntDesign name="picture" size={26} color="black" />
-      </View>
+      </Pressable>
+
+      <Modal animationType="fade" visible={isModalVisible} transparent={true}>
+        <View
+          className="relative h-full w-full flex justify-center items-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+        >
+          <View className="w-[80%] h-[58%] bg-white rounded-lg p-4">
+            <View className="w-full h-[90%]">
+              <CustomCalendarDiary
+                currentDay={selectedDay}
+                setState={setSelectedDay}
+              />
+            </View>
+
+            <View className="w-full h-[10%] flex flex-row justify-around items-center">
+              <AppButton
+                text="확인"
+                type="sublight"
+                onPress={() => {
+                  settingDate();
+                }}
+              />
+              <AppButton
+                text="취소"
+                type="subbold"
+                outline
+                onPress={() => {
+                  setIsModalVisible(false);
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

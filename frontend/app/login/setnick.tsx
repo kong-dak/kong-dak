@@ -23,7 +23,7 @@ export default function SetNicknameScreen() {
     }
     await setNickname(nickText).then((res) => {
       if (res.data.status === 200) {
-        router.push("/(tabs)");
+        router.navigate("/(tabs)");
       }
     });
   };

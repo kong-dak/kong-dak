@@ -15,7 +15,7 @@ export default function QuestionScreen() {
       await getHistory().then((res) => {
         if (res.data.status === 200) {
           const data = res.data.data;
-          setQuestionList(res.data.data);
+          setQuestionList(data);
           // console.log("질문 리스트");
           // data.map((item: QuestionListItem) => {
           //   console.log(item.questionId + " " + item.title);

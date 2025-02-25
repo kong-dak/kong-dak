@@ -28,11 +28,16 @@ import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import dummydata from "../../../assets/dummydata/calandarmonthlist.json";
 import { getDayOfWeek } from "@/assets/utils/getWeekday";
 import CalendarDetailList from "@/components/ui/CalendarDetailList";
+import { monthlySchedules } from "@/assets/apis/calendars";
 
 export default function CalendarScreen() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
   const [currentDate, setCurrentDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const initialDate = year + "-" + month;
   const [checkDate, setCheckDate] = useState<string>("");
   const [showSchedule, setShowSchedule] = useState<MarkedProps[]>([]);
   const [calendarData, setCalendarData] = useState<SchedulePeriod[]>([]);
@@ -49,7 +54,36 @@ export default function CalendarScreen() {
   const [myLatitude, setMyLatitude] = useState<number>(37.5665);
   const [myLongitude, setMyLongitude] = useState<number>(126.978);
 
+  const getMonthlySchedules = async (dateTime: string) => {
+    monthlySchedules(dateTime).then((res) => {
+      const data = res.data.data;
+      const newdata: SchedulePeriod[] = [];
+      data.map(
+        (
+          item: {
+            scheduleId: number;
+            title: string;
+            startTime: string;
+            endTime: string;
+          },
+          index: number
+        ) => {
+          const calendarProcess: SchedulePeriod = {
+            scheduleId: item.scheduleId,
+            title: item.title,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            idx: 0,
+            color: calendarColor[index % calendarColor.length],
+          };
+          newdata.push(calendarProcess);
+        }
+      );
+      setCalendarData(newdata);
+    });
+  };
   useEffect(() => {
+    // getMonthlySchedules(initialDate);
     const data = dummydata.data;
     const newdata: SchedulePeriod[] = [];
     data.map((item, index) => {
@@ -64,9 +98,7 @@ export default function CalendarScreen() {
       newdata.push(calendarProcess);
     });
     setCalendarData(newdata);
-  }, []);
 
-  useEffect(() => {
     const getLocation = async () => {
       const location = await fetchLocation();
       if (location) {
@@ -77,6 +109,12 @@ export default function CalendarScreen() {
 
     getLocation();
   }, []);
+
+  useEffect(() => {
+    const splitDate = currentDate.split("-");
+    console.log(splitDate[0] + "-" + splitDate[1]);
+    // getMonthlySchedules(splitDate[0] + "-" + splitDate[1]);
+  }, [currentDate]);
 
   LocaleConfig.locales["ko"] = {
     monthNames: [
@@ -303,11 +341,11 @@ export default function CalendarScreen() {
 
   return (
     <View className="items-center relative" style={styles.container}>
-      <Text>Calendar화면입니다</Text>
       <View className="w-full h-[100%] bg-slate-200">
         <CalendarView checkDate={checkDate} setCheckDate={setCheckDate} />
       </View>
       <View style={{ marginTop: 400 }}>
+        {/* Modal */}
         <Modal animationType="fade" visible={isModalVisible} transparent={true}>
           <View
             className="relative h-full w-full flex justify-center items-center"
@@ -361,6 +399,7 @@ export default function CalendarScreen() {
                     params: {
                       myLatitude,
                       myLongitude,
+                      type: "POST",
                     },
                   });
                 }}
