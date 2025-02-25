@@ -29,6 +29,10 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean isActive = true;
 
+    @Column(nullable = false)
+    @Setter
+    private boolean nicknameSet = false;
+
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "couple_id")

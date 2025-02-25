@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.response.BaseResponse;
+import com.kongdak.global.security.jwt.sdk.SimpleJwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtTokenProvider jwtTokenProvider;
+    private final SimpleJwtTokenProvider simplejwtTokenProvider;
     private final ObjectMapper objectMapper;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,8 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 handleAuthenticationError(response, ErrorCode.UNAUTHORIZED_ACCESS);
                 return;
             }
-            jwtTokenProvider.validateToken(token);
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+            simplejwtTokenProvider.validateToken(token);
+            Authentication authentication = simplejwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);    
         } catch (BusinessException e) {

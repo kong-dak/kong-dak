@@ -6,3 +6,8 @@ const local = localAxios();
 export async function refreshToken() {
   return await local.post(`/api/auth/refresh`);
 }
+export async function getLoginToken(provider: string, accessToken: string) {
+  return await local.post(`/api/auth/login/${provider}`, {
+    accessToken,
+  });
+}
