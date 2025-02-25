@@ -9,27 +9,29 @@
         </encoder>
     </appender>
 
-    <!-- Logstash 로그 전송 설정 -->
-    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>logstash:5000</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"application":"kongdak"}</customFields>
+    <!-- 파일 로그 (Logstash 대체) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/logs/kongdak.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/logs/kongdak.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
     <!-- 개발 환경 설정 -->
     <root level="INFO">
         <appender-ref ref="Console" />
-        <appender-ref ref="LOGSTASH" />
+        <appender-ref ref="FILE" />
     </root>
 
     <!-- SQL 로그 -->
     <logger name="org.hibernate.SQL" level="DEBUG">
         <appender-ref ref="Console" />
-        <appender-ref ref="LOGSTASH" />
     </logger>
     <logger name="org.hibernate.type.descriptor.sql" level="TRACE">
         <appender-ref ref="Console" />
-        <appender-ref ref="LOGSTASH" />
     </logger>
 </configuration>
