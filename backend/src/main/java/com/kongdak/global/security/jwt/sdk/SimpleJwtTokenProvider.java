@@ -47,7 +47,7 @@ public class SimpleJwtTokenProvider {
         String accessToken = createAccessToken(member);
         String refreshToken = createRefreshToken(member.getEmail(), member.getId());
 
-        return new TokenPairResponse(accessToken, refreshToken);
+        return new TokenPairResponse(accessToken, refreshToken, member.isNicknameSet());
     }
 
     private String createAccessToken(Member member) {
@@ -166,6 +166,6 @@ public class SimpleJwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        return new TokenPairResponse((newAccessToken), newRefreshToken);
+        return new TokenPairResponse(newAccessToken, newRefreshToken, true);
     }
 }
