@@ -14,7 +14,6 @@ services:
       - mariadb-data:/var/lib/mysql
     networks:
       - kongdak-network
-
   redis:
     image: redis:alpine
     container_name: kongdak-redis
@@ -22,49 +21,53 @@ services:
       - "6379:6379"
     networks:
       - kongdak-network
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
-    container_name: kongdak-elasticsearch
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.enabled=false
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: kongdak-prometheus
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
     ports:
-      - "9200:9200"
+      - "9090:9090"
     networks:
       - kongdak-network
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.12.1
-    container_name: kongdak-logstash
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: kongdak-node-exporter
     volumes:
-      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     ports:
-      - "5044:5044"
-      - "5000:5000/tcp"
+      - "9100:9100"
+    networks:
+      - kongdak-network
+  grafana:
+    image: grafana/grafana:latest
+    container_name: kongdak-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
     networks:
       - kongdak-network
     depends_on:
-      - elasticsearch
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.1
-    container_name: kongdak-kibana
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - kongdak-network
-    depends_on:
-      - elasticsearch
-
+      - prometheus
   backend:
     build: 
       context: ./backend
@@ -75,7 +78,7 @@ services:
     depends_on:
       - mariadb
       - redis
-      - logstash
+      - prometheus
     environment:
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/kongdak?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: kongdak_user
@@ -90,7 +93,6 @@ services:
       SPRING_REDIS_PORT: 6379
     networks:
       - kongdak-network
-
   frontend:
     build:
       context: ./frontend
@@ -102,11 +104,10 @@ services:
       - backend
     networks:
       - kongdak-network
-
 networks:
   kongdak-network:
     driver: bridge
-
 volumes:
   mariadb-data:
-  elasticsearch-data:
+  prometheus-data:
+  grafana-data:
