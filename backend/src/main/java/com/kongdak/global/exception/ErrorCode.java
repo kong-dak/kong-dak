@@ -13,7 +13,9 @@ public enum ErrorCode {
 
     // OAUTH2.0 관련 예외
     INVALID_PROVIDER(400, "O001", "옳지 않은 PROVIDER 입니다."),
-    INVALID_SOCIAL_TOKEN(400, "O002", "옳지않은 소셜 토큰입니다."),
+    INVALID_SOCIAL_TOKEN(400, "O002", "옳지 않은 소셜 토큰입니다."),
+    EXPIRED_SOCIAL_TOKEN(400, "O003", "만료된 소셜 토큰입니다."),
+    SOCIAL_SERVER_ERROR(400, "O004", "소셜 서버 에러가 났습니다.."),
 
     // Couple 관련 예외
     COUPLE_NOT_FOUND(404, "C001", "커플을 찾을 수 없습니다"),
@@ -70,6 +72,7 @@ public enum ErrorCode {
     CANNOT_CLOSE_EMITTER(400, "S002", "SSE Emitter를 닫을 수 없습니다"),
     // 시스템 예외
     INTERNAL_SERVER_ERROR(500, "S001", "내부 서버 오류가 발생했습니다");
+
 
 
     private final int status;
