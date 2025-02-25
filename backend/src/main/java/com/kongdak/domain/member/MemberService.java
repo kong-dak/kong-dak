@@ -48,7 +48,7 @@ public class MemberService {
     public MemberResponse updateNickname(String email, String nickname) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-
+        member.setNicknameSet(true);
         member.updateNickname(nickname);
 
         // 파트너 정보 조회

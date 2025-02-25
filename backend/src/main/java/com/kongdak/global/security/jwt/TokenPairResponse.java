@@ -8,6 +8,9 @@ public record TokenPairResponse(
         @Schema(description = "Access 토큰", example = "eyJhbGciOiJIUzI1NiIs...")
         String accessToken,
         @Schema(description = "리프레시 토큰", example = "eyJhbGciOiJIUzI1NiIs...")
-        String refreshToken
+        String refreshToken,
+
+        @Schema(description = "닉네임 변경 여부", example = "true")
+        boolean isNicknameSet
 ) {
 }
