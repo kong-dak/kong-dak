@@ -17,6 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,18 +32,20 @@ public class SimpleJwtTokenProvider {
     @Getter
     private final long refreshTokenValidityInMilliseconds;
 
+
     public SimpleJwtTokenProvider(
             @Value("${spring.jwt.secret}") String secretKey,
             @Value("${spring.jwt.access-token-validity}") long accessTokenValidityInSeconds,
             @Value("${spring.jwt.refresh-token-validity}") long refreshTokenValidityInSeconds) {
-        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityInMilliseconds = accessTokenValidityInSeconds * 1000;
         this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
     }
 
     public TokenPairResponse createTokenPair(Member member) {
         String accessToken = createAccessToken(member);
-        String refreshToken = createRefreshToken(member.getEmail());
+        String refreshToken = createRefreshToken(member.getEmail(), member.getId());
 
         return new TokenPairResponse(accessToken, refreshToken);
     }
@@ -53,6 +56,7 @@ public class SimpleJwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject(member.getEmail())
+                .claim("id", member.getId())
                 .claim("auth", "ROLE_USER")
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -60,12 +64,13 @@ public class SimpleJwtTokenProvider {
                 .compact();
     }
 
-    private String createRefreshToken(String email) {
+    private String createRefreshToken(String email, Long id) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
 
         return Jwts.builder()
                 .setSubject(email)
+                .claim("id", id)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -134,15 +139,18 @@ public class SimpleJwtTokenProvider {
         // Refresh Token에서 사용자 정보(email) 추출
         Claims claims = parseClaims(oldRefreshToken);
         String email = claims.getSubject();
+        Long id = Long.parseLong(claims.get("id").toString());  // id 추출
 
         // 3. 새로운 토큰 쌍 생성
         Date now = new Date();
         Date accessTokenValidity = new Date(now.getTime() + accessTokenValidityInMilliseconds);
         Date refreshTokenValidity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
 
+
         // 새로운 Access Token 생성
         String newAccessToken = Jwts.builder()
                 .setSubject(email)
+                .claim("id", id)
                 .claim("auth", "ROLE_USER")
                 .setIssuedAt(now)
                 .setExpiration(accessTokenValidity)
@@ -152,6 +160,7 @@ public class SimpleJwtTokenProvider {
         // 새로운 Refresh Token 생성
         String newRefreshToken = Jwts.builder()
                 .setSubject(email)
+                .claim("id", id)
                 .setIssuedAt(now)
                 .setExpiration(refreshTokenValidity)
                 .signWith(key, SignatureAlgorithm.HS256)
