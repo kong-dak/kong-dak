@@ -19,7 +19,7 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+//    private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -27,36 +27,36 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        String provider = oAuth2User.getProvider();
-        String email = oAuth2User.getEmail();
-        // Access Token & Refresh Token 생성
-        String accessToken = jwtTokenProvider.createToken(oAuth2User);
-        String refreshToken = jwtTokenProvider.createRefreshToken(oAuth2User);
-
-        refreshTokenRepository.save(email, refreshToken,
-                jwtTokenProvider.getRefreshTokenValidityInMilliseconds());
-
-        // BaseResponse 형식으로 응답 생성
-        BaseResponse<TokenResponse> baseResponse = BaseResponse.ok(
-                TokenResponse.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .provider(provider)
-                        .build()
-        );
-        // Response 설정
-        response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-
-        // TokenResponse DTO 생성 및 JSON 응답
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .provider(provider)
-                .build();
-        response.getWriter().write(objectMapper.writeValueAsString(baseResponse));
-
-        log.info("OAuth2 Login Success: {}", String.valueOf(email));
+//        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+//        String provider = oAuth2User.getProvider();
+//        String email = oAuth2User.getEmail();
+//        // Access Token & Refresh Token 생성
+//        String accessToken = jwtTokenProvider.createToken(oAuth2User);
+//        String refreshToken = jwtTokenProvider.createRefreshToken(oAuth2User);
+//
+//        refreshTokenRepository.save(email, refreshToken,
+//                jwtTokenProvider.getRefreshTokenValidityInMilliseconds());
+//
+//        // BaseResponse 형식으로 응답 생성
+//        BaseResponse<TokenResponse> baseResponse = BaseResponse.ok(
+//                TokenResponse.builder()
+//                        .accessToken(accessToken)
+//                        .refreshToken(refreshToken)
+//                        .provider(provider)
+//                        .build()
+//        );
+//        // Response 설정
+//        response.setContentType("application/json;charset=UTF-8");
+//        response.setStatus(HttpServletResponse.SC_OK);
+//
+//        // TokenResponse DTO 생성 및 JSON 응답
+//        TokenResponse tokenResponse = TokenResponse.builder()
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .provider(provider)
+//                .build();
+//        response.getWriter().write(objectMapper.writeValueAsString(baseResponse));
+//
+//        log.info("OAuth2 Login Success: {}", String.valueOf(email));
     }
 }
