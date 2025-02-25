@@ -11,22 +11,40 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import jsonData from "../../../assets/dummydata/diarylist.json";
 import { DiaryItemProps } from "@/assets/types/type";
+import { getDiaryList } from "@/assets/apis/diary";
 
-export default function DiaryScreen() {
-  const [diaryYear, setDiaryYear] = useState<number>(2025);
-  const [diaryMonth, setDiaryMonth] = useState<number>(1);
+export default function getDiaryScreen() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const [diaryYear, setDiaryYear] = useState<number>(year);
+  const [diaryMonth, setDiaryMonth] = useState<number>(month);
 
   const [diaryItemList, setDiaryItemList] = useState<DiaryItemProps[]>([]);
+
+  const getDiarys = async () => {
+    const diaryClone = diaryMonth.toString().padStart(2, "0");
+    await getDiaryList(diaryYear + "-" + diaryClone).then((res) => {
+      console.log(res.data.data.diaries);
+      if (res.data.data.diaries) {
+        setDiaryItemList(res.data.data.diaries);
+      } else {
+        setDiaryItemList([]);
+      }
+    });
+  };
+
   useEffect(() => {
-    if (diaryYear === 2025 && diaryMonth === 1) {
-      setDiaryItemList(jsonData.data);
-    } else {
-      setDiaryItemList([]);
-    }
+    getDiarys();
   }, [diaryYear, diaryMonth]);
+
+  useEffect(() => {
+    getDiarys();
+  }, []);
 
   const changeMonth = (type: "plus" | "minus") => {
     if (type === "plus") {
@@ -101,7 +119,22 @@ export default function DiaryScreen() {
       <View className="w-full flex flex-row items-center justify-center flex-wrap mt-8">
         {diaryItemList.map((item, index) => {
           return (
-            <View key={index} className="w-[34%] m-4">
+            <Pressable
+              key={index}
+              className="w-[34%] m-4"
+              onPress={() => {
+                router.push({
+                  pathname: `/write/edit`,
+                  params: {
+                    diaryId: item?.diaryId,
+                    datetime: item?.datetime,
+                    content: item?.content,
+                    weather: item?.weather,
+                    photos: item?.photos,
+                  },
+                });
+              }}
+            >
               <DiaryItem
                 diaryId={item.diaryId}
                 datetime={item.datetime}
@@ -109,7 +142,7 @@ export default function DiaryScreen() {
                 weather={item.weather}
                 photos={item.photos}
               />
-            </View>
+            </Pressable>
           );
         })}
         <View className="w-[34%] m-4"></View>
@@ -118,7 +151,12 @@ export default function DiaryScreen() {
       <TouchableOpacity
         className=" absolute right-4 bottom-4 p-3 rounded-full flex items-center justify-center"
         style={{ backgroundColor: Colors.main }}
-        onPress={() => router.push("/write")}
+        onPress={() =>
+          router.push({
+            pathname: "/write",
+            params: { year: diaryYear, month: diaryMonth, type: "POST" },
+          })
+        }
       >
         <MaterialCommunityIcons
           name="pencil-plus-outline"

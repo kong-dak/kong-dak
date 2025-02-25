@@ -25,8 +25,14 @@ export default function localAxios() {
       }
 
       // AsyncStorage 설정
-      await AsyncStorage.setItem("accessToken", "");
-      await AsyncStorage.setItem("refreshToken", "");
+      // await AsyncStorage.setItem(
+      //   "accessToken",
+      //   ""
+      // );
+      // await AsyncStorage.setItem(
+      //   "refreshToken",
+      //   ""
+      // );
 
       // 토큰 가져오기
       const token = await AsyncStorage.getItem("accessToken");
@@ -80,16 +86,16 @@ export default function localAxios() {
 
           // 실패했던 요청 재시도
           return instance(originalRequest);
-        } catch (refreshError) {
+        } catch (error) {
           // refreshToken으로도 인증에 실패한 경우
-          console.log("토큰 갱신 실패:", refreshError);
+          console.log("토큰 갱신 실패:", error);
 
           // 로그인 페이지로 리다이렉트하거나 에러 처리
           await AsyncStorage.clear();
 
-          router.navigate("/");
+          router.navigate("/login");
           // 에러를 다시 던져서 호출한 컴포넌트에서 처리할 수 있도록 함
-          return Promise.reject(refreshError);
+          return Promise.reject(error);
         }
       }
 

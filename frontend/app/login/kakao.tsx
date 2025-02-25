@@ -15,6 +15,8 @@ import {
   shippingAddresses as getKakaoShippingAddresses,
   unlink,
 } from "@react-native-seoul/kakao-login";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getLoginToken } from "@/assets/apis/auth";
 
 const App = () => {
   const [result, setResult] = useState<string>("");
@@ -23,7 +25,30 @@ const App = () => {
     try {
       const token = await login();
       setResult(JSON.stringify(token));
-      console.log("login success ", token);
+      console.log("login success ", token.accessToken);
+
+      const { accessToken, refreshToken } = await getLoginToken(
+        "kakao",
+        token.accessToken
+      ).then((res) => {
+        const accessToken: string = res.data.data.accessToken;
+        const refreshToken: string = res.data.data.refreshToken;
+        console.log("accessToken: " + accessToken);
+        console.log("refreshToken: " + refreshToken);
+        return {
+          accessToken,
+          refreshToken,
+        };
+      });
+      await AsyncStorage.setItem("accessToken", accessToken);
+      await AsyncStorage.setItem("refreshToken", refreshToken);
+      await AsyncStorage.setItem("isLogin", "true");
+      if (
+        (await AsyncStorage.getItem("accessToken")) &&
+        (await AsyncStorage.getItem("refreshToken"))
+      ) {
+        router.navigate("/login/setnick");
+      }
     } catch (err) {
       console.error("login err", err);
     }

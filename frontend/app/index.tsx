@@ -27,9 +27,10 @@ export default function App() {
 
         // 로그인 상태 체크
         const isLogin = await AsyncStorage.getItem("isLogin");
-        if (isLogin !== null) {
+        if (isLogin === "true") {
           router.navigate("/(tabs)");
         } else {
+          // router.navigate("/(tabs)/calendar");
           router.navigate("/login");
         }
       } catch (error) {
