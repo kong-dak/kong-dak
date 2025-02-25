@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,7 +32,7 @@ public class SocialLoginService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final  String KAKAO_USER_INFO_ULI = "https://kapi.kakao.com/v2/user/me";
+    private static final  String KAKAO_USER_INFO_URI = "https://kapi.kakao.com/v2/user/me";
 
     public TokenPairResponse socialLogin(String accessToken, String provider) {
         // 카카오 엑세스 토큰으로 사용자 정보 조회
@@ -68,21 +69,49 @@ public class SocialLoginService {
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
         try {
+            log.info("카카오 user info 요청 with access token: {}", accessToken);
             ResponseEntity<KakaoUserInfo> response = restTemplate.exchange(
-                    KAKAO_USER_INFO_ULI,
+                    KAKAO_USER_INFO_URI,
                     HttpMethod.GET,
                     entity,
                     KakaoUserInfo.class
             );
 
+            log.info("Kakao API 요청 성공");
             KakaoUserInfo userInfo = response.getBody();
-            if (userInfo == null || userInfo.kakaoAccount() == null || userInfo.kakaoAccount().email() == null) {
+            if (userInfo == null) {
+                log.error("Kakao API - null response body");
                 throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
             }
 
+            if (userInfo.kakaoAccount() == null) {
+                log.error("Kakao user info에 kakao account detail 없음: {}", userInfo);
+                throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
+            }
+
+            if (userInfo.kakaoAccount().email() == null) {
+                log.error("Kakao account email 정보 없음: {}", userInfo.kakaoAccount());
+                throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
+            }
+
+            log.info("Successfully validated Kakao token and retrieved email for user");
             return userInfo.kakaoAccount().email();
-        } catch (RestClientException e) {
+        } catch (HttpClientErrorException.Unauthorized e) {
+            log.error("Unauthorized: Kakao token validation failed: {}", e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("expired")) {
+                throw new BusinessException(ErrorCode.EXPIRED_SOCIAL_TOKEN);
+            }
             throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
+        } catch (HttpClientErrorException e) {
+            log.error("HTTP error during Kakao token validation: Status: {}, Response: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BusinessException(ErrorCode.INVALID_SOCIAL_TOKEN);
+        } catch (RestClientException e) {
+            log.error("Error during Kakao token validation: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SOCIAL_SERVER_ERROR);
+        } catch (Exception e) {
+            log.error("Unexpected error during Kakao token validation: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
