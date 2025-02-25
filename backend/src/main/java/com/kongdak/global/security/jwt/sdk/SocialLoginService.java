@@ -72,7 +72,7 @@ public class SocialLoginService {
             log.info("카카오 user info 요청 with access token: {}", accessToken);
             ResponseEntity<KakaoUserInfo> response = restTemplate.exchange(
                     KAKAO_USER_INFO_URI,
-                    HttpMethod.GET,
+                    HttpMethod.POST,
                     entity,
                     KakaoUserInfo.class
             );
