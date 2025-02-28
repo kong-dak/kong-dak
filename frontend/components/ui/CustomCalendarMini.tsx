@@ -1,3 +1,4 @@
+import { CalendarDetail } from "@/assets/types/calendar/calendarModels";
 import {
   CalenderType,
   DayProps,
@@ -6,25 +7,31 @@ import {
 } from "@/assets/types/type";
 import { Colors } from "@/constants/Colors";
 import { Feather } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { View, Text, ViewStyle, TextStyle, Pressable } from "react-native";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 
 interface CustomCalendarMiniProps {
-  currentDay: string;
+  startingDay: string;
+  endingDay: string;
+  setStart: React.Dispatch<React.SetStateAction<string>>;
+  setEnd: React.Dispatch<React.SetStateAction<string>>;
   isCalendarStart: boolean;
   isCalendarEnd: boolean;
 }
 
 export default function CustomCalendarMini({
-  currentDay,
+  startingDay,
+  endingDay,
+  setStart,
+  setEnd,
   isCalendarStart,
   isCalendarEnd,
 }: CustomCalendarMiniProps) {
   const [checkDate, setCheckDate] = useState<string>("");
-  const [startDay, setStartDay] = useState<string>(currentDay);
-  const [endDay, setEndDay] = useState<string>(currentDay);
-  const [selectedDay, setSelectedDay] = useState<string>(currentDay);
+  const [startDay, setStartDay] = useState<string>(startingDay);
+  const [endDay, setEndDay] = useState<string>(endingDay);
+  const [selectedDay, setSelectedDay] = useState<string>(startingDay);
 
   // 기본 마커 스타일을 객체로 정의
   const scheduleStyle = {
@@ -48,13 +55,10 @@ export default function CustomCalendarMini({
     },
   };
 
-  const [markedDates, setMarkedDates] = useState<MarkedDatesType>({
-    "2025-01-08": { ...scheduleStyle },
-  });
+  const [markedDates, setMarkedDates] = useState<MarkedDatesType>({});
 
   useEffect(() => {
-    console.log(currentDay);
-    setMarkedDates({ currentDay: { ...scheduleStyle } });
+    addCalendarDay(startingDay, endingDay, "");
   }, []);
   useEffect(() => {
     console.log(markedDates);
@@ -133,9 +137,11 @@ export default function CustomCalendarMini({
     //startDay조정
     if (startDay > changeDate(startDate)) {
       setStartDay(changeDate(startDate));
+      setStart(changeDate(startDate));
     }
     if (endDay < changeDate(endDate)) {
       setEndDay(changeDate(endDate));
+      setEnd(changeDate(endDate));
     }
 
     setMarkedDates((prev) => ({
@@ -168,15 +174,19 @@ export default function CustomCalendarMini({
       if (type === "start") {
         const setupDay = changeDate(endDate);
         setStartDay(setupDay);
+        setStart(setupDay);
         if (endDay < changeDate(endDate)) {
           setEndDay(changeDate(endDate));
+          setEnd(changeDate(endDate));
         }
         updatedDates[setupDay] = { ...scheduleStyle };
       } else {
         const setupDay = changeDate(startDate);
         setEndDay(setupDay);
+        setEnd(setupDay);
         if (startDay > changeDate(startDate)) {
           setStartDay(changeDate(startDate));
+          setStart(changeDate(startDate));
         }
         updatedDates[setupDay] = { ...scheduleStyle };
       }

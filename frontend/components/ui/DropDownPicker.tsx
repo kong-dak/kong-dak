@@ -15,11 +15,16 @@ export function ImagePicker(props: ImagePickerType) {
     props.type === "WEATHER"
       ? [
           { label: "☀", value: "SUNNY" },
-          { label: "☁", value: "CLOUD" },
+          { label: "☁", value: "CLOUDY" },
+          { label: "🌧", value: "RAINY" },
+          { label: "🌨", value: "SNOWY" },
         ]
       : [
           { label: "😀", value: "HAPPY" },
           { label: "😂", value: "SAD" },
+          { label: "😤", value: "ANGRY" },
+          { label: "😆", value: "EXCITED" },
+          { label: "😖", value: "NERVOUS" },
         ];
   const [items, setItems] = useState(item);
 

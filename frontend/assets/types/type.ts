@@ -57,9 +57,9 @@ export interface MarkedDatesType {
 }
 export interface DiaryItemProps {
   content: string;
-  datetime: string;
+  diaryDate: string;
   diaryId: number;
-  photos: string;
+  thumbnailUrl: string;
   weather: string;
 }
 

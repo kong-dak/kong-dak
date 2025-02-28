@@ -11,18 +11,27 @@ import {
   Image,
   ScrollView,
   Pressable,
+  Alert,
 } from "react-native";
 
 export default function DiaryEditScreen() {
-  const { diaryId, datetime, content, weather, photos } =
+  const { diaryId, diaryDate, content, weather, photos } =
     useLocalSearchParams();
   // const url = require("../../assets/images/diary-write-sample.png");
   // const [imageUri, setImageUri] = useState(url); // 다이어리 이미지 url
 
   const onClickDeleteDiary = async () => {
-    await deleteDiary(Number(diaryId)).then((res) => {
-      console.log(res.data.data);
-    });
+    try {
+      await deleteDiary(Number(diaryId)).then((res) => {
+        console.log("삭제했습니다.", res.data);
+        Alert.alert("알림", "다이어리가 삭제되었습니다.", [{ text: "확인" }]);
+        router.navigate("/(tabs)/diary");
+      });
+    } catch {
+      console.error("delete 에러가 발생하였습니다");
+      Alert.alert("알림", "오류가 발생하였습니다.", [{ text: "확인" }]);
+      router.navigate("/(tabs)");
+    }
   };
   return (
     <View style={styles.container}>
@@ -41,8 +50,10 @@ export default function DiaryEditScreen() {
             />
           </TouchableOpacity>
 
-          <AppText className="text-xl">{datetime}</AppText>
-          {weather}
+          <View>
+            <AppText className="text-xl">{diaryDate}</AppText>
+          </View>
+          <AppText>{weather}</AppText>
           <AntDesign
             className="mx-1"
             name="smileo"

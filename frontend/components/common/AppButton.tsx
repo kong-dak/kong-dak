@@ -38,6 +38,10 @@ export function AppButton({
     btnColor = Colors.sublight;
     btnOutline = Colors.sublight;
     btnText = Colors.white;
+  } else if (type === "red") {
+    btnColor = Colors.red1;
+    btnOutline = Colors.red1;
+    btnText = Colors.white;
   } else {
     btnColor = Colors.main;
     btnOutline = Colors.main;

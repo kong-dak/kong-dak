@@ -5,6 +5,19 @@ export interface CalendarType {
   checkDate: string;
   setCheckDate: React.Dispatch<React.SetStateAction<string>>;
 }
+
+// [ 개인 일정, 공유 일정, 나만 보기 ]
+export type CategoryEnum = "PERSONAL" | "SHARED" | "PRIVATE";
+
+export interface CalendarDetail {
+  title: string;
+  startTime: string;
+  endTime: string;
+  description: string;
+  category: CategoryEnum;
+  emoji: string;
+}
+
 export interface SchedulePeriod {
   scheduleId: number;
   startTime: string;
@@ -14,11 +27,14 @@ export interface SchedulePeriod {
   idx: number;
 }
 export interface MarkedProps {
-  startingDay: string;
-  endingDay: string;
+  scheduleId: number;
+  startTime: string;
+  endTime: string;
   color: string;
   title: string;
   idx: number;
+  myLatitude: number;
+  myLongitude: number;
 }
 export interface MarkedDateProps {
   periods: MarkedProps[];
