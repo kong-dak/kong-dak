@@ -8,14 +8,25 @@ import { getWeekday } from "@/assets/utils/getWeekday";
 
 export default function DiaryItem(props: DiaryItemProps) {
   const content = props.content;
-  const date = props.datetime.split("-");
+  const date = props.diaryDate.split("-");
   const month = date[1];
   const day = date[2];
-  const dayText = getWeekday(props.datetime, "en");
+  const dayText = getWeekday(props.diaryDate, "en");
   return (
     <Pressable
       className="relative w-full h-56 bg-white border p-3 rounded-xl border-gray-300"
-      onPress={() => router.push("/write/edit")}
+      onPress={() =>
+        router.push({
+          pathname: `/write/edit`,
+          params: {
+            diaryId: props.diaryId,
+            diaryDate: props.diaryDate,
+            content: props.content,
+            weather: props.weather,
+            thumbnailUrl: props.thumbnailUrl,
+          },
+        })
+      }
     >
       <ImageBackground
         source={require("../../assets/images/diary-list-sample.png")}

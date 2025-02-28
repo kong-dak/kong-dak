@@ -119,30 +119,15 @@ export default function getDiaryScreen() {
       <View className="w-full flex flex-row items-center justify-center flex-wrap mt-8">
         {diaryItemList.map((item, index) => {
           return (
-            <Pressable
-              key={index}
-              className="w-[34%] m-4"
-              onPress={() => {
-                router.push({
-                  pathname: `/write/edit`,
-                  params: {
-                    diaryId: item?.diaryId,
-                    datetime: item?.datetime,
-                    content: item?.content,
-                    weather: item?.weather,
-                    photos: item?.photos,
-                  },
-                });
-              }}
-            >
+            <View key={index} className="w-[34%] m-4">
               <DiaryItem
                 diaryId={item.diaryId}
-                datetime={item.datetime}
+                diaryDate={item.diaryDate}
                 content={item.content}
                 weather={item.weather}
-                photos={item.photos}
+                thumbnailUrl={item.thumbnailUrl}
               />
-            </Pressable>
+            </View>
           );
         })}
         <View className="w-[34%] m-4"></View>

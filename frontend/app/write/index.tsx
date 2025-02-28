@@ -15,6 +15,7 @@ import {
   Image,
   Modal,
   Pressable,
+  Alert,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { launchImageLibrary } from "react-native-image-picker";
@@ -25,11 +26,17 @@ export default function DiaryWriteScreen() {
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
-  const day = today.getDay() + 1;
+  const day = today.getDate();
+
+  console.log(today, day);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<string>(""); //갤러리 이미지
   const [selectedDay, setSelectedDay] = useState<string>(
-    year + "-" + month + "-" + day
+    year +
+      "-" +
+      month.toString().padStart(2, "0") +
+      "-" +
+      day.toString().padStart(2, "0")
   );
   const [selectedDayText, setSelectedDayText] = useState<string>(
     year +
@@ -45,20 +52,42 @@ export default function DiaryWriteScreen() {
     weather: "SUNNY",
     diaryDate: selectedDay,
     photoUrls: [imageFile],
-    decorations: null,
+    decorations: [],
   });
+  useEffect(() => {
+    setDiaryDetail((prev) => ({
+      ...prev,
+      diaryDate: selectedDay,
+    }));
+  }, [selectedDay]);
 
   const writeDiary = async () => {
     console.log(diaryDetail);
+    if (diaryDetail.content.length > 1000) {
+      Alert.alert(
+        "알림",
+        "1000자를 초과하였습니다. 글자 수를 다시 맞춰주시길 바랍니다.",
+        [{ text: "확인" }]
+      );
+      return;
+    }
     if (props.type === "POST") {
       await postDiary(diaryDetail).then((res) => {
         console.log("보냈습니다", res);
-        const response = res.data.data;
+        router.push("/(tabs)/diary");
       });
     } else if (props.type === "EDIT") {
       await editDiary(Number(props.diaryId), diaryDetail).then((res) => {
-        const response = res.data.data;
+        console.log("수정했습니다", res);
+        router.push("/(tabs)/diary");
       });
+    } else {
+      Alert.alert(
+        "알림",
+        "오류가 발생하였습니다. 다시 시도해주시길 바랍니다.",
+        [{ text: "확인" }]
+      );
+      router.push("/(tabs)/diary");
     }
   };
 
@@ -135,7 +164,7 @@ export default function DiaryWriteScreen() {
         <Pressable
           onPress={() => {
             writeDiary();
-            router.push("/(tabs)/diary");
+            // router.push("/(tabs)/diary");
           }}
         >
           <AppText className="text-base">작성</AppText>
@@ -182,25 +211,41 @@ export default function DiaryWriteScreen() {
           <AppText className="text-base">{selectedDayText}</AppText>
         </Pressable>
       </View>
-      <View className="h-[85%]">
+      <View className="w-full h-[85%]">
         {/* 일기 작성 */}
         <View
-          className={`${imageFile ? "h-[70%]" : "h-full"} flex justify-between`}
+          className={`${
+            imageFile ? "h-[70%]" : "h-full"
+          } flex justify-between w-[90%]`}
         >
           <TextInput
-            className="text-start"
-            style={[styles.TextInput, { color: Colors.main, outline: "none" }]}
+            className="text-start text-wrap"
+            style={[
+              styles.TextInput,
+              {
+                color: Colors.main,
+                outline: "none",
+                flex: 1,
+                flexWrap: "wrap",
+                textAlignVertical: "top",
+              },
+            ]}
             placeholder="일기를 작성해주세요."
             placeholderTextColor={Colors.gray}
             value={diaryDetail.content}
             onChangeText={(e) => {
               onChangeText(e);
             }}
+            multiline={true}
           />
           <View className=" flex justify-end items-end">
             <AppText
               className=" text-center my-2"
-              style={{ color: Colors.gray }}
+              style={
+                diaryDetail.content.length < 1000
+                  ? { color: Colors.gray }
+                  : { color: Colors.red1 }
+              }
             >
               {diaryDetail.content.length} / 1000자
             </AppText>

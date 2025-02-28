@@ -8,13 +8,42 @@ import { Colors } from "@/constants/Colors";
 import { AntDesign, Fontisto } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, StyleSheet, TextInput, Switch, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Switch,
+  Pressable,
+  Alert,
+} from "react-native";
 import { SearchResponse } from "@/assets/types/map/mapModels";
 import { useSearch } from "@/hooks/useSearch";
 import PlaceInfo from "@/components/ui/PlaceInfo";
+import {
+  CalendarDetail,
+  CategoryEnum,
+  SchedulePeriod,
+} from "@/assets/types/calendar/calendarModels";
+import { getTodayDates } from "@/assets/utils/calendar";
+import {
+  createSchedule,
+  deleteSchedule,
+  modifySchedule,
+} from "@/assets/apis/calendars";
 
 export default function CalenderregistScreen() {
   const url = require("../../assets/images/diary-write-sample.png");
+  const today = getTodayDates();
+  const initialDay =
+    today.year +
+    "-" +
+    today.month.toString().padStart(2, "0") +
+    "-" +
+    today.day.toString().padStart(2, "0");
+  const initialTime =
+    today.hour.toString().padStart(2, "0") +
+    ":" +
+    today.minute.toString().padStart(2, "0");
   const [scheduleTogether, setScheduleTogether] = useState<boolean>(false);
   const [showOnly, setShowOnly] = useState<boolean>(false);
   const [isCalendarStart, setIsCalendarStart] = useState<boolean>(false);
@@ -27,18 +56,68 @@ export default function CalenderregistScreen() {
   >([]);
   const { handleSearch } = useSearch(searchResults, setSearchResults);
   const params = useLocalSearchParams();
-  const { title, color, startingDay, endingDay, idx, myLatitude, myLongitude } =
-    params;
+  const {
+    scheduleId,
+    title,
+    color,
+    startTime,
+    endTime,
+    idx,
+    myLatitude,
+    myLongitude,
+    category,
+    type,
+  } = params;
   const [currentLatitude, setCurrentLatitude] = useState<number>(
-    Number(params.myLatitude)
+    Number(myLatitude)
   );
   const [currentLongitude, setCurrentLongitude] = useState<number>(
-    Number(params.myLongitude)
+    Number(myLongitude)
   );
+  const [editScheduleId, setEditScheduleId] = useState<number>(
+    Number(scheduleId)
+  );
+
+  const [calendarDetail, setCalendarDetail] = useState<CalendarDetail>({
+    title: "",
+    startTime: startTime + "T" + initialTime,
+    endTime: endTime + "T" + initialTime,
+    description: "",
+    category: "PERSONAL",
+    emoji: "",
+  });
+
+  const [calendarStartDay, setCalendarStartDay] = useState<string>(
+    startTime + ""
+  );
+  const [calendarStartTime, setCalendarStartTime] =
+    useState<string>(initialTime);
+  const [calendarEndDay, setCalendarEndDay] = useState<string>(endTime + "");
+  const [calendarEndTime, setCalendarEndTime] = useState<string>(initialTime);
 
   const [selectedPlace, setSelectedPlace] = useState<
     SearchResponse["data"]["documents"][0] | null
   >(null);
+
+  useEffect(() => {
+    if (params.type === "EDIT") {
+      setCalendarDetail({
+        title: title as string,
+        startTime: startTime as string,
+        endTime: endTime as string,
+        description: "",
+        category: category as CategoryEnum,
+        emoji: "",
+      });
+
+      const startString = startTime as string;
+      setCalendarStartDay(startString.split("T")[0]);
+      setCalendarStartTime(startString.split("T")[1]);
+      const endString = endTime as string;
+      setCalendarEndDay(endString.split("T")[0]);
+      setCalendarEndTime(endString.split("T")[1]);
+    }
+  }, []);
 
   useEffect(() => {
     if (searchQuery) {
@@ -54,9 +133,93 @@ export default function CalenderregistScreen() {
     console.log("검색 결과:", searchResults);
   }, [searchResults]);
 
+  useEffect(() => {
+    if (scheduleTogether) {
+      setCalendarDetail((prev) => ({ ...prev, category: "SHARED" }));
+    } else if (!scheduleTogether && showOnly) {
+      setCalendarDetail((prev) => ({ ...prev, category: "PRIVATE" }));
+    } else if (!scheduleTogether && !showOnly) {
+      setCalendarDetail((prev) => ({ ...prev, category: "PERSONAL" }));
+    }
+  }, [scheduleTogether, showOnly]);
+
+  useEffect(() => {
+    setCalendarDetail((prev) => ({
+      ...prev,
+      startTime: calendarStartDay + "T" + calendarStartTime,
+    }));
+  }, [calendarStartDay, calendarStartTime]);
+  useEffect(() => {
+    setCalendarDetail((prev) => ({
+      ...prev,
+      endTime: calendarEndDay + "T" + calendarEndTime,
+    }));
+  }, [calendarEndDay, calendarEndTime]);
+
   const handleCameraIdle = (latitude: number, longitude: number) => {
     setCurrentLatitude(latitude);
     setCurrentLongitude(longitude);
+  };
+
+  const onChangeTitle = (e: string) => {
+    if (e.length > 20) {
+      Alert.alert("알림", "20글자 이하로 작성해주시길 바랍니다", [
+        { text: "확인" },
+      ]);
+    } else {
+      setCalendarDetail((prev) => ({ ...prev, title: e }));
+    }
+  };
+
+  const writeCalendar = async () => {
+    console.log(calendarDetail);
+    if (calendarDetail) {
+      if (params.type === "POST") {
+        await createSchedule(calendarDetail).then((res) => {
+          console.log("생성합니다.", res.data);
+          router.navigate("/(tabs)/calendar");
+        });
+      } else if (params.type === "EDIT") {
+        console.log(editScheduleId);
+        await modifySchedule(editScheduleId, calendarDetail).then((res) => {
+          console.log("수정합니다.", res.data);
+          router.navigate("/(tabs)/calendar");
+        });
+      } else {
+        Alert.alert("알림", "죄송합니다. 오류가 발생하였습니다", [
+          { text: "확인" },
+        ]);
+        router.navigate("/(tabs)");
+      }
+    }
+  };
+  const deleteCalendar = async () => {
+    if (calendarDetail) {
+      if (params.type === "EDIT") {
+        console.log(editScheduleId);
+        await deleteSchedule(editScheduleId).then((res) => {
+          console.log("삭제되었습니다.", res.data);
+          router.navigate("/(tabs)/calendar");
+        });
+      } else {
+        Alert.alert("알림", "죄송합니다. 오류가 발생하였습니다", [
+          { text: "확인" },
+        ]);
+        router.navigate("/(tabs)");
+      }
+    }
+  };
+
+  const timeFormatting = (time: string) => {
+    return Number(time.split(":")[0]) < 12
+      ? "오전 " + Number(time.split(":")[0]) + "시 " + time.split(":")[1] + "분"
+      : "오후 " +
+          (Number(time.split(":")[0]) === 12
+            ? Number(time.split(":")[0])
+            : Number(time.split(":")[0]) - 12) +
+          "시 " +
+          time.split(":")[1] +
+          "분";
   };
 
   return (
@@ -69,6 +232,10 @@ export default function CalenderregistScreen() {
             style={[styles.TextInput, { color: Colors.black }]}
             placeholder="알림 제목"
             placeholderTextColor={Colors.gray}
+            value={calendarDetail.title}
+            onChangeText={(e) => {
+              onChangeTitle(e);
+            }}
           />
           <AntDesign
             className="w-[10%]"
@@ -127,8 +294,14 @@ export default function CalenderregistScreen() {
                 setIsTimePickerEnd(false);
               }}
             >
-              <AppText className="text-xl" color={Colors.lightgray1}>
-                11월 21일 (목)
+              <AppText
+                className="text-xl py-1 px-1 rounded-md"
+                color={Colors.lightgray1}
+                style={
+                  isCalendarStart ? { backgroundColor: Colors.lightgray2 } : {}
+                }
+              >
+                {calendarStartDay}
               </AppText>
             </Pressable>
 
@@ -140,8 +313,16 @@ export default function CalenderregistScreen() {
                 setIsTimePickerEnd(false);
               }}
             >
-              <AppText className="text-xl" color={Colors.lightgray1}>
-                오전 9시
+              <AppText
+                className="text-xl py-1 px-1 rounded-md"
+                color={Colors.lightgray1}
+                style={
+                  isTimePickerStart
+                    ? { backgroundColor: Colors.lightgray2 }
+                    : {}
+                }
+              >
+                {timeFormatting(calendarStartTime)}
               </AppText>
             </Pressable>
           </View>
@@ -156,8 +337,14 @@ export default function CalenderregistScreen() {
                 setIsTimePickerEnd(false);
               }}
             >
-              <AppText className="text-xl" color={Colors.lightgray1}>
-                11월 21일 (목)
+              <AppText
+                className="text-xl py-1 px-1 rounded-md"
+                color={Colors.lightgray1}
+                style={
+                  isCalendarEnd ? { backgroundColor: Colors.lightgray2 } : {}
+                }
+              >
+                {calendarEndDay}
               </AppText>
             </Pressable>
             <Pressable
@@ -168,8 +355,14 @@ export default function CalenderregistScreen() {
                 setIsTimePickerEnd(!isTimePickerEnd);
               }}
             >
-              <AppText className="text-xl" color={Colors.lightgray1}>
-                오전 9시
+              <AppText
+                className="text-xl py-1 px-1 rounded-md"
+                color={Colors.lightgray1}
+                style={
+                  isTimePickerEnd ? { backgroundColor: Colors.lightgray2 } : {}
+                }
+              >
+                {timeFormatting(calendarEndTime)}
               </AppText>
             </Pressable>
           </View>
@@ -182,9 +375,12 @@ export default function CalenderregistScreen() {
         {/* 캘린더 관련 isCalendarEnd의 값이 !isCalendarStart인 이유는 하나만 true 상태로 놔두기 위해.*/}
         {isCalendarStart || isCalendarEnd ? (
           <CustomCalendarMini
-            currentDay={"2025-01-06"}
+            startingDay={calendarDetail.startTime.split("T")[0]}
+            endingDay={calendarDetail.endTime.split("T")[0]}
             isCalendarStart={isCalendarStart}
             isCalendarEnd={!isCalendarStart}
+            setStart={setCalendarStartDay}
+            setEnd={setCalendarEndDay}
           />
         ) : null}
         {isTimePickerStart || isTimePickerEnd ? (
@@ -193,6 +389,12 @@ export default function CalenderregistScreen() {
             onTimeChange={(time) => {
               console.log(time);
             }}
+            isTimePickerStart={isTimePickerStart}
+            isTimePickerEnd={isTimePickerEnd}
+            startTime={calendarStartTime}
+            endTime={calendarEndTime}
+            setStartTime={setCalendarStartTime}
+            setEndTime={setCalendarEndTime}
           />
         ) : null}
 
@@ -240,14 +442,21 @@ export default function CalenderregistScreen() {
           text="취소하기"
           type="main"
           onPress={() => router.back()}
-          style={{ width: "45%" }}
+          style={type === "EDIT" ? { width: "32%" } : { width: "45%" }}
           outline={true}
         />
         <AppButton
-          text="일정 등록"
+          text="일정등록"
           type="sublight"
-          onPress={() => router.back()}
-          style={{ width: "45%" }}
+          onPress={() => writeCalendar()}
+          style={type === "EDIT" ? { width: "32%" } : { width: "45%" }}
+        />
+        <AppButton
+          text="삭제"
+          type="red"
+          outline={true}
+          onPress={() => deleteCalendar()}
+          style={type === "EDIT" ? { width: "32%" } : { display: "none" }}
         />
       </View>
     </View>

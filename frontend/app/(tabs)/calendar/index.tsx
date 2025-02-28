@@ -37,7 +37,7 @@ export default function CalendarScreen() {
   const [currentDate, setCurrentDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const initialDate = year + "-" + month;
+  const initialDate = year + "-" + month.toString().padStart(2, "0");
   const [checkDate, setCheckDate] = useState<string>("");
   const [showSchedule, setShowSchedule] = useState<MarkedProps[]>([]);
   const [calendarData, setCalendarData] = useState<SchedulePeriod[]>([]);
@@ -56,7 +56,7 @@ export default function CalendarScreen() {
 
   const getMonthlySchedules = async (dateTime: string) => {
     monthlySchedules(dateTime).then((res) => {
-      const data = res.data.data;
+      const data = res.data.data.schedules;
       const newdata: SchedulePeriod[] = [];
       data.map(
         (
@@ -83,21 +83,22 @@ export default function CalendarScreen() {
     });
   };
   useEffect(() => {
-    // getMonthlySchedules(initialDate);
-    const data = dummydata.data;
-    const newdata: SchedulePeriod[] = [];
-    data.map((item, index) => {
-      const calendarProcess: SchedulePeriod = {
-        scheduleId: item.scheduleId,
-        title: item.title,
-        startTime: item.startTime,
-        endTime: item.endTime,
-        idx: 0,
-        color: calendarColor[index % calendarColor.length],
-      };
-      newdata.push(calendarProcess);
-    });
-    setCalendarData(newdata);
+    setIsModalVisible(false);
+    getMonthlySchedules(initialDate);
+    // const data = dummydata.data;
+    // const newdata: SchedulePeriod[] = [];
+    // data.map((item, index) => {
+    //   const calendarProcess: SchedulePeriod = {
+    //     scheduleId: item.scheduleId,
+    //     title: item.title,
+    //     startTime: item.startTime,
+    //     endTime: item.endTime,
+    //     idx: 0,
+    //     color: calendarColor[index % calendarColor.length],
+    //   };
+    //   newdata.push(calendarProcess);
+    // });
+    // setCalendarData(newdata);
 
     const getLocation = async () => {
       const location = await fetchLocation();
@@ -113,8 +114,12 @@ export default function CalendarScreen() {
   useEffect(() => {
     const splitDate = currentDate.split("-");
     console.log(splitDate[0] + "-" + splitDate[1]);
-    // getMonthlySchedules(splitDate[0] + "-" + splitDate[1]);
+    getMonthlySchedules(splitDate[0] + "-" + splitDate[1]);
   }, [currentDate]);
+
+  useEffect(() => {
+    console.log(calendarData);
+  }, [calendarData]);
 
   LocaleConfig.locales["ko"] = {
     monthNames: [
@@ -312,6 +317,7 @@ export default function CalendarScreen() {
             onDayPress={(day: CustomDateData) => {
               setCheckDate(day.dateString);
               setIsModalVisible(true);
+              console.log("찾아봅시다: ", day.schedule?.periods);
               if (day.schedule?.periods) {
                 setShowSchedule(day.schedule?.periods);
               } else {
@@ -344,72 +350,79 @@ export default function CalendarScreen() {
       <View className="w-full h-[100%] bg-slate-200">
         <CalendarView checkDate={checkDate} setCheckDate={setCheckDate} />
       </View>
-      <View style={{ marginTop: 400 }}>
-        {/* Modal */}
-        <Modal animationType="fade" visible={isModalVisible} transparent={true}>
-          <View
-            className="relative h-full w-full flex justify-center items-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+      <Modal animationType="fade" visible={isModalVisible} transparent={true}>
+        <Pressable
+          className="h-full w-full flex justify-center items-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
+          onPress={() => setIsModalVisible(false)}
+        >
+          <Pressable
+            className="w-[80%] h-[60%] bg-white rounded-lg p-4"
+            onPress={(e) => e.stopPropagation()} // 모달 내부 클릭 시 이벤트 버블링 방지
           >
-            <View className="w-[80%] h-[60%] bg-white rounded-lg p-4">
-              <View className="flex flex-row justify-between">
-                <AppText className="text-xl">
-                  {Number(checkDate.split("-")[2])}일 {getDayOfWeek(checkDate)}
-                </AppText>
-                <Pressable
-                  className="right-6"
-                  onPress={() => {
-                    setIsModalVisible(false);
-                  }}
-                >
-                  <AntDesign name="close" size={24} color={Colors.black} />
-                </Pressable>
-              </View>
-              <View className="border-b py-2"></View>
-              <View className="py-4">
-                <AppText>
-                  음력 {Number(checkDate.split("-")[1])}월{" "}
-                  {checkDate.split("-")[2]}일
-                </AppText>
-              </View>
-              <View>
-                {showSchedule.map((item, index) => {
-                  return (
-                    <CalendarDetailList
-                      title={item.title}
-                      color={item.color}
-                      startingDay={item.startingDay}
-                      endingDay={item.endingDay}
-                      idx={item.idx}
-                    />
-                  );
-                })}
-              </View>
-              {/* 여기 일정 컴포넌트 */}
+            <View className="flex flex-row justify-between">
+              <AppText className="text-xl">
+                {Number(checkDate.split("-")[2])}일 {getDayOfWeek(checkDate)}
+              </AppText>
               <Pressable
-                className="absolute bottom-4 right-4 border p-2 rounded-full "
-                style={{
-                  borderColor: Colors.main,
-                  backgroundColor: Colors.main,
-                }}
+                className="right-6"
                 onPress={() => {
                   setIsModalVisible(false);
-                  router.push({
-                    pathname: "/calenderregist",
-                    params: {
-                      myLatitude,
-                      myLongitude,
-                      type: "POST",
-                    },
-                  });
                 }}
               >
-                <AntDesign name="plus" size={24} color={Colors.white} />
+                <AntDesign name="close" size={24} color={Colors.black} />
               </Pressable>
             </View>
-          </View>
-        </Modal>
-      </View>
+            <View className="border-b py-2"></View>
+            <View className="py-4">
+              <AppText>
+                음력 {Number(checkDate.split("-")[1])}월{" "}
+                {checkDate.split("-")[2]}일
+              </AppText>
+            </View>
+            <View>
+              {showSchedule.map((item, index) => {
+                return (
+                  <CalendarDetailList
+                    key={"캘린더 디테일: " + index}
+                    scheduleId={item.scheduleId}
+                    title={item.title}
+                    color={item.color}
+                    startTime={item.startTime}
+                    endTime={item.endTime}
+                    idx={item.idx}
+                    myLatitude={myLatitude}
+                    myLongitude={myLongitude}
+                  />
+                );
+              })}
+            </View>
+            {/* 여기 일정 컴포넌트 */}
+            <Pressable
+              className="absolute bottom-4 right-4 border p-2 rounded-full "
+              style={{
+                borderColor: Colors.main,
+                backgroundColor: Colors.main,
+              }}
+              onPress={() => {
+                setIsModalVisible(false);
+                router.push({
+                  pathname: "/calenderregist",
+                  params: {
+                    myLatitude,
+                    myLongitude,
+                    type: "POST",
+                    startTime: checkDate,
+                    endTime: checkDate,
+                  },
+                });
+              }}
+            >
+              <AntDesign name="plus" size={24} color={Colors.white} />
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
