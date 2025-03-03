@@ -77,7 +77,7 @@ public class BucketListService {
         Couple couple = coupleService.findCoupleByMemberId(memberId);
 
         // 현재 순서 기준으로 모든 버킷리스트 항목 조회
-        List<BucketList> bucketLists = bucketListRepository.findByCoupleIdOrderByOrderNumAsc(couple.getCoupleId());
+        List<BucketList> bucketLists = bucketListRepository.findByCoupleIdOrderByOrderNumAsc(couple.getId());
 
         // 버킷리스트 ID를 인덱스로 매핑 (빠른 조회를 위해)
         Map<Long, BucketList> bucketListMap = bucketLists.stream()

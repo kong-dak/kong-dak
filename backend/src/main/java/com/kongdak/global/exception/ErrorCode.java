@@ -61,6 +61,10 @@ public enum ErrorCode {
     DIARY_BEING_EDITED(400, "D003", "다이어리가 다른 사람에 의해 수정 중입니다."),
     DIARY_ACCESS_DENIED(403, "D004", "다이어리 접근 권한이 없습니다."),
 
+    // BucketList 관련 예외
+    BUCKET_LIST_NOT_FOUND(404, "B001", "버킷리스트를 찾을 수 없습니다."),
+    BUCKET_LIST_ACCESS_DENIED(403, "B002", "버킷리스트에 접근할 수 없습니다."),
+
     // Auth 관련 예외
     INVALID_REFRESH_TOKEN(401, "A001", "유효하지 않은 리프레시 토큰입니다"),
     INVALID_ACCESS_TOKEN(401, "A002", "유효하지 않은 액세스 토큰입니다"),
