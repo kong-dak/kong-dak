@@ -209,4 +209,11 @@ public class CoupleService {
                 () -> new BusinessException(ErrorCode.COUPLE_NOT_FOUND)
         ).getId().equals(coupleId);
     }
+
+    public Couple findCoupleByMemberId(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        return coupleRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COUPLE_NOT_FOUND));
+    }
 }
