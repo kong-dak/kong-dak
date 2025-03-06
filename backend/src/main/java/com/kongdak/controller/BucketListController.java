@@ -38,7 +38,7 @@ public class BucketListController {
         return BaseResponse.created(bucketList);
     }
 
-    @PatchMapping("/bucketlists/{bucketlistId")
+    @PatchMapping("/bucketlists/{bucketlistId}")
     public BaseResponse<BucketListResponseDto> updateBucketList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("bucketlistId") Long bucketListId,
