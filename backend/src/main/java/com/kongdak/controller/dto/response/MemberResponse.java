@@ -37,7 +37,7 @@ public record MemberResponse(
         return new MemberResponse(
             member.getId(),
                 member.getNickname(),
-                partner.getNickname(),
+                partner != null ? partner.getNickname() : null,
                 member.getEmail(),
                 member.getOauthProvider(),
                 member.getCreatedAt(),
