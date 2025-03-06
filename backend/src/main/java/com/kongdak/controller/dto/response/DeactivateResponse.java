@@ -11,8 +11,5 @@ public record DeactivateResponse(
         String email,
 
         @Schema(description = "탈퇴 처리 시간", example = "2024-01-19T18:30:00")
-        LocalDateTime deactivatedAt,
-
-        @Schema(description = "처리 상태 메시지", example = "회원 탈퇴가 완료되었습니다.")
-        String message
+        LocalDateTime deactivatedAt
 ) {}

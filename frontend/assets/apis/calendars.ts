@@ -1,3 +1,4 @@
+import { CalendarDetail } from "../types/calendar/calendarModels";
 import localAxios from "../utils/http-common";
 
 const local = localAxios();
@@ -27,21 +28,23 @@ export async function scheduleDetail(calendarId: number, scheduleId: number) {
   );
 }
 
-/**일정 추가 */
-export async function createSchedule(calendarId: number) {
-  return await local.post(`/api/calendars/${calendarId}/schedules`);
+/**일정 생성 */
+export async function createSchedule(calendarDetail: CalendarDetail) {
+  return await local.post(`/api/calendars/schedules`, calendarDetail);
 }
 
 /**일정 수정 */
-export async function modifySchedule(calendarId: number, scheduleId: number) {
+export async function modifySchedule(
+  scheduleId: number,
+  calendarDetail: CalendarDetail
+) {
   return await local.patch(
-    `/api/calendars/${calendarId}/schedules/${scheduleId}`
+    `/api/calendars/schedules/${scheduleId}`,
+    calendarDetail
   );
 }
 
 /**일정 삭제 */
-export async function deleteSchedule(calendarId: number, scheduleId: number) {
-  return await local.delete(
-    `/api/calendars/${calendarId}/schedules/${scheduleId}`
-  );
+export async function deleteSchedule(scheduleId: number) {
+  return await local.delete(`/api/calendars/schedules/${scheduleId}`);
 }

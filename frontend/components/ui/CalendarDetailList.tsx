@@ -7,9 +7,12 @@ import { router } from "expo-router";
 export default function CalendarDetailList({
   title,
   color,
-  startingDay,
-  endingDay,
+  startTime,
+  endTime,
   idx,
+  scheduleId,
+  myLatitude,
+  myLongitude,
 }: MarkedProps) {
   return (
     <Pressable
@@ -17,12 +20,15 @@ export default function CalendarDetailList({
         router.push({
           pathname: "/calenderregist",
           params: {
+            scheduleId,
             title,
             color,
-            startingDay,
-            endingDay,
+            startTime,
+            endTime,
             idx,
             type: "EDIT",
+            myLatitude,
+            myLongitude,
           },
         });
       }}

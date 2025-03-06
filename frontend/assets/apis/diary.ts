@@ -15,12 +15,12 @@ export async function getDiaryDetail(diaryId: Number) {
 
 /** 일기 쓰기 */
 export async function postDiary(params: DiaryType) {
-  return await local.post(`/api/diaries`, { params });
+  return await local.post(`/api/diaries`, params);
 }
 
 /** 일기 수정 */
 export async function editDiary(diaryId: Number, params: DiaryType) {
-  return await local.put(`/api/diaries/${diaryId}`, { params });
+  return await local.put(`/api/diaries/${diaryId}`, params);
 }
 
 /** 일기 삭제 */

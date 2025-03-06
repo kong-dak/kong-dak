@@ -36,11 +36,14 @@ export const generateMarkedDates = (
       }
 
       markedDates[dateStr].periods.push({
-        startingDay: period.startTime,
-        endingDay: period.endTime,
+        scheduleId: period.scheduleId,
+        startTime: period.startTime,
+        endTime: period.endTime,
         color: period.color,
         title: period.title,
         idx: periodsLength,
+        myLatitude: 123123,
+        myLongitude: 123123,
       });
     }
   });
@@ -68,4 +71,15 @@ export const getSundayDates = (year: string, month: string) => {
     currentDate.setDate(currentDate.getDate() + 7);
   }
   return sundays;
+};
+
+/** 날짜를 변환 */
+export const getTodayDates = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  return { year, month, day, hour, minute };
 };
