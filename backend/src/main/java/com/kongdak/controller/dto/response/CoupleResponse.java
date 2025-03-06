@@ -1,9 +1,6 @@
 package com.kongdak.controller.dto.response;
 
 import com.kongdak.domain.couple.Couple;
-import com.kongdak.domain.member.MemberRepository;
-import com.kongdak.global.exception.BusinessException;
-import com.kongdak.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
