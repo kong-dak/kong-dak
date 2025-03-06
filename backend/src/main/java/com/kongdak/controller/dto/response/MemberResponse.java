@@ -14,6 +14,9 @@ public record MemberResponse(
         @Schema(description = "닉네임", example = "홍길동")
         String nickname,
 
+        @Schema(description = "파트너 닉네임", example = "토리")
+        String partnerNickname,
+
         @Schema(description = "이메일", example = "user@example.com")
         String email,
 
@@ -34,6 +37,7 @@ public record MemberResponse(
         return new MemberResponse(
             member.getId(),
                 member.getNickname(),
+                partner.getNickname(),
                 member.getEmail(),
                 member.getOauthProvider(),
                 member.getCreatedAt(),
