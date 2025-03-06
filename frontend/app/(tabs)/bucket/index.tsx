@@ -14,6 +14,7 @@ import BucketInputBox from "@/components/ui/BucketInputBox";
 import DragItem from "@/components/ui/DragItem";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useFocusEffect } from "@react-navigation/native";
+import { getBucket } from "@/assets/apis/bucketlist";
 
 export type RootStackParam = {
   Home: undefined;
@@ -39,10 +40,17 @@ export default function BucketScreen() {
   const [isInputText, setIsInputText] = useState<boolean>(false);
 
   const mergeData = () => {
+    console.log("데이터를 병합합니다.");
     setBucketList([...placeList, ...eatList, ...todoList]);
   };
   const sendData = () => {
     console.log("데이터를 보냅니다. ", bucketlist);
+  };
+
+  const getBucketList = async () => {
+    await getBucket().then((res) => {
+      console.log(res.data);
+    });
   };
 
   useFocusEffect(
@@ -65,6 +73,10 @@ export default function BucketScreen() {
   useEffect(() => {
     sendData();
   }, bucketlist);
+
+  // useEffect(() => {
+  //   getBucketList();
+  // },[]);
   const onChangeInputText = (text: string) => {
     setInputBucketText(text); // 상태 업데이트
   };

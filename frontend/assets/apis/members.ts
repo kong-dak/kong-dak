@@ -24,5 +24,10 @@ export async function setNickname(nickname: string) {
 
 /**회원 탈퇴 */
 export async function deactivateMember() {
-  return await local.delete(`/api/members`);
+  return await local.patch(`/api/members/deactivate`);
+}
+
+/**회원 복구 */
+export async function memberRestore() {
+  return await local.patch(`/api/members/activate`);
 }

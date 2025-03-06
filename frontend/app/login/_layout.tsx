@@ -16,6 +16,7 @@ export default function RootLayout() {
       <Stack.Screen name="kakao" />
       <Stack.Screen name="kakaoredirect" />
       <Stack.Screen name="setnick" />
+      <Stack.Screen name="restoreUser" />
       <Stack.Screen
         name="(tabs)"
         options={{

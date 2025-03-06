@@ -29,7 +29,7 @@ export async function disconnect(coupleId: number) {
   return await local.patch(`/api/couples/${coupleId}/disconnect`);
 }
 
-/**커플 연결 해제 */
+/**커플 연결 복구 */
 export async function restore(coupleId: number) {
   return await local.patch(`/api/couples/${coupleId}/restore`);
 }
