@@ -48,10 +48,6 @@ public class SocialLoginService {
                         )
                 ));
 
-        if (!member.isActive()) {
-            throw new BusinessException(ErrorCode.INACTIVE_MEMBER);
-        }
-
         // JWT 토큰 발급
         TokenPairResponse tokenPair = simplejwtTokenProvider.createTokenPair(member);
 
