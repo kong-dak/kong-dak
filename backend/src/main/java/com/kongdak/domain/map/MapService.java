@@ -1,6 +1,7 @@
 package com.kongdak.domain.map;
 
 import com.kongdak.controller.dto.response.KakaoLocalSearchResponse;
+import com.kongdak.global.redis.RedisPlaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,10 @@ public class MapService {
             .build();
 
     private final MapRepository mapRepository;
+    private final RedisPlaceRepository redisPlaceRepository;
+
+    private static final String KEY_PREFIX = "place:";
+    private final StringBuilder redisKeyBuilder = new StringBuilder(KEY_PREFIX);
 
     @Transactional
     public KakaoLocalSearchResponse search(String query, String x, String y, String size, String sort) {
@@ -41,7 +46,18 @@ public class MapService {
                 .block();
 
         List<Place> placesToSave = response.documents().stream()
-                .filter(document -> !mapRepository.existsByPlaceId(document.id()))
+                .filter(document -> {
+                    redisKeyBuilder.append(document.id());
+
+                    boolean notExists = !redisPlaceRepository.exists(redisKeyBuilder.toString());
+
+                    if (notExists) {
+                        redisPlaceRepository.savePlaceId(redisKeyBuilder.toString());
+                    }
+
+                    redisKeyBuilder.setLength(KEY_PREFIX.length());
+                    return notExists;
+                })
                 .map(document -> Place.builder()
                         .placeId(document.id())
                         .placeName(document.place_name())

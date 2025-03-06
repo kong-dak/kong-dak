@@ -93,17 +93,6 @@ services:
       SPRING_REDIS_PORT: 6379
     networks:
       - kongdak-network
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: kongdak-frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    networks:
-      - kongdak-network
 networks:
   kongdak-network:
     driver: bridge
