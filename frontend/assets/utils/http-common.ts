@@ -21,7 +21,7 @@ export default function localAxios() {
     async (config) => {
       // /api로 시작하는 요청에 대해 baseURL 변경
       if (config.url?.startsWith("/api/")) {
-        config.baseURL = "http://3.26.5.65:8080/";
+        config.baseURL = "http://54.252.36.10:8080/";
       }
 
       // AsyncStorage 설정

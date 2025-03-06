@@ -1,0 +1,95 @@
+import { setNickname } from "@/assets/apis/members";
+import { AppButton } from "@/components/common/AppButton";
+import { AppText } from "@/components/common/AppText";
+import Checkbox from "expo-checkbox";
+import { router } from "expo-router";
+import { useState } from "react";
+import { View, StyleSheet, TextInput, Alert } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+
+export default function changeNickScreen() {
+  const [nickText, setNickText] = useState<string>("");
+
+  const changeNickName = async () => {
+    if (!nickText || nickText.trim() === "") {
+      Alert.alert("알림", "닉네임을 입력해주세요.", [{ text: "확인" }]);
+      return; // 함수 실행 중단
+    }
+    await setNickname(nickText).then((res) => {
+      if (res.data.status === 200) {
+        router.navigate("/(tabs)");
+      }
+    });
+  };
+  return (
+    <View style={styles.container}>
+      <View className="h-[35%]"></View>
+      <View className="h-[15%]">
+        <View className="w-full h-full flex items-center">
+          <View className="h-[40%] flex items-center ">
+            <AppText className="text-3xl">별명 설정</AppText>
+            <AppText className="text-lg text-gray-500">
+              미입력시 별명이 랜덤으로 정해집니다.
+            </AppText>
+          </View>
+          <View className="h-[35%]"></View>
+          <View className="h-[25%] flex items-center justify-center">
+            <GestureHandlerRootView className="w-full flex items-center">
+              <TextInput
+                className="text-center text-xl"
+                style={[styles.TextInput, { outline: "none" }]}
+                placeholder="사용할 별명을 입력해주세요"
+                placeholderTextColor={Colors.gray}
+                value={nickText}
+                onChangeText={(text) => {
+                  setNickText(text);
+                }}
+              />
+            </GestureHandlerRootView>
+          </View>
+          <View className="w-full " style={styles.underline} />
+        </View>
+      </View>
+      <View className="h-[25%]"></View>
+      <View className="h-[25%] flex items-center">
+        <View className="flex items-center justify-center w-[50%]">
+          <AppButton
+            text="변경하기"
+            type="main"
+            onPress={() => {
+              changeNickName();
+            }}
+            style={{ width: "100%" }}
+            size="big"
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#fefefe",
+    display: "flex",
+    padding: 2,
+    flex: 1,
+  },
+  checkbox: {
+    marginRight: 8,
+  },
+  TextInput: {
+    padding: 4,
+    marginBottom: 2, // 밑줄과의 간격
+    outline: "none",
+    width: "110%", // 입력창 전체 너비 사용
+    outlineColor: "#929292",
+  },
+  underline: {
+    width: "70%", // 텍스트 길이의 2배
+    height: 1,
+    alignSelf: "center", // 중앙 정렬
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray,
+  },
+});

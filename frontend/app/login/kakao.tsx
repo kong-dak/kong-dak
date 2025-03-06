@@ -17,6 +17,7 @@ import {
 } from "@react-native-seoul/kakao-login";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getLoginToken } from "@/assets/apis/auth";
+import { memberInfo } from "@/assets/apis/members";
 
 const App = () => {
   const [result, setResult] = useState<string>("");
@@ -43,12 +44,14 @@ const App = () => {
       await AsyncStorage.setItem("accessToken", accessToken);
       await AsyncStorage.setItem("refreshToken", refreshToken);
       await AsyncStorage.setItem("isLogin", "true");
-      if (
-        (await AsyncStorage.getItem("accessToken")) &&
-        (await AsyncStorage.getItem("refreshToken"))
-      ) {
-        router.navigate("/login/setnick");
-      }
+
+      await memberInfo().then((res) => {
+        if (res.data.data.isActive === true) {
+          router.navigate("/login/setnick");
+        } else {
+          router.navigate("/login/restoreUser");
+        }
+      });
     } catch (err) {
       console.error("login err", err);
     }
@@ -102,7 +105,7 @@ const App = () => {
           <View style={{ height: 100 }} />
         </ScrollView>
       </View>
-      <Pressable
+      {/* <Pressable
         style={styles.button}
         onPress={() => {
           signInWithKakao();
@@ -121,15 +124,17 @@ const App = () => {
       </Pressable>
       <Pressable style={styles.button} onPress={() => signOutWithKakao()}>
         <Text style={styles.text}>카카오 로그아웃</Text>
-      </Pressable>
+      </Pressable> */}
       <View className="w-full flex items-center h-[20%]">
         <View className="mb-8 w-[80%]">
-          <TouchableOpacity
+          <Pressable
             className=" bg-yellow-300 flex items-center justify-center py-2 rounded-sm my-2"
-            onPress={() => router.push("/login/setnick")}
+            onPress={() => {
+              signInWithKakao();
+            }}
           >
             <Text>동의하고 계속하기</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </View>
