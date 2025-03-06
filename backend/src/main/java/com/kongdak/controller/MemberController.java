@@ -1,6 +1,7 @@
 package com.kongdak.controller;
 
 import com.kongdak.controller.dto.request.NicknameUpdateRequest;
+import com.kongdak.controller.dto.response.ActivateResponse;
 import com.kongdak.controller.dto.response.DeactivateResponse;
 import com.kongdak.controller.dto.response.MemberResponse;
 import com.kongdak.domain.member.MemberService;
@@ -53,11 +54,22 @@ public class MemberController {
     @Operation(summary = "회원 탈퇴", description = "회원 계정을 비활성화합니다.")
     @ApiResponse(responseCode = "200", description = "탈퇴 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
-    @DeleteMapping
+    @PatchMapping("/deactivate")
     public BaseResponse<DeactivateResponse> deactivateMember(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return BaseResponse.ok(memberService.deactivateMember(userDetails.getUsername()));
+    }
+
+    @Operation(summary = "회원 복구", description = "회원 계정을 활성화합니다.")
+    @ApiResponse(responseCode = "200", description = "복구 성공",
+            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    @PatchMapping("/activate")
+    public BaseResponse<ActivateResponse> activateMember(
+            @Parameter(description = "인증된 사용자 정보", hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return BaseResponse.ok(memberService.activateMember(userDetails.getUsername()));
     }
 }

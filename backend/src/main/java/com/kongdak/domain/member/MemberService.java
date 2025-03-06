@@ -1,6 +1,7 @@
 package com.kongdak.domain.member;
 
 import com.kongdak.controller.dto.request.MemberCreateRequest;
+import com.kongdak.controller.dto.response.ActivateResponse;
 import com.kongdak.controller.dto.response.DeactivateResponse;
 import com.kongdak.controller.dto.response.MemberResponse;
 import com.kongdak.global.exception.BusinessException;
@@ -68,8 +69,18 @@ public class MemberService {
 
         return new DeactivateResponse(
                 email,
-                LocalDateTime.now(),
-                "회원 탈퇴가 완료되었습니다."
+                LocalDateTime.now()
+        );
+    }
+
+    @Transactional
+    public ActivateResponse activateMember(String email) {
+        Member member = findByEmail(email);
+        member.activate();
+
+        return new ActivateResponse(
+                email,
+                LocalDateTime.now()
         );
     }
 
