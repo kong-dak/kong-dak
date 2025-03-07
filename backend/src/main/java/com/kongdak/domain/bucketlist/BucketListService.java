@@ -36,9 +36,9 @@ public class BucketListService {
     public BucketListResponseDto createBucketList(Long memberId, BucketListCreateDto dto){
         Couple couple = coupleService.findCoupleByMemberId(memberId);
 
-        // 새 항목의 순서 결정 (가장 작은 orderNum -1). 즉, 가장 위에 위치
-        int newOrder = bucketListRepository.findMinOrderByCoupleId(couple.getId())
-                .map(minOrder -> minOrder - 1)
+        // 새 항목의 순서 결정 (가장 큰 orderNum +1). 즉, 가장 아래에 위치
+        int newOrder = bucketListRepository.findMaxOrderByCoupleId(couple.getId())
+                .map(maxOrder -> maxOrder + 1)
                 .orElse(0);
 
         BucketList bucketList = BucketList.builder()
