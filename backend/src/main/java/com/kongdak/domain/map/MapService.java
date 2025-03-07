@@ -1,6 +1,11 @@
 package com.kongdak.domain.map;
 
 import com.kongdak.controller.dto.response.KakaoLocalSearchResponse;
+import com.kongdak.controller.dto.response.PlaceDetailResponse;
+import com.kongdak.controller.dto.response.PlaceOperatingHourResponse;
+import com.kongdak.controller.dto.response.PlaceReviewResponse;
+import com.kongdak.global.exception.BusinessException;
+import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.redis.RedisPlaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,9 @@ public class MapService {
             .build();
 
     private final MapRepository mapRepository;
+    private final PlaceImageRepository imageRepository;
+    private final PlaceReviewRepository reviewRepository;
+    private final PlaceOperatingHourRepository operatingHourRepository;
     private final RedisPlaceRepository redisPlaceRepository;
 
     private static final String KEY_PREFIX = "place:";
@@ -59,7 +68,7 @@ public class MapService {
                     return notExists;
                 })
                 .map(document -> Place.builder()
-                        .placeId(document.id())
+                        .placeId(Long.parseLong(document.id()))
                         .placeName(document.place_name())
                         .categoryName(document.category_name())
                         .addressName(document.address_name())
@@ -75,4 +84,36 @@ public class MapService {
         return response;
 
     }
+
+    public PlaceDetailResponse getPlaceDetail(Long placeId) {
+
+        Place place = mapRepository.findByPlaceId(placeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
+
+        List<String> previewImages = imageRepository.findTop3ByPlaceId(placeId).stream()
+                .map(PlaceImage::getImageUrl)
+                .toList();
+
+        List<PlaceReviewResponse> previewReviews = reviewRepository.findTop3ByPlaceId(placeId).stream()
+                .map(PlaceReviewResponse::from)
+                .toList();
+
+        List<PlaceOperatingHourResponse> operatingHours = operatingHourRepository.findByPlaceId(placeId).stream()
+                .map(PlaceOperatingHourResponse::from)
+                .toList();
+
+        return PlaceDetailResponse.of(
+                place.getPlaceId(),
+                place.getPlaceName(),
+                place.getCategoryName(),
+                place.getAddressName(),
+                place.getRoadAddressName(),
+                place.getPhone(),
+                previewImages,
+                previewReviews,
+                operatingHours
+        );
+
+    }
+
 }

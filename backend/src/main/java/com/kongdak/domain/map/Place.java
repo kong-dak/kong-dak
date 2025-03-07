@@ -20,7 +20,7 @@ public class Place {
     private Long id;
 
     @Column(name = "place_id", unique = true, nullable = false)
-    private String placeId;
+    private Long placeId;
 
     @Column(name = "place_name", nullable = false)
     private String placeName;
@@ -53,7 +53,7 @@ public class Place {
     private List<PlaceOperatingHour> operatingHours = new ArrayList<>();
 
     @Builder
-    public Place(String placeId, String placeName, String categoryName, String addressName,
+    public Place(Long placeId, String placeName, String categoryName, String addressName,
                  String roadAddressName, String phone, String longitude, String latitude) {
         this.placeId = placeId;
         this.placeName = placeName;

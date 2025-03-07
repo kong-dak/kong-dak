@@ -1,6 +1,7 @@
 package com.kongdak.domain.map;
 
 import com.kongdak.domain.BaseTimeEntity;
+import com.kongdak.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,8 +22,9 @@ public class PlaceReview extends BaseTimeEntity {
     @JoinColumn(name = "place_id")
     private Place place;
 
-    @Column(nullable = false)
-    private String nickname;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(nullable = false)
     private int rating;
@@ -31,9 +33,9 @@ public class PlaceReview extends BaseTimeEntity {
     private String comment;
 
     @Builder
-    public PlaceReview(Place place, String nickname, int rating, String comment) {
+    public PlaceReview(Place place, Member member, int rating, String comment) {
         this.place = place;
-        this.nickname = nickname;
+        this.member = member;
         this.rating = rating;
         this.comment = comment;
     }

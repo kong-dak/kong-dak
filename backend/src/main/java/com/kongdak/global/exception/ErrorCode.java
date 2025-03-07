@@ -30,6 +30,9 @@ public enum ErrorCode {
     PARTNER_NOT_FOUND(404, "C010", "파트너를 찾을 수 없습니다."),
     COUPLE_ALREADY_DISCONNECTED(400, "C011", "이미 끊긴 커플입니다."),
 
+    // Map 관련 예외
+    PLACE_NOT_FOUND(404, "M001", "장소를 찾을 수 없습니다"),
+
 
     // Calendar 관련 예외
     CALENDAR_NOT_FOUND(404, "CL001", "캘린더를 찾을 수 없습니다"),
