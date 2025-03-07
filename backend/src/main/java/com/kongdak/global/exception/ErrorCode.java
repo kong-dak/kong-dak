@@ -74,6 +74,11 @@ public enum ErrorCode {
     // SSE 관련 예외
     CANNOT_SEND_DUMMY_EVENT(400, "S001", "SSE DUMMY 이벤트 전송 실패"),
     CANNOT_CLOSE_EMITTER(400, "S002", "SSE Emitter를 닫을 수 없습니다"),
+
+    // 파일 업로드 관련 예외
+    FILE_UPLOAD_ERROR(400, "F001", "파일 업로드에 실패하였습니다."),
+    FILE_DELETE_ERROR(400, "F001", "파일 삭제에 실패하였습니다."),
+
     // 시스템 예외
     INTERNAL_SERVER_ERROR(500, "S001", "내부 서버 오류가 발생했습니다");
 
