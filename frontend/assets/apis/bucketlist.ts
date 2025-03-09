@@ -14,16 +14,23 @@ export async function deleteBucket(bucketlistId: number) {
 }
 
 /** 버킷리스트 수정 */
-export async function editBucket(bucketlistId: number) {
-  return await local.patch(`api/bucketlists/${bucketlistId}`);
+export async function editBucket(
+  bucketlistId: number,
+  title?: string,
+  isCompleted?: boolean
+) {
+  return await local.patch(`/api/bucketlists/${bucketlistId}`, {
+    title,
+    isCompleted,
+  });
 }
 
 /** 버킷리스트 정렬 */
 export async function reorderBucket(bucketIds: number[]) {
-  return await local.patch(`api/bucketlists/reorder`, { bucketIds });
+  return await local.patch(`/api/bucketlists/reorder`, { bucketIds });
 }
 
 /** 버킷리스트 가져오기 */
 export async function getBucket() {
-  return await local.get(`api/bucketlists`);
+  return await local.get(`/api/bucketlists`);
 }

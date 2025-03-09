@@ -88,5 +88,5 @@ export interface BucketListItem {
   isCompleted: boolean;
   createdAt: string;
   updatedAt: string;
-  order: number;
+  orderNum: number;
 }
