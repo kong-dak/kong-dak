@@ -9,80 +9,108 @@ import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
-import { gestureHandlerRootHOC } from "react-native-gesture-handler";
-import { useCallback, useEffect, useState } from "react";
-import { BucketListItem, BucketType } from "@/assets/types/type";
+import { useCallback, useMemo } from "react";
+import { BucketListItem } from "@/assets/types/type";
 import BucketView from "./BucketView";
+import { editBucket } from "@/assets/apis/bucketlist";
 
 interface DragItemProps {
   bucketData: BucketListItem[];
   setBucketData: React.Dispatch<React.SetStateAction<BucketListItem[]>>;
   isCompletedFlag: boolean;
 }
+
 export default function DragItem({
   bucketData,
   setBucketData,
   isCompletedFlag,
 }: DragItemProps) {
+  // bucketData에서 isCompletedFlag 조건에 맞는 항목만 필터링하여 메모이제이션
+  const filteredData = useMemo(() => {
+    if (isCompletedFlag === true) {
+      return bucketData.filter((item) => !item.isCompleted);
+    }
+    return bucketData;
+  }, [bucketData, isCompletedFlag]);
+
+  // 상태 업데이트 함수 최적화
   const changeBucketList = useCallback(
     (targetItem: BucketListItem) => {
-      const index = bucketData.findIndex(
-        (item) => item.bucketId === targetItem.bucketId
+      setBucketData((prevData) =>
+        prevData.map((item) =>
+          item.bucketId === targetItem.bucketId
+            ? { ...item, isCompleted: !item.isCompleted }
+            : item
+        )
       );
-      if (index !== -1) {
-        const newBucketList = bucketData.map((item, idx) =>
-          idx === index ? { ...item, isCompleted: !item.isCompleted } : item
-        );
-        setBucketData(newBucketList);
-      }
+      editBucket(
+        targetItem.bucketId,
+        targetItem.title,
+        targetItem.isCompleted
+      ).then((res) => {
+        console.log("completed 수정 완료");
+        console.log(res.data);
+      });
     },
-    [bucketData]
+    [] // 의존성 제거 - 함수형 업데이트로 인해 bucketData 의존성이 불필요
   );
-  const renderItem = ({
-    item,
-    drag,
-    isActive,
-  }: RenderItemParams<BucketListItem>) => {
-    return isCompletedFlag === true && item.isCompleted === true ? null : (
-      <ScaleDecorator>
-        <View style={styles.itemContainer}>
-          <TouchableOpacity
-            activeOpacity={1}
-            onLongPress={drag}
-            disabled={isActive}
-            style={styles.dragHandle}
-            delayLongPress={50} // 기본값은 500ms입니다. 더 빠른 반응을 위해 값을 줄입니다.
-          >
-            <Text style={styles.dragIcon}>=</Text>
-          </TouchableOpacity>
-          <Pressable style={styles.contentContainer}>
-            <BucketView
-              id={item.bucketId}
-              title={item.title}
-              category={item.category}
-              isCompleted={item.isCompleted}
-              bucketData={bucketData}
-              onValueChange={() => {
-                changeBucketList(item); // item을 전달
-              }}
-              setBucketData={setBucketData}
-            />
-          </Pressable>
-        </View>
-      </ScaleDecorator>
-    );
-  };
+
+  // 드래그 종료 핸들러 메모이제이션
+  const handleDragEnd = useCallback(
+    ({ data }: { data: BucketListItem[] }) => {
+      setBucketData(data);
+    },
+    [] // 함수형 업데이트로 의존성 제거
+  );
+
+  // 렌더 아이템 함수 메모이제이션
+  const renderItem = useCallback(
+    ({ item, drag, isActive }: RenderItemParams<BucketListItem>) => {
+      // 완료된 항목 필터링은 이제 filteredData에서 처리하므로 이 조건은 불필요
+      return (
+        <ScaleDecorator>
+          <View style={styles.itemContainer}>
+            <TouchableOpacity
+              activeOpacity={1}
+              onLongPress={drag}
+              disabled={isActive}
+              style={styles.dragHandle}
+              delayLongPress={50} // 기본값은 500ms입니다. 더 빠른 반응을 위해 값을 줄입니다.
+            >
+              <Text style={styles.dragIcon}>=</Text>
+            </TouchableOpacity>
+            <Pressable style={styles.contentContainer}>
+              <BucketView
+                id={item.bucketId}
+                title={item.title}
+                category={item.category}
+                isCompleted={item.isCompleted}
+                bucketData={bucketData}
+                onValueChange={() => {
+                  changeBucketList(item); // item을 전달
+                }}
+                setBucketData={setBucketData}
+              />
+            </Pressable>
+          </View>
+        </ScaleDecorator>
+      );
+    },
+    [bucketData, changeBucketList, setBucketData]
+  );
 
   return (
     <View>
       <DraggableFlatList
-        data={bucketData}
+        data={filteredData}
         renderItem={renderItem}
         keyExtractor={(item) => item.bucketId + ""}
-        onDragEnd={({ data }) => {
-          setBucketData(data);
-        }}
+        onDragEnd={handleDragEnd}
         contentContainerStyle={styles.flatListContent}
+        removeClippedSubviews={true} // 화면 밖 항목 메모리에서 제거
+        maxToRenderPerBatch={10} // 한번에 렌더링할 최대 항목 수
+        updateCellsBatchingPeriod={50} // 배치 업데이트 주기
+        windowSize={10} // 렌더 윈도우 크기
       />
     </View>
   );

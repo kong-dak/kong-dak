@@ -7,7 +7,7 @@
       "isCompleted": true,
       "createdAt": "2025-01-09",
       "updatedAt": "2025-01-09",
-      "order": 0
+      "orderNum": 0
     },
     {
       "bucketId": 2,
@@ -16,7 +16,7 @@
       "isCompleted": false,
       "createdAt": "2025-01-09",
       "updatedAt": "2025-01-09",
-      "order": 0
+      "orderNum": 0
     },
     {
       "bucketId": 3,
@@ -25,7 +25,7 @@
       "isCompleted": true,
       "createdAt": "2025-01-09",
       "updatedAt": "2025-01-09",
-      "order": 0
+      "orderNum": 0
     },
     {
       "bucketId": 4,
@@ -34,7 +34,7 @@
       "isCompleted": false,
       "createdAt": "2025-01-09",
       "updatedAt": "2025-01-09",
-      "order": 0
+      "orderNum": 0
     }
   ]
 }

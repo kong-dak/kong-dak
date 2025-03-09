@@ -7,11 +7,20 @@ import { memberInfo } from "@/assets/apis/members";
 import { useEffect, useState } from "react";
 import { requestLocationPermission } from "@/assets/utils/map";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+// 새로운 import 방식
+import {
+  getMessaging,
+  getToken,
+  onMessage,
+} from "@react-native-firebase/messaging";
 
 const { width, height } = Dimensions.get("window");
 
 export default function App() {
   useEffect(() => {
+    getFcmToken();
+    const unsubscribe = subscribe();
+
     const initializeApp = async () => {
       try {
         // 위치 권한 체크
@@ -40,7 +49,30 @@ export default function App() {
     };
 
     initializeApp();
+
+    return unsubscribe;
   }, []);
+
+  /**
+   * FCM 토큰을 받습니다.
+   */
+  const getFcmToken = async () => {
+    // 새로운 API 방식
+    const messagingInstance = getMessaging();
+    const fcmToken = await getToken(messagingInstance);
+    console.log("[+] FCM Token :: ", fcmToken);
+  };
+
+  /**
+   * FCM 메시지를 앱이 foreground 상태일 경우 메시지를 수신합니다.
+   */
+  const subscribe = () => {
+    // 새로운 API 방식
+    const messagingInstance = getMessaging();
+    return onMessage(messagingInstance, async (remoteMessage) => {
+      console.log("[+] Remote Message ", JSON.stringify(remoteMessage));
+    });
+  };
 
   return null; // 또는 로딩 스피너 등을 표시할 수 있습니다
 }
