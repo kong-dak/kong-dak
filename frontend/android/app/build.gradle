@@ -74,6 +74,13 @@ android {
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core:1.13.1'
+            // Support 라이브러리 제외
+            exclude group: 'com.android.support', module: 'support-compat'
+        }
+    }
 }
 
 dependencies {
