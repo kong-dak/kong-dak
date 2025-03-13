@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   GestureResponderEvent,
   ImageSourcePropType,
@@ -7,6 +8,17 @@ import {
 import { DateData } from "react-native-calendars";
 
 export type BucketType = "ALL" | "PLACE" | "EAT" | "TODO";
+
+// HeadlessCheck 컴포넌트 인터페이스 정의
+export interface HeadlessCheckProps {
+  isHeadless?: boolean;
+  children: ReactNode;
+}
+
+// App 컴포넌트의 props 인터페이스 정의
+export interface AppProps {
+  isHeadless?: boolean;
+}
 
 export interface CalenderType {
   checkDate: string;
