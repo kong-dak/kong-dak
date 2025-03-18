@@ -8,17 +8,12 @@ public record PhotoResponse(
         @Schema(description = "사진 ID", example = "1")
         Long photoId,
 
-        @Schema(description = "원본 URL", example = "https://example.com/photo.jpg")
-        String photoUrl,
+        @Schema(description = "DB에 저장된 URL", example = "diary/origin_photo.jpg")
+        String dbPhotoUrl,
+        @Schema(description = "S3에서 제공되는 presigned URL", example = "https://example.com/photo.jpg")
+        String S3PhotoUrl,
 
-        @Schema(description = "썸네일 URL", example = "https://example.com/thumbnail.jpg")
+        @Schema(description = "S3에서 제공되는 presigned 썸네일 URL", example = "https://example.com/thumbnail.jpg")
         String thumbnailUrl
 ) {
-    public static PhotoResponse from(DiaryPhoto photo) {
-        return new PhotoResponse(
-                photo.getId(),
-                photo.getPhotoUrl(),
-                photo.getThumbnailUrl()
-        );
-    }
 }
