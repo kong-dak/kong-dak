@@ -53,7 +53,8 @@ public class S3Service {
             s3Client.putObject(putObjectRequest,
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-            return generateUrl(fileName);
+            // 파일 키만 반환
+            return fileName;
         } catch (IOException e) {
             log.error("파일 업로드 중 오류 발생: {}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.FILE_UPLOAD_ERROR);
