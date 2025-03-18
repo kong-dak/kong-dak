@@ -12,9 +12,19 @@ export default function DiaryItem(props: DiaryItemProps) {
   const month = date[1];
   const day = date[2];
   const dayText = getWeekday(props.diaryDate, "en");
+
+  const getStyle = () => {
+    if (dayText == "SAT") {
+      return Colors.blue2;
+    } else if (dayText === "SUN") return Colors.red1;
+    else return Colors.black;
+  };
+
+  const dayTextColor = getStyle();
+
   return (
     <Pressable
-      className="relative w-full h-56 bg-white border p-3 rounded-xl border-gray-300"
+      className="relative flex flex-row w-full h-32 bg-white border-2 p-3 rounded-xl"
       onPress={() =>
         router.push({
           pathname: `/write/edit`,
@@ -27,28 +37,35 @@ export default function DiaryItem(props: DiaryItemProps) {
           },
         })
       }
+      style={{ borderColor: Colors.sublight }}
     >
-      <ImageBackground
-        source={require("../../assets/images/diary-list-sample.png")}
-        className="h-[80%] p-2 rounded-xl"
-        resizeMode="cover"
-      >
-        <View>
-          <AppText className="text-3xl">{day}</AppText>
-          <AppText className="text-xl">{dayText}</AppText>
-        </View>
-      </ImageBackground>
-      <View className="h-[20%] flex items-center justify-center">
-        <AppText numberOfLines={1} ellipsizeMode="tail" className="w-full">
-          {content}
+      <View className="w-[15%] flex items-center justify-center">
+        <Feather className="mb-2" name="sun" size={20} />
+        <AppText className="text-3xl text-center font-bold">{day}</AppText>
+        <AppText
+          className="text-lg text-center"
+          style={{ color: dayTextColor }}
+        >
+          {dayText}
         </AppText>
       </View>
-      <Feather
-        className="absolute right-0 top-0"
-        name="paperclip"
-        size={24}
-        color={Colors.main}
-      />
+      <View className="w-[85%] flex flex-row justify-between items-center">
+        <View className="w-[75%] h-[80%] flex items-center justify-center">
+          <AppText
+            numberOfLines={2}
+            ellipsizeMode="tail"
+            className="w-full pe-2"
+          >
+            {content}
+          </AppText>
+        </View>
+        <ImageBackground
+          source={require("../../assets/images/diary-list-sample.png")}
+          className="w-[25%]  p-2 rounded-xl"
+          resizeMode="cover"
+          style={{ aspectRatio: 1 / 1 }}
+        ></ImageBackground>
+      </View>
     </Pressable>
   );
 }

@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+  ScrollView,
 } from "react-native";
 import jsonData from "../../../assets/dummydata/diarylist.json";
 import { DiaryItemProps } from "@/assets/types/type";
@@ -88,10 +89,7 @@ export default function getDiaryScreen() {
         />
       </View>
 
-      <View
-        className="w-full flex flex-row items-center mt-8 justify-between py-1"
-        style={{ backgroundColor: Colors.lightgray2 }}
-      >
+      <View className="w-full flex flex-row items-center mt-8 justify-between py-1">
         <AntDesign
           className="m-2"
           name="arrowleft"
@@ -116,22 +114,28 @@ export default function getDiaryScreen() {
         />
       </View>
 
-      <View className="w-full flex flex-row items-center justify-center flex-wrap mt-8">
-        {diaryItemList.map((item, index) => {
-          return (
-            <View key={index} className="w-[34%] m-4">
-              <DiaryItem
-                diaryId={item.diaryId}
-                diaryDate={item.diaryDate}
-                content={item.content}
-                weather={item.weather}
-                thumbnailUrl={item.thumbnailUrl}
-              />
-            </View>
-          );
-        })}
-        <View className="w-[34%] m-4"></View>
-      </View>
+      <ScrollView
+        className="flex-1 w-full"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 8 }}
+      >
+        <View className="w-full flex flex-row items-center justify-center flex-wrap mt-8">
+          {diaryItemList.map((item, index) => {
+            return (
+              <View key={index} className="w-full m-4">
+                <DiaryItem
+                  diaryId={item.diaryId}
+                  diaryDate={item.diaryDate}
+                  content={item.content}
+                  weather={item.weather}
+                  thumbnailUrl={item.thumbnailUrl}
+                />
+              </View>
+            );
+          })}
+          <View className="w-[34%] m-4"></View>
+        </View>
+      </ScrollView>
 
       <TouchableOpacity
         className=" absolute right-4 bottom-4 p-3 rounded-full flex items-center justify-center"
