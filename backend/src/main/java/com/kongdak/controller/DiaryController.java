@@ -43,9 +43,10 @@ public class DiaryController {
         // 프리사인드 URL을 반환하도록 수정
         List<String> fileUrls = files.stream()
                 .map(file -> {
-                    String url = s3Service.uploadFile(file);
-                    String fileName = s3Service.extractFileNameFromUrl(url);
-                    return s3Service.generatePresignedUrl(fileName, Duration.ofDays(7));
+
+                    // 파일 키를 직접 받는 방식으로 변경
+                    String fileKey = s3Service.uploadFile(file);
+                    return s3Service.generatePresignedUrl(fileKey, Duration.ofDays(7));
                 })
                 .collect(Collectors.toList());
 
