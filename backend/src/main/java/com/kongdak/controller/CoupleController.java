@@ -1,9 +1,15 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.ConnectCodeRequest;
-import com.kongdak.controller.dto.request.CoupleConnectRequest;
-import com.kongdak.controller.dto.response.*;
-import com.kongdak.domain.couple.CoupleService;
+import com.kongdak.domain.couple.dto.request.ConnectCodeRequest;
+import com.kongdak.domain.couple.dto.request.CoupleConnectRequest;
+import com.kongdak.domain.couple.dto.response.CoupleDisconnectResponse;
+import com.kongdak.domain.couple.dto.response.CoupleMatchCodeResponse;
+import com.kongdak.domain.couple.dto.response.CoupleResponse;
+import com.kongdak.domain.couple.dto.response.CoupleRestoreResponse;
+import com.kongdak.domain.couple.service.CoupleService;
+import com.kongdak.domain.member.dto.response.MatchAcceptResponse;
+import com.kongdak.domain.member.dto.response.MatchRejectResponse;
+import com.kongdak.domain.member.dto.response.MatchRequestResponse;
 import com.kongdak.global.exception.ErrorResponse;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;

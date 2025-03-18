@@ -1,10 +1,10 @@
 package com.kongdak.global.security.jwt.sdk;
 
-import com.kongdak.controller.dto.request.MemberCreateRequest;
-import com.kongdak.domain.member.Member;
-import com.kongdak.domain.member.MemberRepository;
-import com.kongdak.domain.member.MemberService;
-import com.kongdak.domain.member.OAuthProvider;
+import com.kongdak.domain.member.dto.request.MemberCreateRequest;
+import com.kongdak.domain.member.entity.Member;
+import com.kongdak.domain.member.repository.MemberRepository;
+import com.kongdak.domain.member.service.MemberService;
+import com.kongdak.domain.member.entity.OAuthProvider;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.security.jwt.RefreshTokenRepository;

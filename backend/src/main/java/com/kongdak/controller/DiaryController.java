@@ -1,10 +1,10 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.CreateDiaryRequest;
-import com.kongdak.controller.dto.request.DiaryUpdateRequest;
-import com.kongdak.controller.dto.response.*;
-import com.kongdak.domain.diary.DiaryService;
-import com.kongdak.global.S3.S3Service;
+import com.kongdak.domain.diary.dto.request.CreateDiaryRequest;
+import com.kongdak.domain.diary.dto.request.DiaryUpdateRequest;
+import com.kongdak.domain.diary.dto.response.*;
+import com.kongdak.domain.diary.service.DiaryService;
+import com.kongdak.domain.diary.S3.S3Service;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
