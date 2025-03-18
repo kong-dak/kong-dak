@@ -40,16 +40,15 @@ public record DiaryDetailResponse(
         LocalDateTime updatedAt
 
 ) {
-    public static DiaryDetailResponse from(Diary diary) {
+
+    public static DiaryDetailResponse from(Diary diary, List<PhotoResponse> photos) {
         return new DiaryDetailResponse(
                 diary.getId(),
                 diary.getContent(),
                 diary.getEmotion(),
                 diary.getWeather(),
                 diary.getDiaryDate(),
-                diary.getPhotos().stream()
-                        .map(PhotoResponse::from)
-                        .toList(),
+                photos,
                 diary.getDecorations().stream()
                         .map(DecorationResponse::from)
                         .toList(),
