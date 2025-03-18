@@ -190,6 +190,7 @@ public class DiaryService {
                         String thumbnailUrl = s3Service.generatePresignedUrl(photo.getThumbnailUrl(), Duration.ofHours(24));
                         return new PhotoResponse(
                                 photo.getId(),
+                                photo.getPhotoUrl(),
                                 photoUrl,
                                 thumbnailUrl
                         );
