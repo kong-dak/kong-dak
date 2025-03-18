@@ -1,10 +1,11 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.NicknameUpdateRequest;
-import com.kongdak.controller.dto.response.ActivateResponse;
-import com.kongdak.controller.dto.response.DeactivateResponse;
-import com.kongdak.controller.dto.response.MemberResponse;
-import com.kongdak.domain.member.MemberService;
+import com.kongdak.domain.member.dto.request.NicknameUpdateRequest;
+import com.kongdak.domain.member.dto.response.ActivateResponse;
+import com.kongdak.domain.member.dto.response.DeactivateResponse;
+import com.kongdak.domain.member.dto.response.MemberNicknameChangeResponse;
+import com.kongdak.domain.member.dto.response.MemberResponse;
+import com.kongdak.domain.member.service.MemberService;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +41,7 @@ public class MemberController {
     @ApiResponse(responseCode = "200", description = "수정 성공",
             content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     @PatchMapping("/nickname")
-    public BaseResponse<MemberResponse> updateNickname(
+    public BaseResponse<MemberNicknameChangeResponse> updateNickname(
             @Parameter(description = "인증된 사용자 정보", hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Parameter(description = "변경할 닉네임 정보")

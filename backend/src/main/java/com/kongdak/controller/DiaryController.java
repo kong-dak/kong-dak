@@ -1,9 +1,10 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.CreateDiaryRequest;
-import com.kongdak.controller.dto.request.DiaryUpdateRequest;
-import com.kongdak.controller.dto.response.*;
-import com.kongdak.domain.diary.DiaryService;
+import com.kongdak.domain.diary.dto.request.CreateDiaryRequest;
+import com.kongdak.domain.diary.dto.request.DiaryUpdateRequest;
+import com.kongdak.domain.diary.dto.response.*;
+import com.kongdak.domain.diary.service.DiaryService;
+import com.kongdak.domain.diary.S3.S3Service;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,8 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.time.YearMonth;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/diaries")
@@ -27,6 +32,25 @@ import java.time.YearMonth;
 public class DiaryController {
 
     private final DiaryService diaryService;
+    private final S3Service s3Service;
+
+    @Operation(summary = "다이어리 사진 업로드", description = "다이어리에 첨부할 사진을 업로드합니다.")
+    @PostMapping("/photos")
+    public BaseResponse<DiaryPhotoUploadResponse> uploadDiaryPhotos(
+            @Parameter(description = "업로드할 사진 파일들")
+            @RequestParam("files") List<MultipartFile> files
+    ) {
+        // 프리사인드 URL을 반환하도록 수정
+        List<String> fileUrls = files.stream()
+                .map(file -> {
+                    String url = s3Service.uploadFile(file);
+                    String fileName = s3Service.extractFileNameFromUrl(url);
+                    return s3Service.generatePresignedUrl(fileName, Duration.ofDays(7));
+                })
+                .collect(Collectors.toList());
+
+        return BaseResponse.ok(new DiaryPhotoUploadResponse(fileUrls));
+    }
 
     @Operation(summary = "다이어리 작성", description = "새로운 다이어리를 작성합니다.")
     @ApiResponse(responseCode = "200", description = "작성 성공",

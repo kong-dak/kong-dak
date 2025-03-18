@@ -1,12 +1,12 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.ScheduleCreateRequest;
-import com.kongdak.controller.dto.request.ScheduleUpdateRequest;
-import com.kongdak.controller.dto.response.MonthlyScheduleResponse;
-import com.kongdak.controller.dto.response.ScheduleDeleteResponse;
-import com.kongdak.controller.dto.response.ScheduleDetailResponse;
-import com.kongdak.controller.dto.response.ScheduleResponse;
-import com.kongdak.domain.calendar.CalendarService;
+import com.kongdak.domain.calendar.dto.request.ScheduleCreateRequest;
+import com.kongdak.domain.calendar.dto.request.ScheduleUpdateRequest;
+import com.kongdak.domain.calendar.dto.response.MonthlyScheduleResponse;
+import com.kongdak.domain.calendar.dto.response.ScheduleDeleteResponse;
+import com.kongdak.domain.calendar.dto.response.ScheduleDetailResponse;
+import com.kongdak.domain.calendar.dto.response.ScheduleResponse;
+import com.kongdak.domain.calendar.service.CalendarService;
 import com.kongdak.global.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

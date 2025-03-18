@@ -1,8 +1,8 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.SocialLoginRequest;
-import com.kongdak.controller.dto.request.TokenRefreshRequest;
-import com.kongdak.controller.dto.response.TokenRefreshResponse;
+import com.kongdak.global.security.dto.request.SocialLoginRequest;
+import com.kongdak.global.security.dto.request.TokenRefreshRequest;
+import com.kongdak.global.security.dto.response.TokenRefreshResponse;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.response.BaseResponse;

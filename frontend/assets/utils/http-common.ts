@@ -72,7 +72,7 @@ export default function localAxios() {
           // refreshToken으로 새로운 accessToken 발급 요청
           const refreshToken = await AsyncStorage.getItem("refreshToken");
           const response = await axios.post(
-            "http://3.26.5.65:8080/api/auth/refresh",
+            "http://54.252.36.10:8080/api/auth/refresh",
             { refreshToken }
           );
 

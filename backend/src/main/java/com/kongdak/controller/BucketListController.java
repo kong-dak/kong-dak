@@ -1,12 +1,12 @@
 package com.kongdak.controller;
 
-import com.kongdak.controller.dto.request.BucketListCreateDto;
-import com.kongdak.controller.dto.request.BucketListReorderRequestDto;
-import com.kongdak.controller.dto.request.BucketListUpdateDto;
-import com.kongdak.controller.dto.response.BucketListDeleteResponseDto;
-import com.kongdak.controller.dto.response.BucketListReorderResponseDto;
-import com.kongdak.controller.dto.response.BucketListResponseDto;
-import com.kongdak.domain.bucketlist.BucketListService;
+import com.kongdak.domain.bucketlist.dto.request.BucketListCreateDto;
+import com.kongdak.domain.bucketlist.dto.request.BucketListReorderRequestDto;
+import com.kongdak.domain.bucketlist.dto.request.BucketListUpdateDto;
+import com.kongdak.domain.bucketlist.dto.response.BucketListDeleteResponseDto;
+import com.kongdak.domain.bucketlist.dto.response.BucketListReorderResponseDto;
+import com.kongdak.domain.bucketlist.dto.response.BucketListResponseDto;
+import com.kongdak.domain.bucketlist.service.BucketListService;
 import com.kongdak.global.response.BaseResponse;
 import com.kongdak.global.security.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;

@@ -12,6 +12,7 @@ import { Colors } from "@/constants/Colors";
 import { AntDesign, Entypo, Feather, Ionicons } from "@expo/vector-icons";
 import { Pressable } from "react-native-gesture-handler";
 import { SetStateAction, useEffect, useState } from "react";
+import { deleteBucket, editBucket } from "@/assets/apis/bucketlist";
 
 interface BucketViewType {
   id: number;
@@ -40,25 +41,31 @@ export default function BucketView({
     setNameEditFlag(false);
     setEditTitle(title);
   }, [bucketData]);
-  const onChangeEditFlag = () => {
+  const onChangeEditFlag = async () => {
     setEditFlag(!editFlag);
   };
   const onChangeNameEditFlag = () => {
     setNameEditFlag(!nameEditFlag);
   };
 
-  const deleteBucketDate = () => {
+  const deleteBucketDate = async () => {
     const index = bucketData.findIndex((item) => item.bucketId === id);
     if (index !== -1) {
       // filter를 사용해서 해당 id를 제외한 새로운 배열 생성
       const newBucketList = bucketData.filter((item) => item.bucketId !== id);
+
+      await deleteBucket(id).then((res) => {
+        console.log("데이터 삭제");
+        console.log(res.data);
+      });
+
       setBucketData(newBucketList); // state 업데이트
     }
   };
   const onChangeTitle = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
     setEditTitle(e.nativeEvent.text);
   };
-  const checkInputName = () => {
+  const checkInputName = async () => {
     if (editTitle !== "") {
       const index = bucketData.findIndex((item) => item.bucketId === id);
       if (index !== -1) {
@@ -66,6 +73,12 @@ export default function BucketView({
           idx === index
             ? { ...item, title: editTitle } // 객체를 새로 만들어서 isCompleted 업데이트
             : item
+        );
+        await editBucket(id, editTitle, bucketData[id].isCompleted).then(
+          (res) => {
+            console.log("title 데이터 수정");
+            console.log(res.data);
+          }
         );
         setBucketData(newBucketList);
       }
