@@ -1,5 +1,7 @@
 package com.kongdak.domain.diary.service;
 
+import com.kongdak.domain.calendar.dto.response.PhotoResponse;
+import com.kongdak.domain.diary.S3.S3Service;
 import com.kongdak.domain.diary.dto.request.CreateDiaryRequest;
 import com.kongdak.domain.diary.dto.request.DecorationUpdateRequest;
 import com.kongdak.domain.diary.dto.request.DiaryUpdateRequest;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashMap;
@@ -46,6 +49,7 @@ public class DiaryService {
     private final MemberRepository memberRepository;
     private final CoupleRepository coupleRepository;
     private final RedisLockRepository redisLockRepository;
+    private final S3Service s3Service;
 
     @Transactional
     public Long createDiary(Long memberId, CreateDiaryRequest request) {
@@ -172,7 +176,25 @@ public class DiaryService {
     public DiaryDetailResponse getDiary(Long memberId, Long diaryId) {
         Couple couple = getCoupleByMemberId(memberId);
         Diary diary = getDiaryByIdAndCoupleId(diaryId, couple.getId());
-        return DiaryDetailResponse.from(diary);
+
+        // 사진 URL 생성 로직을 서비스 레이어로 이동
+        List<PhotoResponse> photoResponses = generatePhotoResponses(diary);
+
+        return DiaryDetailResponse.from(diary, photoResponses);
+    }
+
+    private List<PhotoResponse> generatePhotoResponses(Diary diary) {
+        return diary.getPhotos().stream()
+                    .map(photo -> {
+                        String photoUrl = s3Service.generatePresignedUrl(photo.getPhotoUrl(), Duration.ofHours(24));
+                        String thumbnailUrl = s3Service.generatePresignedUrl(photo.getThumbnailUrl(), Duration.ofHours(24));
+                        return new PhotoResponse(
+                                photo.getId(),
+                                photoUrl,
+                                thumbnailUrl
+                        );
+                    })
+                    .collect(Collectors.toList());
     }
 
     public SearchDiaryResponse searchDiaries(Long memberId, YearMonth dateTime) {
