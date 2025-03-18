@@ -26,7 +26,10 @@ public enum NotificationType {
 
     // 버킷리스트
     BUCKET_CREATED("버킷리스트에 새 항목이 추가되었습니다."),
-    BUCKET_COMPLETED("버킷리스트 항목이 완료되었습니다.");
+    BUCKET_COMPLETED("버킷리스트 항목이 완료되었습니다."),
+
+    // 콕 찌르기
+    POKE("상대방을 콕 찔렀습니다.");
 
     private final String defaultMessage;
 
