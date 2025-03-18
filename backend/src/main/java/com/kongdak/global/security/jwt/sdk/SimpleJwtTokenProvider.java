@@ -1,6 +1,6 @@
 package com.kongdak.global.security.jwt.sdk;
 
-import com.kongdak.domain.member.Member;
+import com.kongdak.domain.member.entity.Member;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.security.jwt.CustomUserDetails;

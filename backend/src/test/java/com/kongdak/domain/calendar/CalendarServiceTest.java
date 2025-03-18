@@ -1,15 +1,23 @@
 package com.kongdak.domain.calendar;
 
-import com.kongdak.controller.dto.request.ScheduleCreateRequest;
-import com.kongdak.controller.dto.request.ScheduleUpdateRequest;
-import com.kongdak.controller.dto.response.CalendarResponse;
-import com.kongdak.controller.dto.response.MonthlyScheduleResponse;
-import com.kongdak.controller.dto.response.ScheduleResponse;
-import com.kongdak.domain.couple.Couple;
-import com.kongdak.domain.couple.CoupleService;
-import com.kongdak.domain.member.Member;
-import com.kongdak.domain.member.MemberService;
-import com.kongdak.domain.member.OAuthProvider;
+import com.kongdak.domain.calendar.dto.request.ScheduleCreateRequest;
+import com.kongdak.domain.calendar.dto.request.ScheduleUpdateRequest;
+import com.kongdak.domain.calendar.dto.response.CalendarResponse;
+import com.kongdak.domain.calendar.dto.response.MonthlyScheduleResponse;
+import com.kongdak.domain.calendar.dto.response.ScheduleResponse;
+import com.kongdak.domain.calendar.entity.Calendar;
+import com.kongdak.domain.calendar.entity.ScheduleCategory;
+import com.kongdak.domain.calendar.repository.CalendarRepository;
+import com.kongdak.domain.calendar.repository.HolidayRepository;
+import com.kongdak.domain.calendar.repository.ScheduleRepository;
+import com.kongdak.domain.calendar.service.CalendarService;
+import com.kongdak.domain.calendar.entity.Holiday;
+import com.kongdak.domain.calendar.entity.Schedule;
+import com.kongdak.domain.couple.entity.Couple;
+import com.kongdak.domain.couple.service.CoupleService;
+import com.kongdak.domain.member.entity.Member;
+import com.kongdak.domain.member.service.MemberService;
+import com.kongdak.domain.member.entity.OAuthProvider;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -400,9 +408,9 @@ class CalendarServiceTest {
                     createSchedule(calendar, createScheduleRequest(ScheduleCategory.PERSONAL))
             );
             Holiday holiday = Holiday.builder()
-                    .name("테스트 공휴일")
-                    .date(date)
-                    .build();
+                                     .name("테스트 공휴일")
+                                     .date(date)
+                                     .build();
 
             when(memberService.getCurrentMember()).thenReturn(member);
             when(calendarRepository.findByCouple(couple)).thenReturn(Optional.of(calendar));
