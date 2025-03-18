@@ -11,7 +11,7 @@
 
     <!-- 파일 로그 (Logstash 대체) -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/logs/kongdak.log</file>
+        <file>./logs/kongdak.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>/logs/kongdak.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
