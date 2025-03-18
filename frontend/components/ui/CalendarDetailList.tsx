@@ -32,10 +32,18 @@ export default function CalendarDetailList({
           },
         });
       }}
-      className="h-[20%] rounded-md my-2 p-2"
+      className="relative w-full h-[20%] rounded-md my-2 p-2"
       style={{ backgroundColor: color }}
     >
       <AppText className="text-white">{title}</AppText>
+      <View className="absolute right-0 bottom-0">
+        <AppText
+          className="text-white mb-1 me-1"
+          style={{ textAlign: "right" }}
+        >
+          {startTime.split("T")[0]}~{endTime.split("T")[0]}
+        </AppText>
+      </View>
     </Pressable>
   );
 }

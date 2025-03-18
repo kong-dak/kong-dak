@@ -360,27 +360,29 @@ export default function CalendarScreen() {
             className="w-[80%] h-[60%] bg-white rounded-lg p-4"
             onPress={(e) => e.stopPropagation()} // 모달 내부 클릭 시 이벤트 버블링 방지
           >
-            <View className="flex flex-row justify-between">
-              <AppText className="text-xl">
-                {Number(checkDate.split("-")[2])}일 {getDayOfWeek(checkDate)}
-              </AppText>
-              <Pressable
-                className="right-6"
-                onPress={() => {
-                  setIsModalVisible(false);
-                }}
-              >
-                <AntDesign name="close" size={24} color={Colors.black} />
-              </Pressable>
+            <View className="h-[20%]">
+              <View className="flex flex-row justify-between">
+                <AppText className="text-xl">
+                  {Number(checkDate.split("-")[2])}일 {getDayOfWeek(checkDate)}
+                </AppText>
+                <Pressable
+                  className="right-6"
+                  onPress={() => {
+                    setIsModalVisible(false);
+                  }}
+                >
+                  <AntDesign name="close" size={24} color={Colors.black} />
+                </Pressable>
+              </View>
+              <View className="border-b py-2"></View>
+              <View className="py-4">
+                <AppText>
+                  음력 {Number(checkDate.split("-")[1])}월{" "}
+                  {checkDate.split("-")[2]}일
+                </AppText>
+              </View>
             </View>
-            <View className="border-b py-2"></View>
-            <View className="py-4">
-              <AppText>
-                음력 {Number(checkDate.split("-")[1])}월{" "}
-                {checkDate.split("-")[2]}일
-              </AppText>
-            </View>
-            <View>
+            <View className="h-[80%]">
               {showSchedule.map((item, index) => {
                 return (
                   <CalendarDetailList
