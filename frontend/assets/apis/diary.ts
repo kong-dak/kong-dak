@@ -27,3 +27,14 @@ export async function editDiary(diaryId: Number, params: DiaryType) {
 export async function deleteDiary(diaryId: Number) {
   return await local.delete(`/api/diaries/${diaryId}`);
 }
+
+/** 이미지 등록 */
+export async function uploadPhotos(formData: FormData) {
+  // axios가 multipart/form-data를 자동으로 감지하도록 Content-Type 헤더를 명시적으로 설정하지 마세요
+  return local.post("/api/diaries/photos", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      // 필요한 경우 다른 헤더 추가
+    },
+  });
+}

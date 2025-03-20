@@ -1,4 +1,9 @@
-import { editDiary, getDiaryDetail, postDiary } from "@/assets/apis/diary";
+import {
+  editDiary,
+  getDiaryDetail,
+  postDiary,
+  uploadPhotos,
+} from "@/assets/apis/diary";
 import { DiaryType } from "@/assets/types/diary/diaryModels";
 import { AppButton } from "@/components/common/AppButton";
 import { AppText } from "@/components/common/AppText";
@@ -33,7 +38,9 @@ export default function DiaryWriteScreen() {
 
   console.log(today, day);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [imageFile, setImageFile] = useState<string>(""); //갤러리 이미지
+  const [showImage, setShowImage] = useState<string>(""); //일기에 표현될 이미지
+  const [imageFile, setImageFile] = useState<string>(""); //저장된 multiform data(uri)
+  const [imageFormData, setImageFormData] = useState<string>(""); //s3 저장 후 반환받은 데이터
   const [selectedDay, setSelectedDay] = useState<string>(
     year +
       "-" +
@@ -54,9 +61,10 @@ export default function DiaryWriteScreen() {
     emotion: "HAPPY",
     weather: "SUNNY",
     diaryDate: selectedDay,
-    photoUrls: [imageFile],
+    photoUrls: [imageFormData],
     decorations: [],
   });
+
   useEffect(() => {
     setDiaryDetail((prev) => ({
       ...prev,
@@ -64,6 +72,55 @@ export default function DiaryWriteScreen() {
     }));
   }, [selectedDay]);
 
+  const sendDiary = async (uri: string) => {
+    const cloneDiaryDetail: DiaryType = { ...diaryDetail, photoUrls: [uri] };
+    console.log("데이터를 보냅니다.", cloneDiaryDetail);
+    await postDiary(cloneDiaryDetail)
+      .then((res) => {
+        console.log("보냈습니다", res);
+        router.push("/(tabs)/diary");
+      })
+      .catch((error) => {
+        console.error("에러 발생:", error);
+
+        // 400 에러 확인
+        if (
+          error.response &&
+          error.response.status === 400 &&
+          error.response.data.code === "D002"
+        ) {
+          Alert.alert(
+            "해당 날짜에 다이어리가 존재합니다.",
+            "덮여쓰시겠습니까?",
+            [{ text: "네" }, { text: "아니요" }]
+          );
+          // Alert.alert(
+          //   "중복 오류",
+          //   "선택한 날짜에 이미 다이어리가 존재합니다",
+          //   [{ text: "확인" }]
+          // );
+        }
+      });
+  };
+
+  const modifyDiary = async (uri: string) => {
+    if (uri !== "") {
+      const cloneDiaryDetail: DiaryType = { ...diaryDetail, photoUrls: [uri] };
+      console.log("보내기전 clonediaryDetail:", cloneDiaryDetail);
+      await editDiary(Number(props.diaryId), cloneDiaryDetail).then((res) => {
+        console.log("수정했습니다", res.data);
+        console.log(res.data.data.changedFields.photos);
+        router.push("/(tabs)/diary");
+      });
+    } else {
+      console.log("보내기전 diaryDetail:", diaryDetail);
+      await editDiary(Number(props.diaryId), diaryDetail).then((res) => {
+        console.log("수정했습니다", res.data);
+        console.log(res.data.data.changedFields.photos);
+        router.push("/(tabs)/diary");
+      });
+    }
+  };
   const writeDiary = async () => {
     // console.log(diaryDetail);
     if (diaryDetail.content.length > 1000) {
@@ -75,37 +132,20 @@ export default function DiaryWriteScreen() {
       return;
     }
     if (props.type === "POST") {
-      await postDiary(diaryDetail)
-        .then((res) => {
-          console.log("보냈습니다", res);
-          router.push("/(tabs)/diary");
-        })
-        .catch((error) => {
-          console.error("에러 발생:", error);
-
-          // 400 에러 확인
-          if (
-            error.response &&
-            error.response.status === 400 &&
-            error.response.data.code === "D002"
-          ) {
-            Alert.alert(
-              "해당 날짜에 다이어리가 존재합니다.",
-              "덮여쓰시겠습니까?",
-              [{ text: "네" }, { text: "아니요" }]
-            );
-            // Alert.alert(
-            //   "중복 오류",
-            //   "선택한 날짜에 이미 다이어리가 존재합니다",
-            //   [{ text: "확인" }]
-            // );
-          }
-        });
+      //Formdata 만들기
+      if (imageFile.length > 0) {
+        makeFormData();
+      } else {
+        sendDiary("");
+      }
     } else if (props.type === "EDIT") {
-      await editDiary(Number(props.diaryId), diaryDetail).then((res) => {
-        console.log("수정했습니다", res);
-        router.push("/(tabs)/diary");
-      });
+      console.log("수정할이미지");
+      console.log(imageFile);
+      if (imageFile.length > 0) {
+        makeFormData();
+      } else {
+        modifyDiary("");
+      }
     } else {
       Alert.alert(
         "알림",
@@ -150,37 +190,79 @@ export default function DiaryWriteScreen() {
         // console.log(res);
         // console.log(response.assets[0].base64)
         if (res.didCancel) {
+          console.log("이미지 선택을 취소했습니다.");
           return;
         } else if (res.errorCode) {
-          console.log("Image Error : " + res.errorCode);
+          console.log("ImagePicker 에러: " + res.errorCode);
         }
-        // base64가 존재하는지 확인
         const base64 = res.assets?.[0]?.base64;
         if (base64) {
-          setImageFile(base64);
+          setShowImage(base64);
+        }
+
+        // uri가 존재하는지 확인
+        const fileUri = res.assets?.[0].uri;
+        if (fileUri) {
+          setImageFile(fileUri);
         }
       }
     );
+  };
+
+  const makeFormData = async () => {
+    const formData = new FormData();
+    const fileNameParts = imageFile.split("/");
+    const fileName = fileNameParts[fileNameParts.length - 1];
+
+    // 파일 타입 추정 (확장자에 따라)
+    let fileType = "image/jpeg"; // 기본값
+    if (fileName.endsWith(".png")) {
+      fileType = "image/png";
+    } else if (fileName.endsWith(".gif")) {
+      fileType = "image/gif";
+    }
+    // 파일 객체 생성
+    const fileObject = {
+      uri: imageFile,
+      name: fileName,
+      type: fileType,
+    } as unknown as Blob;
+
+    formData.append("files", fileObject);
+
+    await uploadPhotos(formData).then((res) => {
+      console.log(res.data.data);
+      setImageFormData(res.data.data.photoUrls[0]);
+      setDiaryDetail((prev) => ({
+        ...prev,
+        photoUrls: [res.data.data.photoUrls[0]],
+      }));
+      if (props.type === "POST") {
+        sendDiary(res.data.data.photoUrls[0]);
+      } else {
+        modifyDiary(res.data.data.photoUrls[0]);
+      }
+    });
   };
 
   useEffect(() => {
     if (diaryAPIType === "EDIT") {
       const initialDiaryProps = async () => {
         await getDiaryDetail(Number(props.diaryId)).then((res) => {
-          console.log(res.data.data);
-          setDiaryDetail(res.data.data);
+          setDiaryDetail((prev) => ({
+            ...prev,
+            content: res.data.data.content,
+            emotion: res.data.data.emotion,
+            weather: res.data.data.weather,
+            photoUrls: [res.data.data.photos[0].photoUrl],
+            decorations: res.data.data.decorations,
+          }));
+          setShowImage(res.data.data.photos[0].photoUrl);
         });
       };
       initialDiaryProps();
     }
   }, []);
-
-  // useEffect(() => {
-  //   setDiaryDetail((prev) => ({
-  //     ...prev,
-  //     photoUrls: [imageFile],
-  //   }));
-  // }, [imageFile]);
 
   return (
     <KeyboardAvoidingView
@@ -284,10 +366,14 @@ export default function DiaryWriteScreen() {
             </View>
 
             {/* 이미지 */}
-            <View className={`w-full ${imageFile ? "flex-[0.3]" : "h-0"} p-4`}>
-              {imageFile && (
+            <View className={`w-full ${showImage ? "flex-[0.3]" : "h-0"} p-4`}>
+              {showImage && (
                 <Image
-                  source={{ uri: `data:image/jpeg;base64,${imageFile}` }}
+                  source={
+                    showImage.startsWith("http")
+                      ? { uri: showImage } // S3 URL인 경우
+                      : { uri: `data:image/jpeg;base64,${showImage}` } // base64 문자열인 경우
+                  }
                   className="w-full h-full"
                   resizeMode="contain"
                 />
