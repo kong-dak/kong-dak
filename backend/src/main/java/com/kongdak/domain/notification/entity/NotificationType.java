@@ -23,7 +23,7 @@ public enum NotificationType {
     DAILY_QUESTION_NEW("오늘의 질문이 도착했습니다."),
     DAILY_QUESTION_ANSWERED("상대방이 질문에 답변했습니다."),
     DAILY_QUESTION_REPLIED("답변에 댓글이 달렸습니다."),
-
+    DAILY_QUESTION_EMOJI_CREATED("답변에 이모지가 달렸습니다."),
     // 버킷리스트
     BUCKET_CREATED("버킷리스트에 새 항목이 추가되었습니다."),
     BUCKET_COMPLETED("버킷리스트 항목이 완료되었습니다."),
