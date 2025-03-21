@@ -7,6 +7,8 @@ import com.kongdak.domain.bucketlist.entity.BucketList;
 import com.kongdak.domain.bucketlist.repository.BucketListRepository;
 import com.kongdak.domain.couple.entity.Couple;
 import com.kongdak.domain.couple.service.CoupleService;
+import com.kongdak.domain.member.service.MemberService;
+import com.kongdak.domain.notification.service.NotificationService;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,8 @@ import java.util.stream.Collectors;
 public class BucketListService {
     private final BucketListRepository bucketListRepository;
     private final CoupleService coupleService;
-
+    private final MemberService memberService;
+    private final NotificationService notificationService;
     public List<BucketListResponseDto> getBucketLists(Long memberId) {
         Couple couple = coupleService.findCoupleByMemberId(memberId);
         List<BucketList> bucketLists = bucketListRepository.findByCoupleIdOrderByOrderNumAsc(couple.getId());
@@ -49,6 +52,9 @@ public class BucketListService {
                 .category(dto.category())
                 .orderNum(newOrder)
                 .build();
+
+        Long partnerId = memberService.getPartnerIdByMemberId(memberId);
+        notificationService.sendBucketCreatedNotification(bucketList.getId(), memberId, partnerId);
         BucketList savedBucketList = bucketListRepository.save(bucketList);
         return BucketListResponseDto.from(savedBucketList);
     }
@@ -63,6 +69,10 @@ public class BucketListService {
 
         if (dto.isCompleted() != null) {
             bucketList.toggleCompletion();
+        }
+        if (bucketList.isCompleted()){
+            Long partnerId = memberService.getPartnerIdByMemberId(memberId);
+            notificationService.sendBucketCompletedNotification(bucketListId, memberId, partnerId);
         }
 
         return BucketListResponseDto.from(bucketList);

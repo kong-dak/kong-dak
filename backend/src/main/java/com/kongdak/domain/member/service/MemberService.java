@@ -1,5 +1,6 @@
 package com.kongdak.domain.member.service;
 
+import com.kongdak.domain.couple.entity.Couple;
 import com.kongdak.domain.member.dto.request.MemberCreateRequest;
 import com.kongdak.domain.member.dto.response.ActivateResponse;
 import com.kongdak.domain.member.dto.response.DeactivateResponse;
@@ -104,6 +105,17 @@ public class MemberService {
         }
 
         return MemberResponse.from(member, partner);
+    }
+
+    public Long getPartnerIdByMemberId(Long memberId){
+        Member member = memberRepository.findById(memberId)
+                                        .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+
+        Couple couple = member.getCouple();
+
+        return memberRepository.findByCoupleAndIdNot(couple, memberId)
+                               .map(Member::getId)
+                               .orElseThrow(() -> new BusinessException(ErrorCode.PARTNER_NOT_FOUND));
     }
 
 

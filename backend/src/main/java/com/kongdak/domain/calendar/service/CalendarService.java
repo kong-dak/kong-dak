@@ -14,6 +14,7 @@ import com.kongdak.domain.couple.entity.Couple;
 import com.kongdak.domain.couple.service.CoupleService;
 import com.kongdak.domain.member.entity.Member;
 import com.kongdak.domain.member.service.MemberService;
+import com.kongdak.domain.notification.service.NotificationService;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,8 @@ public class CalendarService {
     private final ScheduleRepository scheduleRepository;
     private final HolidayRepository holidayRepository;
     private final MemberService memberService;
-    private final CoupleService coupleService;  // 추가
+    private final CoupleService coupleService;
+    private final NotificationService notificationService;
 
     // 캘린더 생성 (커플 연결 시 자동 생성)
     @Transactional
@@ -81,12 +83,10 @@ public class CalendarService {
     // 월별 휴일 조회
     public List<HolidayResponse> getMonthlyHolidays(LocalDateTime dateTime) {
 
-        return holidayRepository.findByYearAndMonth(
-                dateTime.getYear(),
-                dateTime.getMonthValue())
-                .stream()
-                .map(HolidayResponse::from)
-                .collect(Collectors.toList());
+        return holidayRepository.findByYearAndMonth(dateTime.getYear(), dateTime.getMonthValue())
+                                .stream()
+                                .map(HolidayResponse::from)
+                                .collect(Collectors.toList());
     }
 
     // 일별 일정 조회
@@ -95,14 +95,14 @@ public class CalendarService {
         validateCalendarAccess(calendar);
 
         return scheduleRepository.findDailySchedules(calendar.getId(), date)
-                .stream()
-                .map(ScheduleResponse::from)
-                .collect(Collectors.toList());
+                                 .stream()
+                                 .map(ScheduleResponse::from)
+                                 .collect(Collectors.toList());
     }
 
     // 일정 생성
     @Transactional
-    public ScheduleResponse createSchedule(ScheduleCreateRequest request) {
+    public ScheduleResponse createSchedule(ScheduleCreateRequest request, Long memberId) {
         request.validate();
 
         Calendar calendar = getCurrentCalendar();
@@ -111,41 +111,44 @@ public class CalendarService {
         validateCalendarAccess(calendar);
 
         Schedule schedule = Schedule.builder()
-                .calendar(calendar)
-                .creator(currentMember)
-                .title(request.title())
-                .startTime(request.startTime())
-                .endTime(request.endTime())
-                .description(request.description())
-                .category(request.category())
-                .emoji(request.emoji())
-                .build();
+                                    .calendar(calendar)
+                                    .creator(currentMember)
+                                    .title(request.title())
+                                    .startTime(request.startTime())
+                                    .endTime(request.endTime())
+                                    .description(request.description())
+                                    .category(request.category())
+                                    .emoji(request.emoji())
+                                    .build();
 
         Schedule savedSchedule = scheduleRepository.save(schedule);
+        Long partnerId = memberService.getPartnerIdByMemberId(memberId);
+        notificationService.sendScheduleCreatedNotification(schedule.getId(), memberId, partnerId);
         return ScheduleResponse.from(savedSchedule);
     }
 
     // 일정 수정
     @Transactional
-    public ScheduleResponse updateSchedule(Long scheduleId, ScheduleUpdateRequest request) {
-        request.validate(); // Record의 validate 메서드 호출
+    public ScheduleResponse updateSchedule(Long memberId, Long scheduleId, ScheduleUpdateRequest request) {
+        request.validate();
 
         Calendar calendar = getCurrentCalendar();
         Schedule schedule = findScheduleById(scheduleId);
+        Member member = memberService.findMemberById(memberId);
 
         validateCalendarAccess(calendar);
         validateScheduleAccess(schedule);
         validateScheduleForCalendar(schedule, calendar.getId());
 
-        schedule.update(
-                request.title(),
-                request.startTime(),
-                request.endTime(),
-                request.description(),
-                request.category(),
-                request.emoji()
-        );
+        schedule.update(request.title(),
+                        request.startTime(),
+                        request.endTime(),
+                        request.description(),
+                        request.category(),
+                        request.emoji());
 
+        Long partnerId = memberService.getPartnerIdByMemberId(memberId);
+        notificationService.sendScheduleUpdatedNotification(scheduleId, memberId, partnerId);
         return ScheduleResponse.from(schedule);
     }
 
@@ -162,22 +165,18 @@ public class CalendarService {
 
         scheduleRepository.delete(schedule);
 
-        return ScheduleDeleteResponse.of(
-                scheduleId,
-                calendar.getId(),
-                scheduleTitle,
-                LocalDateTime.now()
-        );
+        return ScheduleDeleteResponse.of(scheduleId, calendar.getId(), scheduleTitle, LocalDateTime.now());
     }
+
 
     private Calendar findCalendarById(Long calendarId) {
         return calendarRepository.findById(calendarId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.CALENDAR_NOT_FOUND));
+                                 .orElseThrow(() -> new BusinessException(ErrorCode.CALENDAR_NOT_FOUND));
     }
 
     private Schedule findScheduleById(Long scheduleId) {
         return scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
+                                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
     }
 
     public Schedule findScheduleById(Long calendarId, Long scheduleId) {
@@ -186,7 +185,9 @@ public class CalendarService {
 
         validateCalendarAccess(calendar);
 
-        if (!schedule.getCalendar().getId().equals(calendarId)) {
+        if (!schedule.getCalendar()
+                     .getId()
+                     .equals(calendarId)) {
             throw new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND);
         }
 
@@ -201,7 +202,8 @@ public class CalendarService {
             throw new BusinessException(ErrorCode.COUPLE_ALREADY_DISCONNECTED);
         }
 
-        if (!currentMember.getCouple().equals(couple)) {
+        if (!currentMember.getCouple()
+                          .equals(couple)) {
             throw new BusinessException(ErrorCode.CALENDAR_ACCESS_DENIED);
         }
     }
@@ -212,20 +214,27 @@ public class CalendarService {
         // SHARED 카테고리인 경우 커플 중 누구나 수정 가능
         if (schedule.getCategory() == ScheduleCategory.SHARED) {
 
-            if (coupleService.isCoupleMember(currentMember, schedule.getCalendar().getCouple().getId())) {
+            if (coupleService.isCoupleMember(
+                    currentMember,
+                    schedule.getCalendar()
+                            .getCouple()
+                            .getId())) {
                 return;
             }
             throw new BusinessException(ErrorCode.SCHEDULE_ACCESS_DENIED);
         }
 
 
-        if (!schedule.getCreator().equals(currentMember)) {
+        if (!schedule.getCreator()
+                     .equals(currentMember)) {
             throw new BusinessException(ErrorCode.SCHEDULE_ACCESS_DENIED);
         }
     }
 
     private void validateScheduleForCalendar(Schedule schedule, Long calendarId) {
-        if (!schedule.getCalendar().getId().equals(calendarId)) {
+        if (!schedule.getCalendar()
+                     .getId()
+                     .equals(calendarId)) {
             throw new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND);
         }
     }
@@ -233,8 +242,10 @@ public class CalendarService {
     // 현재 사용자의 캘린더 조회
     private Calendar getCurrentCalendar() {
         Member currentMember = memberService.getCurrentMember();
+
         return calendarRepository.findByCouple(currentMember.getCouple())
-                .orElseThrow(() -> new BusinessException(ErrorCode.CALENDAR_NOT_FOUND));
+                                 .orElseThrow(() -> new BusinessException(ErrorCode.CALENDAR_NOT_FOUND));
     }
+
 
 }

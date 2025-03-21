@@ -18,6 +18,7 @@ import com.kongdak.domain.diary.repository.DiaryPhotoRepository;
 import com.kongdak.domain.diary.repository.DiaryRepository;
 import com.kongdak.domain.member.entity.Member;
 import com.kongdak.domain.member.repository.MemberRepository;
+import com.kongdak.domain.notification.service.NotificationService;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.redis.RedisLockRepository;
@@ -50,6 +51,7 @@ public class DiaryService {
     private final CoupleRepository coupleRepository;
     private final RedisLockRepository redisLockRepository;
     private final S3Service s3Service;
+    private final NotificationService notificationService;
 
     @Transactional
     public Long createDiary(Long memberId, CreateDiaryRequest request) {
@@ -94,7 +96,13 @@ public class DiaryService {
             });
         }
 
-        return diaryRepository.save(diary).getId();
+        // 일기 저장
+        Diary savedDiary = diaryRepository.save(diary);
+        // 알림 전송
+        Long partnerId = getPartnerIdByMemberId(memberId);
+        notificationService.sendDiaryCreatedNotification(savedDiary.getId(), memberId, partnerId);
+
+        return savedDiary.getId();
     }
 
     @Transactional
@@ -304,5 +312,14 @@ public class DiaryService {
                     .build();
             diary.addDecoration(decoration);
         });
+    }
+
+
+    private Long getPartnerIdByMemberId(Long memberId) {
+        Couple couple = getCoupleByMemberId(memberId);
+
+        return memberRepository.findByCoupleAndIdNot(couple, memberId)
+                               .map(Member::getId)
+                               .orElseThrow(() -> new BusinessException(ErrorCode.PARTNER_NOT_FOUND));
     }
 }

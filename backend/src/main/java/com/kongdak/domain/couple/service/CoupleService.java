@@ -1,8 +1,8 @@
 package com.kongdak.domain.couple.service;
 
-import com.kongdak.domain.couple.dto.request.CoupleMatchRequest;
 import com.kongdak.domain.calendar.entity.Calendar;
 import com.kongdak.domain.calendar.repository.CalendarRepository;
+import com.kongdak.domain.couple.dto.request.CoupleMatchRequest;
 import com.kongdak.domain.couple.dto.response.CoupleDisconnectResponse;
 import com.kongdak.domain.couple.dto.response.CoupleResponse;
 import com.kongdak.domain.couple.dto.response.CoupleRestoreResponse;
@@ -15,9 +15,7 @@ import com.kongdak.domain.member.dto.response.MatchRequestResponse;
 import com.kongdak.domain.member.entity.Member;
 import com.kongdak.domain.member.repository.MemberRepository;
 import com.kongdak.domain.member.service.MemberService;
-import com.kongdak.domain.notification.entity.NotificationEvent;
-import com.kongdak.domain.notification.entity.NotificationType;
-import com.kongdak.domain.notification.service.SseEmitterService;
+import com.kongdak.domain.notification.service.NotificationService;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +38,8 @@ public class CoupleService {
     private final MemberRepository memberRepository;
     private final CalendarRepository calendarRepository;
     private final CoupleMatchRedisRepository coupleMatchRedisRepository;
-    private final SseEmitterService sseEmitterService;
+    private final NotificationService notificationService;
+
     // 연결 코드 발급
     public String getConnectCode(Long memberId) {
         return coupleMatchRedisRepository.findCodeByMemberId(memberId)
@@ -59,13 +58,7 @@ public class CoupleService {
         String requestId = String.format("%06d", new Random().nextInt(1000000));
         coupleMatchRedisRepository.saveMatchRequest(requestId, requesterId, targetId);
 
-        // SSE로 상대방에게 알림 전송
-        NotificationEvent notification = NotificationEvent.of(
-                NotificationType.COUPLE_MATCH_REQUEST,
-                requestId,
-                requesterId
-        );
-        sseEmitterService.sendToMember(targetId, notification);
+        notificationService.sendCoupleRequestNotification(requestId, requesterId, targetId);
 
         return new MatchRequestResponse(
                 requestId,
@@ -92,14 +85,7 @@ public class CoupleService {
         // 매칭 요청 삭제
         coupleMatchRedisRepository.deleteMatchRequest(requestId);
 
-//        // 양쪽 모두에게 매칭 성공 알림
-        NotificationEvent notification = NotificationEvent.of(
-                NotificationType.COUPLE_MATCH_ACCEPTED,
-                request.requesterId(),
-                memberId
-        );
-        sseEmitterService.sendToMember(request.requesterId(), notification);
-        sseEmitterService.sendToMember(memberId, notification);
+        notificationService.sendCoupleAcceptedNotification(memberId, request.requesterId());
 
         return MatchAcceptResponse.of(request.requesterId(), memberId, matchedAt);
     }
@@ -114,14 +100,7 @@ public class CoupleService {
         }
 
         coupleMatchRedisRepository.deleteMatchRequest(requestId);
-
-//        // 요청자에게 거절 알림
-        NotificationEvent notification = NotificationEvent.of(
-                NotificationType.COUPLE_MATCH_REJECTED,
-                request.requesterId(),
-                request.targetId()
-        );
-        sseEmitterService.sendToMember(request.requesterId(), notification);
+        notificationService.sendCoupleRejectedNotification(memberId, request.requesterId());
 
         return MatchRejectResponse.of(
                 request.requesterId(),
