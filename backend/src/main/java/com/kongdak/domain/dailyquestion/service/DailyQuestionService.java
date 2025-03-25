@@ -17,6 +17,7 @@ import com.kongdak.domain.dailyquestion.repository.DailyAnswerRepository;
 import com.kongdak.domain.dailyquestion.repository.DailyQuestionRepository;
 import com.kongdak.domain.member.entity.Member;
 import com.kongdak.domain.member.repository.MemberRepository;
+import com.kongdak.domain.notification.service.NotificationService;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class DailyQuestionService {
     private final AnswerEmojiRepository answerEmojiRepository;
     private final MemberRepository memberRepository;
     private final CoupleRepository coupleRepository;
+    private final NotificationService notificationService;
 
     // 오늘의 질문 조회
     public DailyQuestionResponse getDailyQuestion(Long memberId) {
@@ -82,6 +84,9 @@ public class DailyQuestionService {
         if (dailyAnswerRepository.findByQuestionIdAndMemberId(questionId, memberId).isPresent()) {
             throw new BusinessException(ErrorCode.ALREADY_ANSWERED);
         }
+
+        Long partnerId = getPartnerIdByMemberId(memberId);
+        notificationService.sendQuestionAnsweredNotification(questionId, memberId, partnerId);
 
         DailyAnswer answer = DailyAnswer.builder()
                 .question(question)
@@ -147,6 +152,8 @@ public class DailyQuestionService {
                                              .emoji(request.emoji())
                                              .build();
 
+        Long partnerId = getPartnerIdByMemberId(memberId);
+        notificationService.sendDailyQuestionEmojiNotification(answerId, memberId, partnerId);
         AnswerEmoji savedEmoji = answerEmojiRepository.save(answerEmoji);
         return AnswerEmojiResponse.from(savedEmoji);
     }
@@ -165,6 +172,9 @@ public class DailyQuestionService {
         if (answers.size() != 2) {
             throw new BusinessException(ErrorCode.BOTH_ANSWERS_REQUIRED);
         }
+
+        Long partnerId = getPartnerIdByMemberId(memberId);
+        notificationService.sendAnswerRepliedNotification(questionId, memberId, partnerId);
 
         AnswerReply reply = AnswerReply.builder()
                                        .member(member)
@@ -273,5 +283,17 @@ public class DailyQuestionService {
         boolean bothAnswered = answers.size() == 2;
 
         return DailyAnswerUpdateResponse.from(answer, bothAnswered, memberId);
+    }
+
+    private Couple getCoupleByMemberId(Long memberId) {
+        return coupleRepository.findByMemberId(memberId)
+                               .orElseThrow(() -> new BusinessException(ErrorCode.COUPLE_NOT_FOUND));
+    }
+    private Long getPartnerIdByMemberId(Long memberId) {
+        Couple couple = getCoupleByMemberId(memberId);
+
+        return memberRepository.findByCoupleAndIdNot(couple, memberId)
+                               .map(Member::getId)
+                               .orElseThrow(() -> new BusinessException(ErrorCode.PARTNER_NOT_FOUND));
     }
 }

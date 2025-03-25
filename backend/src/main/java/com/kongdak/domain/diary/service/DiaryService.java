@@ -1,5 +1,7 @@
 package com.kongdak.domain.diary.service;
 
+import com.kongdak.domain.calendar.dto.response.PhotoResponse;
+import com.kongdak.domain.diary.S3.S3Service;
 import com.kongdak.domain.diary.dto.request.CreateDiaryRequest;
 import com.kongdak.domain.diary.dto.request.DecorationUpdateRequest;
 import com.kongdak.domain.diary.dto.request.DiaryUpdateRequest;
@@ -16,6 +18,7 @@ import com.kongdak.domain.diary.repository.DiaryPhotoRepository;
 import com.kongdak.domain.diary.repository.DiaryRepository;
 import com.kongdak.domain.member.entity.Member;
 import com.kongdak.domain.member.repository.MemberRepository;
+import com.kongdak.domain.notification.service.NotificationService;
 import com.kongdak.global.exception.BusinessException;
 import com.kongdak.global.exception.ErrorCode;
 import com.kongdak.global.redis.RedisLockRepository;
@@ -23,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashMap;
@@ -46,6 +50,8 @@ public class DiaryService {
     private final MemberRepository memberRepository;
     private final CoupleRepository coupleRepository;
     private final RedisLockRepository redisLockRepository;
+    private final S3Service s3Service;
+    private final NotificationService notificationService;
 
     @Transactional
     public Long createDiary(Long memberId, CreateDiaryRequest request) {
@@ -90,7 +96,13 @@ public class DiaryService {
             });
         }
 
-        return diaryRepository.save(diary).getId();
+        // 일기 저장
+        Diary savedDiary = diaryRepository.save(diary);
+        // 알림 전송
+        Long partnerId = getPartnerIdByMemberId(memberId);
+        notificationService.sendDiaryCreatedNotification(savedDiary.getId(), memberId, partnerId);
+
+        return savedDiary.getId();
     }
 
     @Transactional
@@ -172,7 +184,26 @@ public class DiaryService {
     public DiaryDetailResponse getDiary(Long memberId, Long diaryId) {
         Couple couple = getCoupleByMemberId(memberId);
         Diary diary = getDiaryByIdAndCoupleId(diaryId, couple.getId());
-        return DiaryDetailResponse.from(diary);
+
+        // 사진 URL 생성 로직을 서비스 레이어로 이동
+        List<PhotoResponse> photoResponses = generatePhotoResponses(diary);
+
+        return DiaryDetailResponse.from(diary, photoResponses);
+    }
+
+    private List<PhotoResponse> generatePhotoResponses(Diary diary) {
+        return diary.getPhotos().stream()
+                    .map(photo -> {
+                        String photoUrl = s3Service.generatePresignedUrl(photo.getPhotoUrl(), Duration.ofHours(24));
+                        String thumbnailUrl = s3Service.generatePresignedUrl(photo.getThumbnailUrl(), Duration.ofHours(24));
+                        return new PhotoResponse(
+                                photo.getId(),
+                                photo.getPhotoUrl(),
+                                photoUrl,
+                                thumbnailUrl
+                        );
+                    })
+                    .collect(Collectors.toList());
     }
 
     public SearchDiaryResponse searchDiaries(Long memberId, YearMonth dateTime) {
@@ -281,5 +312,14 @@ public class DiaryService {
                     .build();
             diary.addDecoration(decoration);
         });
+    }
+
+
+    private Long getPartnerIdByMemberId(Long memberId) {
+        Couple couple = getCoupleByMemberId(memberId);
+
+        return memberRepository.findByCoupleAndIdNot(couple, memberId)
+                               .map(Member::getId)
+                               .orElseThrow(() -> new BusinessException(ErrorCode.PARTNER_NOT_FOUND));
     }
 }

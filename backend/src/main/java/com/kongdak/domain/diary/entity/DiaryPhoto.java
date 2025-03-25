@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 @Entity
 @Getter
@@ -21,9 +22,10 @@ public class DiaryPhoto extends BaseTimeEntity {
     @JoinColumn(name = "diary_id")
     private Diary diary;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)  // 길이를 1000으로 변경
     private String photoUrl;
 
+    @Column(length = 1000)
     private String thumbnailUrl;
 
     @Builder

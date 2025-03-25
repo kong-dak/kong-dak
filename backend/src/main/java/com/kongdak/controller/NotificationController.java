@@ -34,7 +34,7 @@ public class NotificationController {
     public SseEmitter subscribe(
             @Parameter(description = "인증된 사용자 ID", hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return sseEmitterService.connect(Long.parseLong(userDetails.getUsername()));
+        return sseEmitterService.connect(userDetails.getId());
     }
 
     @GetMapping
@@ -42,7 +42,7 @@ public class NotificationController {
     public BaseResponse<NotificationListResponse> getNotifications(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        List<NotificationEvent> notifications = notificationService.getNotifications(Long.parseLong(userDetails.getUsername()));
+        List<NotificationEvent> notifications = notificationService.getNotifications(userDetails.getId());
 
         NotificationListResponse response = new NotificationListResponse(notifications.stream()
                                                                                       .map(NotificationResponse::from)
@@ -56,7 +56,7 @@ public class NotificationController {
     public BaseResponse<NotificationListResponse> getUnreadNotifications(
             @Parameter(description = "인증된 사용자 ID", hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        List<NotificationEvent> notifications = notificationService.getUnreadNotifications(Long.parseLong(userDetails.getUsername()));
+        List<NotificationEvent> notifications = notificationService.getUnreadNotifications(userDetails.getId());
 
         NotificationListResponse response = new NotificationListResponse(notifications.stream()
                                                                                       .map(NotificationResponse::from)
@@ -71,7 +71,7 @@ public class NotificationController {
             @Parameter(description = "알림 ID", required = true) @PathVariable Long notificationId,
             @Parameter(description = "인증된 사용자 ID", hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        notificationService.markAsRead(notificationId, Long.parseLong(userDetails.getUsername()));
+        notificationService.markAsRead(notificationId, userDetails.getId());
         return BaseResponse.ok();
     }
 
@@ -80,7 +80,7 @@ public class NotificationController {
     public BaseResponse<Void> pokePartner(
             @Parameter(description = "인증된 사용자 ID", hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long memberId = Long.parseLong(userDetails.getUsername());
+        Long memberId = userDetails.getId();
         notificationService.sendPokeNotification(memberId, null); // 상대방 ID는 서비스에서 조회
         return BaseResponse.ok();
     }
@@ -90,5 +90,20 @@ public class NotificationController {
     @Operation(summary = "알림 연결 상태 조회", description = "현재 SSE 연결 상태를 조회합니다. (관리자용)")
     public BaseResponse<Map<String, Object>> getConnectionStatus() {
         return BaseResponse.ok(sseEmitterService.getConnectionStatus());
+    }
+
+    // 테스트용
+    @GetMapping("/{memberId}")
+    @Operation(summary = "[테스트] 특정 사용자의 알림 목록 조회", description = "특정 사용자의 알림 목록을 조회합니다.")
+    public BaseResponse<NotificationListResponse> getMemberNotifications(
+            @PathVariable("memberId") Long memberId
+    ) {
+        List<NotificationEvent> notifications = notificationService.getNotifications(memberId);
+
+        NotificationListResponse response = new NotificationListResponse(notifications.stream()
+                                                                                      .map(NotificationResponse::from)
+                                                                                      .toList());
+
+        return BaseResponse.ok(response);
     }
 }

@@ -8,6 +8,7 @@ import com.kongdak.domain.calendar.dto.response.ScheduleDetailResponse;
 import com.kongdak.domain.calendar.dto.response.ScheduleResponse;
 import com.kongdak.domain.calendar.service.CalendarService;
 import com.kongdak.global.response.BaseResponse;
+import com.kongdak.global.security.jwt.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -101,8 +103,9 @@ public class CalendarController {
     })
     @PostMapping("/schedules")
     public BaseResponse<ScheduleResponse> createSchedule(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody ScheduleCreateRequest request) {
-        return BaseResponse.created(calendarService.createSchedule(request));
+        return BaseResponse.created(calendarService.createSchedule(request,  userDetails.getId()));
     }
 
 
@@ -119,9 +122,10 @@ public class CalendarController {
     })
     @PatchMapping("/schedules/{scheduleId}")
     public BaseResponse<ScheduleResponse> updateSchedule(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("scheduleId") Long scheduleId,
             @Valid @RequestBody ScheduleUpdateRequest request) {
-        ScheduleResponse scheduleResponse = calendarService.updateSchedule(scheduleId, request);
+        ScheduleResponse scheduleResponse = calendarService.updateSchedule(userDetails.getId(), scheduleId, request);
         return BaseResponse.ok(scheduleResponse);
     }
 

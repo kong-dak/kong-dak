@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Duration;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,16 +41,19 @@ public class DiaryController {
             @Parameter(description = "업로드할 사진 파일들")
             @RequestParam("files") List<MultipartFile> files
     ) {
-        // 프리사인드 URL을 반환하도록 수정
-        List<String> fileUrls = files.stream()
-                .map(file -> {
-                    String url = s3Service.uploadFile(file);
-                    String fileName = s3Service.extractFileNameFromUrl(url);
-                    return s3Service.generatePresignedUrl(fileName, Duration.ofDays(7));
-                })
-                .collect(Collectors.toList());
+        // S3에 파일 업로드하고 객체 키만 반환
+        List<String> fileKeys = files.stream()
+                                     .map(s3Service::uploadFile)
+                                     .collect(Collectors.toList());
 
-        return BaseResponse.ok(new DiaryPhotoUploadResponse(fileUrls));
+        // 사용자에게는 객체 키와 임시 미리보기용 Presigned URL을 함께 제공
+        Map<String, String> keyUrlMap = fileKeys.stream()
+                                                .collect(Collectors.toMap(
+                                                        key -> key,  // 키는 S3 객체 키
+                                                        key -> s3Service.generatePresignedUrl(key, Duration.ofHours(24))  // 값은 24시간 유효한 Presigned URL
+                                                ));
+
+        return BaseResponse.ok(new DiaryPhotoUploadResponse(fileKeys, keyUrlMap));
     }
 
     @Operation(summary = "다이어리 작성", description = "새로운 다이어리를 작성합니다.")

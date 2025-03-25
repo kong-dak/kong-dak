@@ -13,20 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-
     Optional<Member> findByEmail(String email);
-    Optional<Member> findByEmailAndOauthProvider(String email, OAuthProvider provider);
 
     boolean existsByEmail(String email);
-
-    @Query("SELECT m FROM Member m WHERE m.isActive = true AND m.couple IS NULL")
-    List<Member> findActiveUnconnectedMembers();
-
-    @Query("SELECT m.id FROM Member m WHERE m.couple = :couple AND m.id != :memberId")
-    Optional<Long> findPartnerIdByCoupleAndMemberIdNot(
-            @Param("couple") Couple couple,
-            @Param("memberId") Long memberId
-    );
 
     // 특정 커플에 속한 모든 멤버 조회
     @Query("SELECT m FROM Member m WHERE m.couple = :couple")
@@ -38,4 +27,18 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             @Param("couple") Couple couple,
             @Param("memberId") Long memberId
     );
+
+    Optional<Member> findByCoupleAndIdNot(Couple couple, Long memberId);
+
+    //            @Param("memberId") Long memberId
+    //    Optional<Member> findByEmailAndOauthProvider(String email, OAuthProvider provider);
+    //
+    //    @Query("SELECT m FROM Member m WHERE m.isActive = true AND m.couple IS NULL")
+    //    List<Member> findActiveUnconnectedMembers();
+    //
+    //    @Query("SELECT m.id FROM Member m WHERE m.couple = :couple AND m.id != :memberId")
+    //    Optional<Long> findPartnerIdByCoupleAndMemberIdNot(
+    //            @Param("couple") Couple couple,
+
+    //    );
 }
