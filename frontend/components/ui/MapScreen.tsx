@@ -28,6 +28,17 @@ export default function MapScreen({
   const ref = useRef<NaverMapViewRef>(null);
 
   useEffect(() => {
+    if (searchResults.length > 0) {
+      // 검색 결과가 있을 때 첫 번째 검색 결과로 카메라 이동
+      ref.current?.animateCameraTo({
+        latitude: parseFloat(searchResults[0].y),
+        longitude: parseFloat(searchResults[0].x),
+        zoom: 16,
+      });
+    }
+  }, [searchResults]);
+
+  useEffect(() => {
     if (selectedPlace) {
       ref.current?.animateCameraTo({
         latitude: parseFloat(selectedPlace.y),

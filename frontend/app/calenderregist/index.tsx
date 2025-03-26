@@ -16,7 +16,10 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import { SearchResponse } from "@/assets/types/map/mapModels";
+import {
+  PlaceDetailResponse,
+  SearchResponse,
+} from "@/assets/types/map/mapModels";
 import { useSearch } from "@/hooks/useSearch";
 import PlaceInfo from "@/components/ui/PlaceInfo";
 import {
@@ -30,6 +33,8 @@ import {
   deleteSchedule,
   modifySchedule,
 } from "@/assets/apis/calendars";
+import { placeDetail } from "@/assets/apis/maps";
+import PlaceDetailModal from "@/components/ui/PlaceDetailModal";
 
 export default function CalenderregistScreen() {
   const url = require("../../assets/images/diary-write-sample.png");
@@ -99,6 +104,10 @@ export default function CalenderregistScreen() {
     SearchResponse["data"]["documents"][0] | null
   >(null);
 
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [selectedPlaceDetail, setSelectedPlaceDetail] =
+    useState<PlaceDetailResponse | null>(null);
+
   useEffect(() => {
     if (params.type === "EDIT") {
       setCalendarDetail({
@@ -127,11 +136,6 @@ export default function CalenderregistScreen() {
       });
     }
   }, [searchQuery]);
-
-  // 검색 결과를 콘솔에 출력
-  useEffect(() => {
-    console.log("검색 결과:", searchResults);
-  }, [searchResults]);
 
   useEffect(() => {
     if (scheduleTogether) {
@@ -220,6 +224,16 @@ export default function CalenderregistScreen() {
           "시 " +
           time.split(":")[1] +
           "분";
+  };
+
+  const fetchPlaceDetail = async (placeId: number) => {
+    try {
+      const response = await placeDetail(placeId);
+      setSelectedPlaceDetail(response.data.data);
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error("장소 상세 정보를 불러오는 중 오류 발생:", error);
+    }
   };
 
   return (
@@ -417,7 +431,14 @@ export default function CalenderregistScreen() {
             searchResults={searchResults}
             selectedPlace={selectedPlace}
             setSelectedPlace={setSelectedPlace}
+            onPlacePress={(placeId) => fetchPlaceDetail(placeId)}
           />
+          {isModalVisible && (
+            <PlaceDetailModal
+              selectedPlace={selectedPlaceDetail}
+              closeModal={() => setIsModalVisible(false)}
+            />
+          )}
         </View>
 
         <View

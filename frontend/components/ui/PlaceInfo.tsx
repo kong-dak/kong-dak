@@ -1,5 +1,11 @@
 import React, { useRef, useEffect } from "react";
-import { View, Text, FlatList, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import { SearchResponse } from "@/assets/types/map/mapModels";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -10,12 +16,14 @@ interface PlaceInfoProps {
   searchResults: SearchResponse["data"]["documents"];
   selectedPlace: SearchResponse["data"]["documents"][0] | null;
   setSelectedPlace: (place: SearchResponse["data"]["documents"][0]) => void;
+  onPlacePress: (placeId: number) => void;
 }
 
 export default function PlaceInfo({
   searchResults,
   selectedPlace,
   setSelectedPlace,
+  onPlacePress,
 }: PlaceInfoProps) {
   const flatListRef = useRef<FlatList>(null);
 
@@ -54,36 +62,41 @@ export default function PlaceInfo({
         decelerationRate="fast"
         initialNumToRender={1}
         renderItem={({ item, index }) => (
-          <View
-            className="bg-white p-4 rounded-2xl shadow-lg justify-center items-center border border-black"
-            style={{
-              width: CARD_WIDTH,
-              // ✅ 첫 번째 & 마지막 카드 마진 조정
-              marginLeft: index === 0 ? CARD_MARGIN * 2 : CARD_MARGIN,
-              marginRight:
-                index === searchResults.length - 1
-                  ? CARD_MARGIN * 2
-                  : CARD_MARGIN,
-            }}
+          <TouchableOpacity
+            onPress={() => onPlacePress(Number(item.id))}
+            activeOpacity={0.8}
           >
-            <Text className="text-xl font-bold text-black">
-              📍 {item.place_name}
-            </Text>
-            <Text className="text-base text-gray-600 mt-2">
-              주소: {item.address_name}
-            </Text>
-            <Text className="text-base text-gray-600">
-              도로명 주소: {item.road_address_name}
-            </Text>
-            {item.phone && (
-              <Text className="text-base text-gray-600">📞 {item.phone}</Text>
-            )}
-            {item.place_url && (
-              <Text className="text-blue-500 underline mt-2">
-                {item.place_url}
+            <View
+              className="bg-white p-4 rounded-2xl shadow-lg justify-center items-center border border-black"
+              style={{
+                width: CARD_WIDTH,
+                // ✅ 첫 번째 & 마지막 카드 마진 조정
+                marginLeft: index === 0 ? CARD_MARGIN * 2 : CARD_MARGIN,
+                marginRight:
+                  index === searchResults.length - 1
+                    ? CARD_MARGIN * 2
+                    : CARD_MARGIN,
+              }}
+            >
+              <Text className="text-xl font-bold text-black">
+                📍 {item.place_name}
               </Text>
-            )}
-          </View>
+              <Text className="text-base text-gray-600 mt-2">
+                주소: {item.address_name}
+              </Text>
+              <Text className="text-base text-gray-600">
+                도로명 주소: {item.road_address_name}
+              </Text>
+              {item.phone && (
+                <Text className="text-base text-gray-600">📞 {item.phone}</Text>
+              )}
+              {item.place_url && (
+                <Text className="text-blue-500 underline mt-2">
+                  {item.place_url}
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
         )}
         // ✅ 최종 위치에서 선택된 카드 확인
         onMomentumScrollEnd={(event) => {
