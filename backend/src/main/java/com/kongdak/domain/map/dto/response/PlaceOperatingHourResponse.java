@@ -1,4 +1,4 @@
-package com.kongdak.controller.dto.response;
+package com.kongdak.domain.map.dto.response;
 
 import com.kongdak.domain.map.PlaceOperatingHour;
 import io.swagger.v3.oas.annotations.media.Schema;

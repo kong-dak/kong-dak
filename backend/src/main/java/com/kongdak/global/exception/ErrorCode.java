@@ -32,7 +32,9 @@ public enum ErrorCode {
 
     // Map 관련 예외
     PLACE_NOT_FOUND(404, "M001", "장소를 찾을 수 없습니다"),
-
+    REVIEW_NOT_FOUND(404, "M002", "리뷰를 찾을 수 없습니다"),
+    NOT_YOUR_REVIEW(403, "M003", "다른 사람의 리뷰를 수정, 삭제할 수 없습니다"),
+    PLACE_IMAGE_NOT_FOUND(404, "M004", "리뷰 이미지를 찾을 수 없습니다"),
 
     // Calendar 관련 예외
     CALENDAR_NOT_FOUND(404, "CL001", "캘린더를 찾을 수 없습니다"),

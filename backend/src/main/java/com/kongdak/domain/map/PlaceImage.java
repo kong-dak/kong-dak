@@ -17,8 +17,8 @@ public class PlaceImage {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "place_id")
-    private Place place;
+    @JoinColumn(name = "review_id", nullable = false)
+    private PlaceReview placeReview;
 
     @Column(nullable = false)
     private String imageUrl;
@@ -27,9 +27,13 @@ public class PlaceImage {
     private String description;
 
     @Builder
-    public PlaceImage(Place place, String imageUrl, String description) {
-        this.place = place;
+    public PlaceImage(String imageUrl, String description) {
         this.imageUrl = imageUrl;
         this.description = description;
     }
+
+    public void setPlaceReview(PlaceReview review) {
+        this.placeReview = review;
+    }
+
 }

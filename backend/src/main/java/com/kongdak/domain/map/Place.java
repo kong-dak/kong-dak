@@ -47,9 +47,6 @@ public class Place {
     private List<PlaceReview> placeReviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlaceImage> placeImages = new ArrayList<>();
-
-    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlaceOperatingHour> operatingHours = new ArrayList<>();
 
     @Builder
